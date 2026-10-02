@@ -436,6 +436,62 @@
     .avail-legend span { display: inline-flex; align-items: center; gap: 7px; }
     .avail-legend .dot { width: 8px; height: 8px; border-radius: 50%; }
 
+    /* ── Film consigliati — stesse proporzioni/struttura delle card
+       Cinewow di cinemamultisalateatro.ch (immagine orizzontale 16:10,
+       titolo + regista + data sotto), qui in nero/rosso ─────────────── */
+    .cinewow-titles {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 18px;
+    }
+    .cinewow-card {
+      display: flex;
+      flex-direction: column;
+      border-radius: 10px;
+      overflow: hidden;
+      background: var(--surf);
+      border: 1px solid var(--line);
+      color: var(--white);
+      text-decoration: none;
+      transition: transform .25s var(--ease), border-color .25s var(--ease);
+    }
+    .cinewow-card:hover { transform: translateY(-4px); border-color: var(--red); }
+    .cinewow-card-media {
+      position: relative;
+      aspect-ratio: 16 / 10;
+      background: linear-gradient(135deg, #222, #161616);
+      overflow: hidden;
+    }
+    .cinewow-card-media img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity .4s var(--ease);
+    }
+    .cinewow-card-media img.img-loaded { opacity: 1; }
+    .cinewow-card-body { padding: 14px 16px 16px; }
+    .cinewow-card-title {
+      font-size: .98rem;
+      font-weight: 800;
+      line-height: 1.25;
+      text-wrap: balance;
+    }
+    .cinewow-title-meta {
+      display: block;
+      margin-top: 5px;
+      font-size: .76rem;
+      color: var(--muted);
+    }
+    .cinewow-title-date {
+      display: block;
+      margin-top: 2px;
+      color: var(--red);
+      font-weight: 600;
+    }
+
     /* ── Servizi ──────────────────────────────────────────────── */
     #servizi { background: var(--surf); }
 
@@ -672,6 +728,15 @@
     </div>
   </section>
 
+  <section class="panel" id="film-consigliati">
+    <div class="panel-inner">
+      <div class="eyebrow reveal">Film consigliati</div>
+      <h2 class="title reveal">I migliori della stagione,<br><span class="accent">i più consigliati.</span></h2>
+      <p class="section-sub reveal">I titoli più nuovi tra quelli idonei per l'Open Air, pronti per la tua serata.</p>
+      <div id="filmConsigliatiGrid" class="cinewow-titles reveal" style="margin-top:40px"><p style="color:var(--muted);font-size:.9rem">Caricamento…</p></div>
+    </div>
+  </section>
+
   <section class="panel" id="come-funziona">
     <div class="panel-inner">
       <div class="eyebrow reveal">Come funziona</div>
@@ -771,13 +836,65 @@
 
   <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import{getFirestore,collection,onSnapshot}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import{getFirestore,collection,getDocs,onSnapshot}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const FB={apiKey:"AIzaSyCYM1tZsUI-pz3D0J6EWEMqyDxrk9hep1o",authDomain:"cinemanager-4c67c.firebaseapp.com",projectId:"cinemanager-4c67c",storageBucket:"cinemanager-4c67c.firebasestorage.app",messagingSenderId:"730874662111",appId:"1:730874662111:web:8a4a501dd81644bc96ed6a"};
 const app=initializeApp(FB);
 const db=getFirestore(app);
 
 function esc(s){return(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+// ── Film consigliati — i 20 più recenti con f.openAir (stesso flag di
+// gestione.html → Archivio Film, già usato in richiedi.html), con la
+// stessa regola di disponibilità già in uso in gestione.html → Catalogo
+// Film Open Air (oaFrom se impostata a mano, altrimenti uscita + 2 mesi)
+function tmdbSize(url,size){return url?url.replace(/\/t\/p\/(original|w\d+)\//,'/t/p/'+size+'/'):url;}
+function oaFilmDisponibileLabel(f){
+  let d;
+  if(f.oaFrom){
+    d=f.oaFrom;
+  }else if(f.release){
+    const rd=new Date(f.release+'T12:00:00');
+    rd.setMonth(rd.getMonth()+2);
+    d=toLocalDate(rd);
+  }else{
+    return null;
+  }
+  return new Date(d+'T12:00:00').toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'});
+}
+
+(async function loadFilmConsigliati(){
+  const el=document.getElementById('filmConsigliatiGrid');
+  if(!el)return;
+  try{
+    const snap=await getDocs(collection(db,'films'));
+    const films=snap.docs.map(d=>({id:d.id,...d.data()}))
+      .filter(f=>f.openAir===true&&f.title)
+      .sort((a,b)=>(b.release||'').localeCompare(a.release||''))
+      .slice(0,20);
+    if(!films.length){
+      el.innerHTML='<p style="color:var(--muted);font-size:.9rem">Nessun titolo in evidenza al momento.</p>';
+      return;
+    }
+    el.innerHTML=films.map(f=>{
+      const img=f.backdrop?tmdbSize(f.backdrop,'w500'):'';
+      const imgTag=img?`<img src="${esc(img)}" alt="" loading="lazy" onload="this.classList.add('img-loaded')">`:'';
+      const avail=oaFilmDisponibileLabel(f);
+      const metaParts=[];
+      if(f.director)metaParts.push('di '+esc(f.director));
+      return `<a class="cinewow-card" href="richiedi.html?film=${encodeURIComponent(f.title)}">
+        <div class="cinewow-card-media">${imgTag}</div>
+        <div class="cinewow-card-body">
+          <div class="cinewow-card-title">${esc(f.title)}</div>
+          <div class="cinewow-title-meta">${metaParts.join(' · ')}${avail?`<span class="cinewow-title-date">Disponibile dal ${esc(avail)}</span>`:''}</div>
+        </div>
+      </a>`;
+    }).join('');
+  }catch(e){
+    console.error(e);
+    el.innerHTML='<p style="color:var(--muted);font-size:.9rem">Impossibile caricare i film al momento.</p>';
+  }
+})();
 
 // ── Disponibilità date — stesso calendario a tab scorrevoli di
 // richiedi.html, qui di sola consultazione: toccare un giorno porta

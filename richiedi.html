@@ -745,6 +745,17 @@ function oaFilmDisponibileLabel(f){
       selEl.innerHTML='<option value="">Seleziona un titolo…</option>'
         +allFilms.map(f=>`<option value="${esc(f.title)}">${esc(f.title)}${f.release?' ('+f.release.slice(0,4)+')':''}</option>`).join('');
     }
+
+    // Arrivo dalle card "Film consigliati" della home
+    // (richiedi.html?film=Titolo): pre-seleziona quel titolo, nella
+    // griglia se è tra i 15 in evidenza, altrimenti solo nel campo testo
+    const filmQ=new URLSearchParams(location.search).get('film');
+    if(filmQ){
+      document.getElementById('filmPreferenza').value=filmQ;
+      if(selEl)selEl.value=[...selEl.options].some(o=>o.value===filmQ)?filmQ:'';
+      const matchCard=[...catEl.querySelectorAll('.film-card-pick')].find(b=>b.dataset.title===filmQ);
+      if(matchCard)matchCard.classList.add('selected');
+    }
   }catch(e){
     console.error(e);
     catEl.innerHTML='<p style="color:var(--muted);font-size:.86rem">Impossibile caricare il catalogo film al momento.</p>';
