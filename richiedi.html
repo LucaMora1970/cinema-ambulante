@@ -240,7 +240,8 @@
       transition: border-color .2s var(--ease), color .2s var(--ease), background .2s var(--ease);
     }
     .day-tab .num { font-size: 1rem; color: var(--white); }
-    .day-tab .dot { width: 6px; height: 6px; border-radius: 50%; margin-top: 1px; }
+    .day-tab .dots { display: flex; gap: 3px; margin-top: 3px; }
+    .day-tab .dot { width: 6px; height: 6px; border-radius: 50%; background: #4ade80; }
     .day-tab:hover { border-color: var(--red); }
     .day-tab.on { border-color: var(--red); background: var(--red); }
     .day-tab.on .num, .day-tab.on { color: var(--white); }
@@ -280,7 +281,8 @@
       letter-spacing: normal;
       color: var(--white);
     }
-    .date-chip .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .date-chip .dots { display: flex; gap: 3px; flex-shrink: 0; }
+    .date-chip .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; background: #4ade80; }
     .date-chip .avail-label { color: var(--muted); font-size: .72rem; }
     .date-chip button {
       border: 0;
@@ -584,7 +586,7 @@
             <div id="dataMonths"></div>
           </div>
           <div class="date-chips" id="dateChips"></div>
-          <p class="date-hint" id="dateHint">Tocca uno o più giorni per aggiungerli: scegliamo insieme quella migliore in base alla disponibilità.</p>
+          <p class="date-hint" id="dateHint">Tocca uno o più giorni per aggiungerli: scegliamo insieme quella migliore in base alla disponibilità. ●● disponibile · ● ultimo posto disponibile.</p>
         </fieldset>
 
         <fieldset>
@@ -829,9 +831,7 @@ function dateAvailability(d){
   const pren=_bookings.filter(b=>(b.dates||[]).some(bd=>bd.date===d)).length;
   const max=(slot&&slot.maxPren)||2;
   if(pren>=max)return{hide:true};
-  const remaining=max-pren;
-  if(remaining===1)return{color:'#f0801a',label:'1 postazione disponibile'};
-  return{color:'#4ade80',label:remaining+' postazioni disponibili'};
+  return{dots:Math.min(max-pren,2),label:'Disponibile'};
 }
 
 // ── Calendario a tab scorrevoli — stesso componente/interazione di
@@ -911,8 +911,9 @@ function renderDataMonths(){
   const activeDays=months[_dataActiveMonthIdx].days;
   const dayTabs=activeDays.map(x=>{
     const selected=_dates.includes(x.dateStr);
+    const dots='<span class="dot"></span>'.repeat(x.av.dots||1);
     return `<button type="button" class="day-tab${selected?' on':''}" onclick="toggleCalendarDate('${x.dateStr}')" title="${esc(x.av.label||'')}">
-      <span>${x.dow}</span><span class="num">${x.dayNum}</span><span class="dot" style="background:${x.av.color||'#888'}"></span>
+      <span>${x.dow}</span><span class="num">${x.dayNum}</span><span class="dots">${dots}</span>
     </button>`;
   }).join('');
   wrap.innerHTML=
@@ -971,7 +972,9 @@ function renderDateChips(){
     const av=dateAvailability(d);
     const dt=new Date(d+'T12:00:00');
     const label=dt.toLocaleDateString('it-IT',{weekday:'short',day:'2-digit',month:'2-digit',year:'numeric'});
-    return `<span class="date-chip"><span class="dot" style="background:${av.color}"></span>${esc(label)}<span class="avail-label">${esc(av.label)}</span><button type="button" onclick="removeDate('${d}')" aria-label="Rimuovi">✕</button></span>`;
+    const dots=av.hide?'<span class="dot" style="background:#888"></span>':'<span class="dot"></span>'.repeat(av.dots||1);
+    const availLabel=av.hide?'Non più disponibile':av.label;
+    return `<span class="date-chip"><span class="dots">${dots}</span>${esc(label)}<span class="avail-label">${esc(availLabel)}</span><button type="button" onclick="removeDate('${d}')" aria-label="Rimuovi">✕</button></span>`;
   }).join('');
 }
 

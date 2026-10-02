@@ -405,7 +405,8 @@
       transition: border-color .2s var(--ease), background .2s var(--ease);
     }
     .day-tab .num { font-size: 1rem; color: var(--white); }
-    .day-tab .dot { width: 6px; height: 6px; border-radius: 50%; margin-top: 1px; }
+    .day-tab .dots { display: flex; gap: 3px; margin-top: 3px; }
+    .day-tab .dot { width: 6px; height: 6px; border-radius: 50%; background: #4ade80; }
     .day-tab:hover { border-color: var(--red); }
     .day-tab.active-month { border-color: var(--red); background: var(--red); color: var(--white); }
 
@@ -434,7 +435,8 @@
       color: var(--muted);
     }
     .avail-legend span { display: inline-flex; align-items: center; gap: 7px; }
-    .avail-legend .dot { width: 8px; height: 8px; border-radius: 50%; }
+    .avail-legend .dots { display: inline-flex; gap: 3px; }
+    .avail-legend .dot { width: 8px; height: 8px; border-radius: 50%; background: #4ade80; }
 
     /* ── Film consigliati — stesse proporzioni/struttura delle card
        Cinewow di cinemamultisalateatro.ch (immagine orizzontale 16:10,
@@ -723,7 +725,7 @@
     <div class="panel-inner">
       <div class="eyebrow reveal">Disponibilità</div>
       <h2 class="title reveal">Date<br><span class="accent">prenotabili.</span></h2>
-      <p class="section-sub reveal">Tocca una data per iniziare subito la richiesta — verde libera, arancione quasi al completo. Le date non disponibili non sono mostrate. Clicca su una data per prenotarla.</p>
+      <p class="section-sub reveal">Clicca su una data per prenotarla — due pallini posti entrambi disponibili, un pallino solo l'ultimo posto. Le date non disponibili non sono mostrate.</p>
       <div id="homeDataWrap" class="reveal" style="margin-top:40px"><div id="homeDataMonths"></div></div>
     </div>
   </section>
@@ -945,9 +947,7 @@ function homeDateAvailability(d){
   const pren=_homeBookings.filter(b=>(b.dates||[]).some(bd=>bd.date===d)).length;
   const max=(slot&&slot.maxPren)||2;
   if(pren>=max)return{hide:true};
-  const remaining=max-pren;
-  if(remaining===1)return{color:'#f0801a',label:'1 postazione disponibile'};
-  return{color:'#4ade80',label:remaining+' postazioni disponibili'};
+  return{dots:Math.min(max-pren,2),label:'Disponibile'};
 }
 
 // Stagione Open Air: solo maggio–settembre, l'anno in corso se non è ancora
@@ -988,8 +988,9 @@ function renderHomeDataMonths(){
   const monthTabs=months.map((m,mi)=>`<button type="button" class="day-tab${mi===_homeDataActiveMonthIdx?' active-month':''}" onclick="selectHomeDataMonth(${mi})">${esc(m.label)}</button>`).join('');
   const activeDays=months[_homeDataActiveMonthIdx].days;
   const dayTabs=activeDays.map(x=>{
+    const dots='<span class="dot"></span>'.repeat(x.av.dots||1);
     return `<a class="day-tab" href="richiedi.html?data=${x.dateStr}" title="${esc(x.av.label||'')}">
-      <span>${x.dow}</span><span class="num">${x.dayNum}</span><span class="dot" style="background:${x.av.color||'#888'}"></span>
+      <span>${x.dow}</span><span class="num">${x.dayNum}</span><span class="dots">${dots}</span>
     </a>`;
   }).join('');
   wrap.innerHTML=
@@ -997,7 +998,7 @@ function renderHomeDataMonths(){
     +`<div class="day-tabs-track"><div class="day-tabs-thumb" id="homeMonthThumb"></div></div>`
     +`<div class="day-tabs-scroll" id="homeDayScroll" style="margin-top:12px">${dayTabs}</div>`
     +`<div class="day-tabs-track"><div class="day-tabs-thumb" id="homeDayThumb"></div></div>`
-    +`<div class="avail-legend"><span><span class="dot" style="background:#4ade80"></span>Verde (2 postazioni disponibili)</span><span><span class="dot" style="background:#f0801a"></span>Arancione (1 postazione disponibile)</span></div>`;
+    +`<div class="avail-legend"><span><span class="dots"><span class="dot"></span><span class="dot"></span></span>Disponibile</span><span><span class="dots"><span class="dot"></span></span>Ultimo posto disponibile</span></div>`;
   [['homeMonthScroll','homeMonthThumb'],['homeDayScroll','homeDayThumb']].forEach(([sId,tId])=>{
     const scrollEl=document.getElementById(sId);
     const thumbEl=document.getElementById(tId);
