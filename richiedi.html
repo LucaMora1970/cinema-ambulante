@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0a0a0a">
+  <title>Richiedi una serata — Cinematografo Ambulante</title>
+  <meta name="description" content="Richiedi una serata di cinema open air: dicci dove, quando e che film vorresti vedere, ti rispondiamo con disponibilità e dettagli.">
+  <link rel="canonical" href="https://www.cinema-ambulante.ch/richiedi.html">
+
+  <style>
+    :root {
+      --black: #0a0a0a;
+      --surf: #161616;
+      --surf2: #1e1e1e;
+      --white: #f7f4ef;
+      --muted: #9a9a95;
+      --red: #e0312a;
+      --red-deep: #8c1f1a;
+      --line: rgba(247,244,239,.16);
+      --ease: cubic-bezier(.16,1,.3,1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { background: var(--black); }
+
+    body {
+      background: var(--black);
+      color: var(--white);
+      font-family: 'DM Sans', Arial, Helvetica, sans-serif;
+      line-height: 1.5;
+    }
+
+    a { color: inherit; }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 max(5vw, 20px);
+      background: rgba(10,10,10,.92);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      font-size: .9rem;
+      letter-spacing: .02em;
+      text-transform: uppercase;
+      text-decoration: none;
+    }
+    .brand-mark {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      border: 2px solid var(--red);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .75rem;
+      flex-shrink: 0;
+    }
+
+    .back-link {
+      font-size: .78rem;
+      font-weight: 600;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--white); }
+
+    main {
+      width: min(100%, 720px);
+      margin: 0 auto;
+      padding: 56px max(5vw, 20px) 100px;
+    }
+
+    .page-eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--red);
+      font-size: .74rem;
+      font-weight: 700;
+      letter-spacing: .24em;
+      text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+    .page-eyebrow::before { content:""; width: 40px; height: 2px; background: var(--red); }
+
+    h1 {
+      font-size: clamp(2.2rem, 6vw, 3.2rem);
+      line-height: 1;
+      letter-spacing: -.02em;
+      text-transform: uppercase;
+    }
+
+    .page-sub {
+      margin-top: 18px;
+      color: #c8c6c0;
+      font-size: 1.02rem;
+      max-width: 560px;
+    }
+
+    form { margin-top: 48px; }
+
+    fieldset {
+      border: 0;
+      margin-bottom: 40px;
+    }
+
+    .fs-title {
+      font-size: .74rem;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 18px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 560px) {
+      .row { grid-template-columns: 1fr; }
+    }
+
+    label.field {
+      display: block;
+      margin-bottom: 16px;
+      font-size: .78rem;
+      font-weight: 600;
+      letter-spacing: .03em;
+      color: var(--muted);
+      text-transform: uppercase;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="tel"],
+    input[type="number"],
+    input[type="date"],
+    textarea,
+    select {
+      display: block;
+      width: 100%;
+      margin-top: 8px;
+      padding: 13px 14px;
+      background: var(--surf);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      color: var(--white);
+      font-family: inherit;
+      font-size: .92rem;
+      text-transform: none;
+      letter-spacing: normal;
+      outline: none;
+      transition: border-color .2s var(--ease);
+    }
+    input:focus, textarea:focus, select:focus { border-color: var(--red); }
+
+    textarea { resize: vertical; min-height: 90px; }
+
+    /* ── Date multiple con disponibilità ─────────────────────── */
+    .date-add-row {
+      display: flex;
+      gap: 10px;
+      align-items: flex-end;
+      flex-wrap: wrap;
+    }
+    .date-add-row input[type="date"] { margin-top: 0; width: auto; flex: 1; min-width: 160px; }
+
+    .btn-add-date {
+      flex-shrink: 0;
+      padding: 13px 18px;
+      background: var(--surf2);
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      color: var(--white);
+      font-size: .82rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: border-color .2s var(--ease);
+    }
+    .btn-add-date:hover { border-color: var(--red); }
+
+    .date-chips {
+      margin-top: 14px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .date-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surf);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 7px 8px 7px 14px;
+      font-size: .82rem;
+      text-transform: none;
+      letter-spacing: normal;
+      color: var(--white);
+    }
+    .date-chip .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .date-chip .avail-label { color: var(--muted); font-size: .72rem; }
+    .date-chip button {
+      border: 0;
+      background: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: .9rem;
+      padding: 4px 6px;
+      line-height: 1;
+    }
+    .date-chip button:hover { color: var(--red); }
+
+    .date-hint {
+      margin-top: 10px;
+      font-size: .78rem;
+      color: var(--muted);
+      text-transform: none;
+      letter-spacing: normal;
+    }
+
+    /* ── Servizi extra ────────────────────────────────────────── */
+    .servizio-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .servizio-row:last-child { border-bottom: 0; }
+    .servizio-row input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--red);
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+    .servizio-row label {
+      flex: 1;
+      font-size: .92rem;
+      font-weight: 600;
+      color: var(--white);
+      text-transform: none;
+      letter-spacing: normal;
+      cursor: pointer;
+    }
+    .servizio-row .servizio-desc {
+      display: block;
+      font-size: .78rem;
+      font-weight: 400;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+    .servizio-row input[type="number"] {
+      width: 80px;
+      margin-top: 0;
+      flex-shrink: 0;
+      display: none;
+    }
+    .servizio-row.has-qta input[type="number"] { display: block; }
+
+    /* ── Film ─────────────────────────────────────────────────── */
+    .radio-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 12px;
+      cursor: pointer;
+    }
+    .radio-row input[type="radio"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--red);
+      margin-top: 1px;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+    .radio-row span {
+      font-size: .92rem;
+      font-weight: 600;
+      color: var(--white);
+      text-transform: none;
+      letter-spacing: normal;
+    }
+    #film-pref-wrap { display: none; margin-top: 10px; margin-left: 28px; }
+
+    /* ── Battery pack + privacy ───────────────────────────────── */
+    .check-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-top: 4px;
+    }
+    .check-row input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--red);
+      margin-top: 3px;
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+    .check-row span {
+      font-size: .84rem;
+      color: #d8d6d0;
+      text-transform: none;
+      letter-spacing: normal;
+      line-height: 1.55;
+    }
+
+    .submit-row {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+
+    button.submit {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 16px 32px;
+      background: var(--red);
+      color: var(--white);
+      border: 0;
+      border-radius: 6px;
+      font-size: .88rem;
+      font-weight: 700;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background .2s var(--ease), transform .2s var(--ease);
+    }
+    button.submit:hover { background: var(--red-deep); transform: translateY(-1px); }
+    button.submit:disabled { opacity: .5; cursor: default; transform: none; }
+
+    .form-msg {
+      font-size: .84rem;
+      font-weight: 600;
+    }
+    .form-msg.err { color: #ff6b61; }
+    .form-msg.ok { color: #4ade80; }
+
+    .sent-state {
+      text-align: center;
+      padding: 60px 0;
+    }
+    .sent-state h2 {
+      font-size: clamp(1.8rem, 5vw, 2.6rem);
+      text-transform: uppercase;
+      letter-spacing: -.02em;
+    }
+    .sent-state p {
+      margin-top: 18px;
+      color: #c8c6c0;
+      max-width: 480px;
+      margin-inline: auto;
+    }
+    .sent-state a {
+      display: inline-block;
+      margin-top: 32px;
+      font-size: .82rem;
+      font-weight: 700;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      color: var(--red);
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <a href="index.html" class="brand">
+      <span class="brand-mark">🎬</span>
+      <span>Cinematografo Ambulante</span>
+    </a>
+    <a href="index.html" class="back-link">← Torna al sito</a>
+  </header>
+
+  <main>
+    <div id="content">
+      <div class="page-eyebrow">Richiedi una serata</div>
+      <h1>Raccontaci<br>dove e quando.</h1>
+      <p class="page-sub">Compila il modulo con i dettagli della tua serata — ti rispondiamo con disponibilità, dettagli tecnici e costo.</p>
+
+      <form id="requestForm" onsubmit="return submitRequest(event)">
+
+        <fieldset>
+          <div class="fs-title">Chi richiede</div>
+          <div class="row">
+            <label class="field">Ragione sociale / Nome gruppo
+              <input type="text" name="ragione" required>
+            </label>
+            <label class="field">Persona di riferimento
+              <input type="text" name="referente" required>
+            </label>
+          </div>
+          <div class="row">
+            <label class="field">Email
+              <input type="email" name="email" required>
+            </label>
+            <label class="field">Telefono
+              <input type="tel" name="tel" required>
+            </label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <div class="fs-title">Dove</div>
+          <div class="row">
+            <label class="field">Luogo (piazza, cortile, parco...)
+              <input type="text" name="luogo" required>
+            </label>
+            <label class="field">Comune
+              <input type="text" name="comune" required>
+            </label>
+          </div>
+          <label class="field">Spettatori previsti (circa)
+            <input type="number" name="spettatori" min="1" style="max-width:220px">
+          </label>
+        </fieldset>
+
+        <fieldset>
+          <div class="fs-title">Quando</div>
+          <label class="field">Date desiderate</label>
+          <div class="date-add-row">
+            <input type="date" id="dateInput">
+            <button type="button" class="btn-add-date" onclick="addDate()">+ Aggiungi data</button>
+          </div>
+          <div class="date-chips" id="dateChips"></div>
+          <p class="date-hint" id="dateHint">Puoi aggiungere più date: scegliamo insieme quella migliore in base alla disponibilità.</p>
+        </fieldset>
+
+        <fieldset>
+          <div class="fs-title">Il film</div>
+          <label class="radio-row">
+            <input type="radio" name="filmScelta" value="definire" checked onchange="toggleFilmPref()">
+            <span>Non ho ancora deciso, consigliatemi voi</span>
+          </label>
+          <label class="radio-row">
+            <input type="radio" name="filmScelta" value="preferenza" onchange="toggleFilmPref()">
+            <span>Ho già un'idea</span>
+          </label>
+          <div id="film-pref-wrap">
+            <input type="text" id="filmPreferenza" placeholder="Titolo o genere di film che vorresti">
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <div class="fs-title">Extra (facoltativi)</div>
+          <div id="serviziList"><p style="color:var(--muted);font-size:.86rem">Caricamento…</p></div>
+        </fieldset>
+
+        <fieldset>
+          <div class="fs-title">Altro</div>
+          <div class="check-row" style="margin-bottom:18px">
+            <input type="checkbox" id="batteryPack">
+            <span>Sul posto non c'è una presa elettrica disponibile (serviranno batterie/gruppo elettrogeno)</span>
+          </div>
+          <label class="field">Note
+            <textarea name="note" placeholder="Altri dettagli utili per organizzare la serata…"></textarea>
+          </label>
+        </fieldset>
+
+        <fieldset>
+          <div class="check-row">
+            <input type="checkbox" name="consenso" required id="consenso">
+            <span>Acconsento al trattamento dei miei dati personali (nome, contatti) da parte del Cinematografo Ambulante ai fini della gestione della richiesta. I dati non vengono condivisi con terzi.</span>
+          </div>
+        </fieldset>
+
+        <div class="submit-row">
+          <button type="submit" class="submit">Invia richiesta →</button>
+          <span class="form-msg" id="formMsg"></span>
+        </div>
+      </form>
+    </div>
+  </main>
+
+  <script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import{getFirestore,collection,doc,getDoc,addDoc,onSnapshot,serverTimestamp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const FB={apiKey:"AIzaSyCYM1tZsUI-pz3D0J6EWEMqyDxrk9hep1o",authDomain:"cinemanager-4c67c.firebaseapp.com",projectId:"cinemanager-4c67c",storageBucket:"cinemanager-4c67c.firebasestorage.app",messagingSenderId:"730874662111",appId:"1:730874662111:web:8a4a501dd81644bc96ed6a"};
+const app=initializeApp(FB);
+const db=getFirestore(app);
+
+function esc(s){return(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+window.toggleFilmPref=function(){
+  const wrap=document.getElementById('film-pref-wrap');
+  const isPref=document.querySelector('input[name="filmScelta"]:checked').value==='preferenza';
+  wrap.style.display=isPref?'block':'none';
+};
+
+// ── Servizi extra: stessa collezione "oaServizi" già gestita da
+// gestione.html, lettura pubblica già prevista ──────────────────────────
+let _servizi=[];
+onSnapshot(collection(db,'oaServizi'),snap=>{
+  _servizi=snap.docs.map(d=>({id:d.id,...d.data()})).filter(s=>s.attivo!==false).sort((a,b)=>(a.ordine||0)-(b.ordine||0));
+  const el=document.getElementById('serviziList');
+  if(!el)return;
+  if(!_servizi.length){el.innerHTML='<p style="color:var(--muted);font-size:.86rem">Nessun extra configurato al momento — scrivici nelle note se ti serve qualcosa di specifico.</p>';return;}
+  el.innerHTML=_servizi.map(s=>`
+    <div class="servizio-row${s.conQuantita?' has-qta':''}">
+      <input type="checkbox" id="serv-${esc(s.id)}" data-id="${esc(s.id)}" data-qta="${s.conQuantita?'1':'0'}" onchange="toggleServQta('${esc(s.id)}')">
+      <label for="serv-${esc(s.id)}">${esc(s.icona||'✨')} ${esc(s.nome)}${s.descrizione?`<span class="servizio-desc">${esc(s.descrizione)}</span>`:''}</label>
+      ${s.conQuantita?`<input type="number" id="qta-${esc(s.id)}" min="${s.qtaMin||1}" max="${s.qtaMax||99}" value="${s.qtaMin||1}" placeholder="${esc(s.labelQuantita||'Quantità')}">`:''}
+    </div>
+  `).join('');
+},()=>{
+  const el=document.getElementById('serviziList');
+  if(el)el.innerHTML='<p style="color:var(--muted);font-size:.86rem">Scrivici nelle note gli extra che ti interessano.</p>';
+});
+window.toggleServQta=function(id){};
+
+// ── Date multiple con indicatore di disponibilità ───────────────────────
+// Stessa logica già usata in gestione.html (oaRenderRichieste): slot
+// bloccato dallo staff, già pieno (maxPren raggiunto) o semplicemente non
+// ancora pianificato — qui solo per dare un'idea, la richiesta resta
+// comunque inviabile: la conferma finale la dà sempre lo staff
+let _oaSlots=[];
+let _bookings=[];
+onSnapshot(collection(db,'oaSlots'),snap=>{_oaSlots=snap.docs.map(d=>({id:d.id,...d.data()}));renderDateChips();});
+onSnapshot(collection(db,'bookings'),snap=>{_bookings=snap.docs.map(d=>({id:d.id,...d.data()})).filter(b=>b.type==='openair');renderDateChips();});
+
+let _dates=[];
+function dateAvailability(d){
+  const today=new Date().toISOString().slice(0,10);
+  if(d<today)return{color:'#888',label:'Data passata'};
+  const slot=_oaSlots.find(s=>s.data===d);
+  const pren=_bookings.filter(b=>(b.dates||[]).some(bd=>bd.date===d)).length;
+  if(slot&&slot.bloccata)return{color:'#e0312a',label:'Non disponibile'};
+  if(!slot)return{color:'#e0312a',label:'Da verificare',faint:true};
+  const max=slot.maxPren||2;
+  if(pren>=max)return{color:'#e0312a',label:'Già al completo'};
+  if(pren>=1)return{color:'#f0801a',label:pren+' prenotazione già presente'};
+  return{color:'#4ade80',label:'Disponibile'};
+}
+
+window.addDate=function(){
+  const input=document.getElementById('dateInput');
+  const d=input.value;
+  if(!d)return;
+  if(_dates.includes(d)){input.value='';return;}
+  _dates.push(d);
+  _dates.sort();
+  input.value='';
+  renderDateChips();
+};
+
+window.removeDate=function(d){
+  _dates=_dates.filter(x=>x!==d);
+  renderDateChips();
+};
+
+function renderDateChips(){
+  const el=document.getElementById('dateChips');
+  if(!el)return;
+  el.innerHTML=_dates.map(d=>{
+    const av=dateAvailability(d);
+    const dt=new Date(d+'T12:00:00');
+    const label=dt.toLocaleDateString('it-IT',{weekday:'short',day:'2-digit',month:'2-digit',year:'numeric'});
+    return `<span class="date-chip"><span class="dot" style="background:${av.color}"></span>${esc(label)}<span class="avail-label">${esc(av.label)}</span><button type="button" onclick="removeDate('${d}')" aria-label="Rimuovi">✕</button></span>`;
+  }).join('');
+}
+
+// ── Invio ────────────────────────────────────────────────────────────
+window.submitRequest=async function(ev){
+  ev.preventDefault();
+  const form=ev.target;
+  const btn=form.querySelector('.submit');
+  const msg=document.getElementById('formMsg');
+  const ragione=(form.ragione.value||'').trim();
+  const referente=(form.referente.value||'').trim();
+  const email=(form.email.value||'').trim();
+  const tel=(form.tel.value||'').trim();
+  const luogo=(form.luogo.value||'').trim();
+  const comune=(form.comune.value||'').trim();
+
+  if(!ragione||!referente||!email||!tel||!luogo||!comune){
+    msg.textContent='Compila tutti i campi obbligatori.';msg.className='form-msg err';return false;
+  }
+  if(!_dates.length){
+    msg.textContent='Aggiungi almeno una data.';msg.className='form-msg err';return false;
+  }
+  if(!form.consenso.checked){
+    msg.textContent='Serve il consenso al trattamento dei dati per inviare la richiesta.';msg.className='form-msg err';return false;
+  }
+
+  const servizi=[];
+  _servizi.forEach(s=>{
+    const cb=document.getElementById('serv-'+s.id);
+    if(cb&&cb.checked){
+      if(s.conQuantita){
+        const qtaEl=document.getElementById('qta-'+s.id);
+        servizi.push({id:s.id,qta:parseInt(qtaEl?.value)||1});
+      }else{
+        servizi.push(s.id);
+      }
+    }
+  });
+
+  const filmScelta=document.querySelector('input[name="filmScelta"]:checked').value;
+  const filmPreferenza=filmScelta==='preferenza'?(document.getElementById('filmPreferenza').value||'').trim():'';
+
+  const data={
+    ragione,referente,email,tel,luogo,comune,
+    spettatori:form.spettatori.value?parseInt(form.spettatori.value):null,
+    date:_dates.slice(),
+    servizi,
+    filmDaDefinire:filmScelta==='definire',
+    filmPreferenza:filmPreferenza||null,
+    filmSelezionato:null,
+    requisitiConfermati:{batteryPackRichiesto:document.getElementById('batteryPack').checked},
+    note:(form.note.value||'').trim(),
+    consensoPrivacy:true,
+    stato:'nuova',
+    createdAt:serverTimestamp()
+  };
+
+  btn.disabled=true;
+  msg.textContent='Invio in corso…';
+  msg.className='form-msg';
+
+  try{
+    await addDoc(collection(db,'oaRichieste'),data);
+    try{
+      const staffSnap=await getDoc(doc(db,'settings','richiesteStaff'));
+      const staffEmails=(staffSnap.exists()?(staffSnap.data().emails||[]):[]).filter(Boolean);
+      if(staffEmails.length){
+        fetch('https://cinema-import-proxy.netlify.app/.netlify/functions/send-request-email',{
+          method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({
+            kind:'nuova-richiesta-staff',
+            to:staffEmails.join(','),
+            nome:ragione+' ('+referente+')',
+            tipoLabel:'Open Air — Cinematografo Ambulante',
+            riepilogo:'Email: '+email+'\nTelefono: '+tel+'\nLuogo: '+luogo+' — '+comune+'\nDate: '+_dates.join(', ')+(data.spettatori?'\nSpettatori: '+data.spettatori:''),
+            link:'https://cinemamultisalateatro.ch/gestione.html'
+          })
+        }).catch(e=>console.error('notifica staff',e));
+      }
+    }catch(e){console.error('notifica staff',e);}
+
+    document.getElementById('content').innerHTML=`
+      <div class="sent-state">
+        <h2>Richiesta inviata ✓</h2>
+        <p>Grazie ${esc(referente)}, abbiamo ricevuto la tua richiesta per una serata a ${esc(luogo)}. Ti risponderemo via email con disponibilità e dettagli.</p>
+        <a href="index.html">← Torna al sito</a>
+      </div>`;
+  }catch(e){
+    console.error(e);
+    btn.disabled=false;
+    msg.textContent='Invio non riuscito. Riprova tra qualche minuto o scrivici a info@cinema-ambulante.ch.';
+    msg.className='form-msg err';
+  }
+  return false;
+};
+  </script>
+</body>
+</html>
