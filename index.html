@@ -163,12 +163,12 @@
       background-size: cover;
       background-position: center 40%;
     }
-    /* Su schermi larghi la foto occupa solo la metà sinistra della hero
+    /* Su schermi larghi la foto occupa solo la metà destra della hero
        (ridotta di oltre il 30% rispetto al pieno sfondo) invece di coprire
        tutta la larghezza — su mobile resta a piena larghezza, dove non
        c'è spazio laterale da alleggerire */
     @media (min-width: 780px) {
-      .hero-bg { right: 30%; }
+      .hero-bg { left: 30%; }
     }
 
     .hero::before {
@@ -554,6 +554,12 @@
       font-weight: 700;
       line-height: 1.4;
     }
+    .timeline-content p {
+      margin-top: 6px;
+      font-size: .85rem;
+      line-height: 1.55;
+      color: var(--muted);
+    }
 
     /* ── Servizi ──────────────────────────────────────────────── */
     #servizi { background: var(--surf); }
@@ -786,7 +792,7 @@
     <div class="panel-inner">
       <div class="eyebrow reveal">Disponibilità</div>
       <h2 class="title reveal">Date<br><span class="accent">prenotabili.</span></h2>
-      <p class="section-sub reveal">Clicca su una data per prenotarla — due pallini posti entrambi disponibili, un pallino solo l'ultimo posto. Le date non disponibili non sono mostrate. L'orario indicato è quello di inizio possibile: la proiezione può iniziare solo dopo il tramonto, per avere l'oscurità necessaria.</p>
+      <p class="section-sub reveal">Le date non disponibili non sono mostrate. L'orario indicato è quello di inizio possibile: la proiezione può iniziare solo dopo il tramonto, per avere l'oscurità necessaria.</p>
       <div id="homeDataWrap" class="reveal" style="margin-top:40px"><div id="homeDataMonths"></div></div>
     </div>
   </section>
@@ -866,12 +872,12 @@
   <section class="panel" id="prestazioni">
     <div class="panel-inner">
       <div class="eyebrow reveal">Il nostro lavoro</div>
-      <h2 class="title reveal">Cosa facciamo<br><span class="accent">prima della serata.</span></h2>
-      <p class="section-sub reveal">Organizzare una proiezione open air richiede settimane di lavoro, non solo la sera dell'evento.</p>
+      <h2 class="title reveal">Iter del<br><span class="accent">progetto.</span></h2>
+      <p class="section-sub reveal">Organizzare una proiezione open air non è come accendere un televisore e scegliere un canale: richiede da parte nostra una lunga preparazione e l'impiego di veicoli, persone, competenze tecniche, tecnologia e materiale molto costoso, oltre a una gestione amministrativa che si protrae anche dopo il giorno della proiezione.</p>
       <div class="timeline reveal">
         <div class="timeline-item">
           <div class="timeline-dot"></div>
-          <div class="timeline-content"><h3>Sopralluogo del luogo</h3></div>
+          <div class="timeline-content"><h3>Sopralluogo e verifica accessi, allacciamenti e logistica</h3></div>
         </div>
         <div class="timeline-item">
           <div class="timeline-dot"></div>
@@ -879,7 +885,19 @@
         </div>
         <div class="timeline-item">
           <div class="timeline-dot"></div>
-          <div class="timeline-content"><h3>Blocco della data e del personale</h3></div>
+          <div class="timeline-content"><h3>Prenotazione definitiva della data e del personale</h3></div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content"><h3>Disegno tecnico dell'allestimento</h3></div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content"><h3>Consulenza e verifica della disponibilità dei diritti del film scelto</h3></div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content"><h3>Fornitura dei materiali per la promozione all'organizzatore</h3></div>
         </div>
         <div class="timeline-item">
           <div class="timeline-dot"></div>
@@ -893,6 +911,10 @@
           <div class="timeline-dot"></div>
           <div class="timeline-content"><h3>Attivazione del link dedicato in Cinetour.ch con tutte le specifiche della serata</h3></div>
         </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content"><h3>Inserimento della data nei post social di Cinetour</h3></div>
+        </div>
         <div class="timeline-item timeline-item-marked">
           <div class="timeline-dot"></div>
           <div class="timeline-content">
@@ -905,6 +927,21 @@
           <div class="timeline-content">
             <span class="timeline-when">La sera precedente</span>
             <h3>Preparazione dell'equipaggiamento</h3>
+          </div>
+        </div>
+        <div class="timeline-item timeline-item-marked">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <span class="timeline-when">Il giorno dell'evento, entro le 16:00</span>
+            <h3>Decisione sullo svolgimento in base alle condizioni meteo</h3>
+            <p>Se la meteo lo permette: partenza. Se non lo permette: verifica della data di recupero tra quelle ancora disponibili e comunicazione tempestiva dell'annullo nel portale Cinetour per il pubblico.</p>
+          </div>
+        </div>
+        <div class="timeline-item timeline-item-marked">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <span class="timeline-when">In caso di annullo</span>
+            <h3>Notifica della procedura, rientro del personale, sistemazione del materiale e attivazione del recupero</h3>
           </div>
         </div>
       </div>
