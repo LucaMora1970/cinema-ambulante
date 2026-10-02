@@ -242,6 +242,7 @@
     .day-tab .num { font-size: 1rem; color: var(--white); }
     .day-tab .dots { display: flex; gap: 3px; margin-top: 3px; }
     .day-tab .dot { width: 6px; height: 6px; border-radius: 50%; background: #4ade80; }
+    .day-tab .hour { display: block; margin-top: 4px; font-size: .62rem; font-weight: 600; color: var(--muted); letter-spacing: normal; }
     .day-tab:hover { border-color: var(--red); }
     .day-tab.on { border-color: var(--red); background: var(--red); }
     .day-tab.on .num, .day-tab.on { color: var(--white); }
@@ -428,10 +429,16 @@
     }
     .film-card-pick .fc-date {
       font-size: .66rem;
-      color: var(--muted);
-      padding: 0 8px 8px;
+      color: var(--red);
+      font-weight: 600;
+      padding: 0 8px 2px;
       text-transform: none;
       letter-spacing: normal;
+    }
+    .film-card-pick .fc-date-promo {
+      color: var(--muted);
+      font-weight: 400;
+      padding: 0 8px 8px;
     }
 
     /* ── Battery pack + privacy ───────────────────────────────── */
@@ -586,7 +593,7 @@
             <div id="dataMonths"></div>
           </div>
           <div class="date-chips" id="dateChips"></div>
-          <p class="date-hint" id="dateHint">Tocca uno o più giorni per aggiungerli: scegliamo insieme quella migliore in base alla disponibilità. ●● disponibile · ● ultimo posto disponibile.</p>
+          <p class="date-hint" id="dateHint">Tocca uno o più giorni per aggiungerli: scegliamo insieme quella migliore in base alla disponibilità. ●● disponibile · ● ultimo posto disponibile. L'orario indicato è quello di inizio possibile: la proiezione può iniziare solo dopo il tramonto, per avere l'oscurità necessaria.</p>
         </fieldset>
 
         <fieldset>
@@ -702,7 +709,38 @@ window.toggleFilmNonSo=function(){
 // film già usciti, senza filtro openAir) per chi vuole un titolo diverso
 // — un'unica lettura di "films" basta per entrambe ─────────────────────────
 function toLocalDate(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
-function oaFilmDisponibileLabel(f){
+
+// Orario di inizio possibile = tramonto + 10 minuti a Mendrisio, calcolato
+// con la sunrise equation (Wikipedia/NOAA) — nessun servizio esterno,
+// nessuna chiave API. La proiezione può iniziare solo dopo il tramonto,
+// per avere l'oscurità necessaria
+const MENDRISIO_LAT=45.8667,MENDRISIO_LON=8.9833;
+function startTimeLabel(dateStr){
+  const rad=Math.PI/180;
+  const date=new Date(dateStr+'T12:00:00Z');
+  const JD=date.getTime()/86400000+2440587.5;
+  const n=Math.ceil(JD-2451545.0+0.0008);
+  const Jstar=n-MENDRISIO_LON/360;
+  const M=(357.5291+0.98560028*Jstar)%360;
+  const Mrad=M*rad;
+  const C=1.9148*Math.sin(Mrad)+0.0200*Math.sin(2*Mrad)+0.0003*Math.sin(3*Mrad);
+  const lambda=(M+C+180+102.9372)%360;
+  const lambdaRad=lambda*rad;
+  const Jtransit=2451545.0+Jstar+0.0053*Math.sin(Mrad)-0.0069*Math.sin(2*lambdaRad);
+  const decl=Math.asin(Math.sin(lambdaRad)*Math.sin(23.4397*rad));
+  const h0=-0.833*rad;
+  const latRad=MENDRISIO_LAT*rad;
+  const cosOmega=(Math.sin(h0)-Math.sin(latRad)*Math.sin(decl))/(Math.cos(latRad)*Math.cos(decl));
+  const omega0=Math.acos(Math.max(-1,Math.min(1,cosOmega)))/rad;
+  const Jset=Jtransit+omega0/360;
+  const sunsetUTC=new Date((Jset-2440587.5)*86400000);
+  const start=new Date(sunsetUTC.getTime()+10*60000);
+  return start.toLocaleTimeString('it-CH',{timeZone:'Europe/Zurich',hour:'2-digit',minute:'2-digit'});
+}
+// "Promuovibile dal" = disponibile dal meno 3 settimane: non è un campo a
+// sé in archivio film, si calcola dalla stessa data di disponibilità
+// (oaFrom se impostata a mano, altrimenti uscita + 2 mesi)
+function oaFilmDates(f){
   let d;
   if(f.oaFrom){
     d=f.oaFrom;
@@ -713,7 +751,10 @@ function oaFilmDisponibileLabel(f){
   }else{
     return null;
   }
-  return new Date(d+'T12:00:00').toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'});
+  const fmt=dt=>dt.toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'});
+  const disp=new Date(d+'T12:00:00');
+  const prom=new Date(disp);prom.setDate(prom.getDate()-21);
+  return{disponibile:fmt(disp),promuovibile:fmt(prom)};
 }
 
 (async function loadFilmCatalog(){
@@ -731,14 +772,14 @@ function oaFilmDisponibileLabel(f){
       catEl.innerHTML='<p style="color:var(--muted);font-size:.86rem">Nessun titolo in evidenza al momento — cerca nell\'archivio qui sotto o scrivi la tua preferenza.</p>';
     }else{
       catEl.innerHTML=openAirFilms.map(f=>{
-        const avail=oaFilmDisponibileLabel(f);
+        const dates=oaFilmDates(f);
         const poster=f.poster
           ?`<img src="${esc(f.poster)}" alt="" loading="lazy">`
           :'<div class="fc-noposter">🎬</div>';
         return `<button type="button" class="film-card-pick" data-title="${esc(f.title)}" onclick="selectFilmCard(this)">
           ${poster}
           <div class="fc-title">${esc(f.title)}</div>
-          ${avail?`<div class="fc-date">Dal ${esc(avail)}</div>`:''}
+          ${dates?`<div class="fc-date">Disponibile dal ${esc(dates.disponibile)}</div><div class="fc-date fc-date-promo">Promuovibile dal ${esc(dates.promuovibile)}</div>`:''}
         </button>`;
       }).join('');
     }
@@ -912,8 +953,8 @@ function renderDataMonths(){
   const dayTabs=activeDays.map(x=>{
     const selected=_dates.includes(x.dateStr);
     const dots='<span class="dot"></span>'.repeat(x.av.dots||1);
-    return `<button type="button" class="day-tab${selected?' on':''}" onclick="toggleCalendarDate('${x.dateStr}')" title="${esc(x.av.label||'')}">
-      <span>${x.dow}</span><span class="num">${x.dayNum}</span><span class="dots">${dots}</span>
+    return `<button type="button" class="day-tab${selected?' on':''}" onclick="toggleCalendarDate('${x.dateStr}')" title="${esc(x.av.label||'')} — dalle ${esc(startTimeLabel(x.dateStr))}">
+      <span>${x.dow}</span><span class="num">${x.dayNum}</span><span class="dots">${dots}</span><span class="hour">${esc(startTimeLabel(x.dateStr))}</span>
     </button>`;
   }).join('');
   wrap.innerHTML=
@@ -973,7 +1014,7 @@ function renderDateChips(){
     const dt=new Date(d+'T12:00:00');
     const label=dt.toLocaleDateString('it-IT',{weekday:'short',day:'2-digit',month:'2-digit',year:'numeric'});
     const dots=av.hide?'<span class="dot" style="background:#888"></span>':'<span class="dot"></span>'.repeat(av.dots||1);
-    const availLabel=av.hide?'Non più disponibile':av.label;
+    const availLabel=av.hide?'Non più disponibile':av.label+' · dalle '+startTimeLabel(d);
     return `<span class="date-chip"><span class="dots">${dots}</span>${esc(label)}<span class="avail-label">${esc(availLabel)}</span><button type="button" onclick="removeDate('${d}')" aria-label="Rimuovi">✕</button></span>`;
   }).join('');
 }

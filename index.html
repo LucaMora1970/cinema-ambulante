@@ -163,6 +163,13 @@
       background-size: cover;
       background-position: center 40%;
     }
+    /* Su schermi larghi la foto occupa solo la metà sinistra della hero
+       (ridotta di oltre il 30% rispetto al pieno sfondo) invece di coprire
+       tutta la larghezza — su mobile resta a piena larghezza, dove non
+       c'è spazio laterale da alleggerire */
+    @media (min-width: 780px) {
+      .hero-bg { right: 30%; }
+    }
 
     .hero::before {
       content: "";
@@ -407,6 +414,7 @@
     .day-tab .num { font-size: 1rem; color: var(--white); }
     .day-tab .dots { display: flex; gap: 3px; margin-top: 3px; }
     .day-tab .dot { width: 6px; height: 6px; border-radius: 50%; background: #4ade80; }
+    .day-tab .hour { display: block; margin-top: 4px; font-size: .62rem; font-weight: 600; color: var(--muted); letter-spacing: normal; }
     .day-tab:hover { border-color: var(--red); }
     .day-tab.active-month { border-color: var(--red); background: var(--red); color: var(--white); }
 
@@ -492,6 +500,10 @@
       margin-top: 2px;
       color: var(--red);
       font-weight: 600;
+    }
+    .cinewow-title-date-promo {
+      color: var(--muted);
+      font-weight: 400;
     }
 
     /* ── Servizi ──────────────────────────────────────────────── */
@@ -725,7 +737,7 @@
     <div class="panel-inner">
       <div class="eyebrow reveal">Disponibilità</div>
       <h2 class="title reveal">Date<br><span class="accent">prenotabili.</span></h2>
-      <p class="section-sub reveal">Clicca su una data per prenotarla — due pallini posti entrambi disponibili, un pallino solo l'ultimo posto. Le date non disponibili non sono mostrate.</p>
+      <p class="section-sub reveal">Clicca su una data per prenotarla — due pallini posti entrambi disponibili, un pallino solo l'ultimo posto. Le date non disponibili non sono mostrate. L'orario indicato è quello di inizio possibile: la proiezione può iniziare solo dopo il tramonto, per avere l'oscurità necessaria.</p>
       <div id="homeDataWrap" class="reveal" style="margin-top:40px"><div id="homeDataMonths"></div></div>
     </div>
   </section>
@@ -763,6 +775,40 @@
           <div class="step-num">04</div>
           <h3>Si accendono le luci</h3>
           <p>Il sole tramonta, lo schermo si accende: il cinema arriva dove normalmente non c'è.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="panel" id="requisiti">
+    <div class="panel-inner">
+      <div class="eyebrow reveal">Requisiti</div>
+      <h2 class="title reveal">Cosa serve per<br><span class="accent">ospitare una proiezione.</span></h2>
+      <div class="steps reveal">
+        <div class="step">
+          <div class="step-num">01</div>
+          <h3>Luogo accessibile</h3>
+          <p>Lo spazio dev'essere raggiungibile con furgoni e rimorchi.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">02</div>
+          <h3>Autorizzazione comunale</h3>
+          <p>Serve il permesso del Comune per l'occupazione dello spazio pubblico.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">03</div>
+          <h3>Nessun ostacolo</h3>
+          <p>Il sedime dev'essere libero da ostacoli e gradini su tutta la superficie.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">04</div>
+          <h3>Dimensioni minime</h3>
+          <p>Almeno 10 × 20 metri, con un'altezza libera di 5.50 metri.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">05</div>
+          <h3>Oscuramento</h3>
+          <p>Possibilità di spegnere le luci dietro lo schermo e sull'area di proiezione.</p>
         </div>
       </div>
     </div>
@@ -851,7 +897,10 @@ function esc(s){return(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>'
 // stessa regola di disponibilità già in uso in gestione.html → Catalogo
 // Film Open Air (oaFrom se impostata a mano, altrimenti uscita + 2 mesi)
 function tmdbSize(url,size){return url?url.replace(/\/t\/p\/(original|w\d+)\//,'/t/p/'+size+'/'):url;}
-function oaFilmDisponibileLabel(f){
+// "Promuovibile dal" = disponibile dal meno 3 settimane: non è un campo a
+// sé in archivio film, si calcola dalla stessa data di disponibilità
+// (oaFrom se impostata a mano, altrimenti uscita + 2 mesi)
+function oaFilmDates(f){
   let d;
   if(f.oaFrom){
     d=f.oaFrom;
@@ -862,7 +911,10 @@ function oaFilmDisponibileLabel(f){
   }else{
     return null;
   }
-  return new Date(d+'T12:00:00').toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'});
+  const fmt=dt=>dt.toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'});
+  const disp=new Date(d+'T12:00:00');
+  const prom=new Date(disp);prom.setDate(prom.getDate()-21);
+  return{disponibile:fmt(disp),promuovibile:fmt(prom)};
 }
 
 (async function loadFilmConsigliati(){
@@ -881,14 +933,14 @@ function oaFilmDisponibileLabel(f){
     el.innerHTML=films.map(f=>{
       const img=f.backdrop?tmdbSize(f.backdrop,'w500'):'';
       const imgTag=img?`<img src="${esc(img)}" alt="" loading="lazy" onload="this.classList.add('img-loaded')">`:'';
-      const avail=oaFilmDisponibileLabel(f);
+      const dates=oaFilmDates(f);
       const metaParts=[];
       if(f.director)metaParts.push('di '+esc(f.director));
       return `<a class="cinewow-card" href="richiedi.html?film=${encodeURIComponent(f.title)}">
         <div class="cinewow-card-media">${imgTag}</div>
         <div class="cinewow-card-body">
           <div class="cinewow-card-title">${esc(f.title)}</div>
-          <div class="cinewow-title-meta">${metaParts.join(' · ')}${avail?`<span class="cinewow-title-date">Disponibile dal ${esc(avail)}</span>`:''}</div>
+          <div class="cinewow-title-meta">${metaParts.join(' · ')}${dates?`<span class="cinewow-title-date">Disponibile dal ${esc(dates.disponibile)}</span><span class="cinewow-title-date cinewow-title-date-promo">Promuovibile dal ${esc(dates.promuovibile)}</span>`:''}</div>
         </div>
       </a>`;
     }).join('');
@@ -902,6 +954,34 @@ function oaFilmDisponibileLabel(f){
 // richiedi.html, qui di sola consultazione: toccare un giorno porta
 // direttamente al modulo con quella data già scelta (richiedi.html?data=…)
 function toLocalDate(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+
+// Orario di inizio possibile = tramonto + 10 minuti a Mendrisio, calcolato
+// con la sunrise equation (Wikipedia/NOAA) — nessun servizio esterno,
+// nessuna chiave API. La proiezione può iniziare solo dopo il tramonto,
+// per avere l'oscurità necessaria
+const MENDRISIO_LAT=45.8667,MENDRISIO_LON=8.9833;
+function startTimeLabel(dateStr){
+  const rad=Math.PI/180;
+  const date=new Date(dateStr+'T12:00:00Z');
+  const JD=date.getTime()/86400000+2440587.5;
+  const n=Math.ceil(JD-2451545.0+0.0008);
+  const Jstar=n-MENDRISIO_LON/360;
+  const M=(357.5291+0.98560028*Jstar)%360;
+  const Mrad=M*rad;
+  const C=1.9148*Math.sin(Mrad)+0.0200*Math.sin(2*Mrad)+0.0003*Math.sin(3*Mrad);
+  const lambda=(M+C+180+102.9372)%360;
+  const lambdaRad=lambda*rad;
+  const Jtransit=2451545.0+Jstar+0.0053*Math.sin(Mrad)-0.0069*Math.sin(2*lambdaRad);
+  const decl=Math.asin(Math.sin(lambdaRad)*Math.sin(23.4397*rad));
+  const h0=-0.833*rad;
+  const latRad=MENDRISIO_LAT*rad;
+  const cosOmega=(Math.sin(h0)-Math.sin(latRad)*Math.sin(decl))/(Math.cos(latRad)*Math.cos(decl));
+  const omega0=Math.acos(Math.max(-1,Math.min(1,cosOmega)))/rad;
+  const Jset=Jtransit+omega0/360;
+  const sunsetUTC=new Date((Jset-2440587.5)*86400000);
+  const start=new Date(sunsetUTC.getTime()+10*60000);
+  return start.toLocaleTimeString('it-CH',{timeZone:'Europe/Zurich',hour:'2-digit',minute:'2-digit'});
+}
 const CAL_MESI=['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
 const CAL_GIORNI_SHORT=['DOM','LUN','MAR','MER','GIO','VEN','SAB'];
 
@@ -989,8 +1069,8 @@ function renderHomeDataMonths(){
   const activeDays=months[_homeDataActiveMonthIdx].days;
   const dayTabs=activeDays.map(x=>{
     const dots='<span class="dot"></span>'.repeat(x.av.dots||1);
-    return `<a class="day-tab" href="richiedi.html?data=${x.dateStr}" title="${esc(x.av.label||'')}">
-      <span>${x.dow}</span><span class="num">${x.dayNum}</span><span class="dots">${dots}</span>
+    return `<a class="day-tab" href="richiedi.html?data=${x.dateStr}" title="${esc(x.av.label||'')} — dalle ${esc(startTimeLabel(x.dateStr))}">
+      <span>${x.dow}</span><span class="num">${x.dayNum}</span><span class="dots">${dots}</span><span class="hour">${esc(startTimeLabel(x.dateStr))}</span>
     </a>`;
   }).join('');
   wrap.innerHTML=
