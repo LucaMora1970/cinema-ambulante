@@ -166,9 +166,15 @@
     /* Su schermi larghi la foto occupa solo la metà destra della hero
        (ridotta di oltre il 30% rispetto al pieno sfondo) invece di coprire
        tutta la larghezza — su mobile resta a piena larghezza, dove non
-       c'è spazio laterale da alleggerire */
+       c'è spazio laterale da alleggerire. "contain" invece di "cover" per
+       non tagliare l'immagine: mantiene le proporzioni intere */
     @media (min-width: 780px) {
-      .hero-bg { left: 30%; }
+      .hero-bg {
+        left: 30%;
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: right center;
+      }
     }
 
     .hero::before {
