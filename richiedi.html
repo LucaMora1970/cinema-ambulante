@@ -325,6 +325,55 @@
     }
     #film-pref-wrap { display: none; margin-top: 10px; margin-left: 28px; }
 
+    .film-catalog {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .film-card-pick {
+      background: var(--surf);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      overflow: hidden;
+      cursor: pointer;
+      text-align: left;
+      padding: 0;
+      font-family: inherit;
+      color: var(--white);
+      transition: border-color .2s var(--ease), transform .2s var(--ease);
+    }
+    .film-card-pick:hover { border-color: var(--red); transform: translateY(-2px); }
+    .film-card-pick.selected { border-color: var(--red); box-shadow: 0 0 0 2px var(--red) inset; }
+    .film-card-pick img {
+      width: 100%;
+      aspect-ratio: 2 / 3;
+      object-fit: cover;
+      display: block;
+      background: var(--surf2);
+    }
+    .film-card-pick .fc-noposter {
+      aspect-ratio: 2 / 3;
+      background: var(--surf2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+    }
+    .film-card-pick .fc-title {
+      font-size: .76rem;
+      font-weight: 700;
+      padding: 8px 8px 2px;
+      line-height: 1.3;
+    }
+    .film-card-pick .fc-date {
+      font-size: .66rem;
+      color: var(--muted);
+      padding: 0 8px 8px;
+      text-transform: none;
+      letter-spacing: normal;
+    }
+
     /* ── Battery pack + privacy ───────────────────────────────── */
     .check-row {
       display: flex;
@@ -485,6 +534,8 @@
             <span>Ho già un'idea</span>
           </label>
           <div id="film-pref-wrap">
+            <p class="date-hint" style="margin:0 0 10px">Scegli tra le uscite più recenti idonee per l'Open Air, oppure scrivi direttamente il titolo che vuoi</p>
+            <div class="film-catalog" id="filmCatalog"><p style="color:var(--muted);font-size:.86rem">Caricamento…</p></div>
             <input type="text" id="filmPreferenza" placeholder="Titolo o genere di film che vorresti">
           </div>
         </fieldset>
@@ -522,7 +573,7 @@
 
   <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import{getFirestore,collection,doc,getDoc,addDoc,onSnapshot,serverTimestamp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import{getFirestore,collection,doc,getDoc,getDocs,addDoc,onSnapshot,serverTimestamp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const FB={apiKey:"AIzaSyCYM1tZsUI-pz3D0J6EWEMqyDxrk9hep1o",authDomain:"cinemanager-4c67c.firebaseapp.com",projectId:"cinemanager-4c67c",storageBucket:"cinemanager-4c67c.firebasestorage.app",messagingSenderId:"730874662111",appId:"1:730874662111:web:8a4a501dd81644bc96ed6a"};
 const app=initializeApp(FB);
@@ -555,6 +606,63 @@ window.toggleFilmPref=function(){
   const wrap=document.getElementById('film-pref-wrap');
   const isPref=document.querySelector('input[name="filmScelta"]:checked').value==='preferenza';
   wrap.style.display=isPref?'block':'none';
+};
+
+// ── Catalogo film Open Air: stessa collezione pubblica "films" già letta
+// da index.html/sala-privata.html, filtrata sul flag f.openAir (gestione.html
+// → Archivio Film → "Idoneo per proiezioni Open Air estive") — stessa regola
+// di disponibilità già in uso in gestione.html → Catalogo Film Open Air
+// (oaFrom se impostata a mano, altrimenti uscita + 2 mesi), così pubblico e
+// admin mostrano sempre la stessa data ─────────────────────────────────────
+function toLocalDate(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+function oaFilmDisponibileLabel(f){
+  let d;
+  if(f.oaFrom){
+    d=f.oaFrom;
+  }else if(f.release){
+    const rd=new Date(f.release+'T12:00:00');
+    rd.setMonth(rd.getMonth()+2);
+    d=toLocalDate(rd);
+  }else{
+    return null;
+  }
+  return new Date(d+'T12:00:00').toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'});
+}
+
+(async function loadFilmCatalog(){
+  const el=document.getElementById('filmCatalog');
+  if(!el)return;
+  try{
+    const snap=await getDocs(collection(db,'films'));
+    const films=snap.docs.map(d=>({id:d.id,...d.data()}))
+      .filter(f=>f.openAir===true&&f.title)
+      .sort((a,b)=>(b.release||'').localeCompare(a.release||''))
+      .slice(0,15);
+    if(!films.length){
+      el.innerHTML='<p style="color:var(--muted);font-size:.86rem">Nessun titolo in evidenza al momento — scrivi comunque la tua preferenza qui sotto.</p>';
+      return;
+    }
+    el.innerHTML=films.map(f=>{
+      const avail=oaFilmDisponibileLabel(f);
+      const poster=f.poster
+        ?`<img src="${esc(f.poster)}" alt="" loading="lazy">`
+        :'<div class="fc-noposter">🎬</div>';
+      return `<button type="button" class="film-card-pick" data-title="${esc(f.title)}" onclick="selectFilmCard(this)">
+        ${poster}
+        <div class="fc-title">${esc(f.title)}</div>
+        ${avail?`<div class="fc-date">Dal ${esc(avail)}</div>`:''}
+      </button>`;
+    }).join('');
+  }catch(e){
+    console.error(e);
+    el.innerHTML='<p style="color:var(--muted);font-size:.86rem">Impossibile caricare il catalogo film al momento.</p>';
+  }
+})();
+
+window.selectFilmCard=function(btn){
+  document.querySelectorAll('.film-card-pick').forEach(b=>b.classList.remove('selected'));
+  btn.classList.add('selected');
+  document.getElementById('filmPreferenza').value=btn.dataset.title;
 };
 
 // ── Servizi extra: stessa collezione "oaServizi" già gestita da
