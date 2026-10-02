@@ -506,6 +506,55 @@
       font-weight: 400;
     }
 
+    /* ── Il nostro lavoro — percorso verticale invece di card: il punto è
+       mostrare la sequenza reale di lavoro prima della serata, non solo
+       elencarlo ──────────────────────────────────────────────────────── */
+    .timeline {
+      position: relative;
+      margin-top: 48px;
+      max-width: 640px;
+      padding-left: 36px;
+    }
+    .timeline::before {
+      content: "";
+      position: absolute;
+      left: 7px;
+      top: 8px;
+      bottom: 8px;
+      width: 2px;
+      background: var(--line);
+    }
+    .timeline-item {
+      position: relative;
+      padding-bottom: 30px;
+    }
+    .timeline-item:last-child { padding-bottom: 0; }
+    .timeline-dot {
+      position: absolute;
+      left: -36px;
+      top: 2px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: var(--black);
+      border: 2px solid var(--line);
+    }
+    .timeline-item-marked .timeline-dot { border-color: var(--red); background: var(--red); }
+    .timeline-when {
+      display: block;
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--red);
+      margin-bottom: 4px;
+    }
+    .timeline-content h3 {
+      font-size: 1rem;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
     /* ── Servizi ──────────────────────────────────────────────── */
     #servizi { background: var(--surf); }
 
@@ -814,6 +863,54 @@
     </div>
   </section>
 
+  <section class="panel" id="prestazioni">
+    <div class="panel-inner">
+      <div class="eyebrow reveal">Il nostro lavoro</div>
+      <h2 class="title reveal">Cosa facciamo<br><span class="accent">prima della serata.</span></h2>
+      <p class="section-sub reveal">Organizzare una proiezione open air richiede settimane di lavoro, non solo la sera dell'evento.</p>
+      <div class="timeline reveal">
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content"><h3>Sopralluogo del luogo</h3></div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content"><h3>Verifica e preparazione tecnica</h3></div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content"><h3>Blocco della data e del personale</h3></div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content"><h3>Avvio della procedura di acquisto dei diritti e dei supporti di riproduzione</h3></div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content"><h3>Inserimento delle specifiche e coordinate nel comunicato stampa per i media</h3></div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content"><h3>Attivazione del link dedicato in Cinetour.ch con tutte le specifiche della serata</h3></div>
+        </div>
+        <div class="timeline-item timeline-item-marked">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <span class="timeline-when">7 giorni prima dell'evento</span>
+            <h3>Caricamento dei supporti e test tecnico di riproduzione</h3>
+          </div>
+        </div>
+        <div class="timeline-item timeline-item-marked">
+          <div class="timeline-dot"></div>
+          <div class="timeline-content">
+            <span class="timeline-when">La sera precedente</span>
+            <h3>Preparazione dell'equipaggiamento</h3>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section class="panel" id="servizi">
     <div class="panel-inner">
       <div class="eyebrow reveal">Servizi</div>
@@ -854,7 +951,6 @@
 
   <section class="cta-banner">
     <h2>Pronto a portare il cinema<br>nella tua piazza?</h2>
-    <p>Raccontaci dove e quando — ti rispondiamo con disponibilità e dettagli.</p>
     <a href="richiedi.html" class="btn-solid">Richiedi una serata →</a>
   </section>
 
