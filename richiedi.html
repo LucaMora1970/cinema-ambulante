@@ -8,6 +8,11 @@
   <meta name="description" content="Richiedi una serata di cinema open air: dicci dove, quando e che film vorresti vedere, ti rispondiamo con disponibilità e dettagli.">
   <link rel="canonical" href="https://www.cinema-ambulante.ch/richiedi.html">
 
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="img/favicon-16x16.png">
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+
   <style>
     :root {
       --black: #0a0a0a;
@@ -39,13 +44,22 @@
       top: 0;
       z-index: 40;
       height: 76px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
       padding: 0 max(5vw, 20px);
       background: rgba(10,10,10,.92);
       backdrop-filter: blur(8px);
       border-bottom: 1px solid var(--line);
+    }
+
+    /* Stesso limite di larghezza/centratura di <main> (720px), cosi' il
+       contenuto dell'header resta allineato col modulo sotto invece di
+       andare da bordo a bordo su schermi larghi */
+    .header-inner {
+      width: min(100%, 720px);
+      height: 100%;
+      margin-inline: auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
     }
 
     .brand {
@@ -59,15 +73,17 @@
       text-decoration: none;
     }
     .brand-mark {
-      width: 28px;
-      height: 28px;
+      width: 38px;
+      height: 38px;
       border-radius: 50%;
-      border: 2px solid var(--red);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: .75rem;
       flex-shrink: 0;
+      overflow: hidden;
+    }
+    .brand-mark img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
     }
 
     .back-link {
@@ -264,6 +280,11 @@
       letter-spacing: normal;
       cursor: pointer;
     }
+    .servizio-row-icon {
+      display: inline-flex;
+      vertical-align: -3px;
+    }
+    .servizio-row-icon svg { width: 1rem; height: 1rem; color: var(--red); display: block; }
     .servizio-row .servizio-desc {
       display: block;
       font-size: .78rem;
@@ -390,11 +411,13 @@
 <body>
 
   <header>
-    <a href="index.html" class="brand">
-      <span class="brand-mark">🎬</span>
-      <span>Cinematografo Ambulante</span>
-    </a>
-    <a href="index.html" class="back-link">← Torna al sito</a>
+    <div class="header-inner">
+      <a href="index.html" class="brand">
+        <span class="brand-mark"><img src="img/logo.png" alt="Cinematografo Ambulante"></span>
+        <span>Cinematografo Ambulante</span>
+      </a>
+      <a href="index.html" class="back-link">← Torna al sito</a>
+    </div>
   </header>
 
   <main>
@@ -506,6 +529,9 @@ const app=initializeApp(FB);
 const db=getFirestore(app);
 
 function esc(s){return(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+// Icona di riserva quando un servizio extra (oaServizi, da gestione.html)
+// non ha un'icona propria — SVG pulito invece di un emoji di sistema
+const FALLBACK_ICON_SVG='<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 2c.6 3.6 2.4 5.4 6 6-3.6.6-5.4 2.4-6 6-.6-3.6-2.4-5.4-6-6 3.6-.6 5.4-2.4 6-6Z"/></svg>';
 
 window.toggleFilmPref=function(){
   const wrap=document.getElementById('film-pref-wrap');
@@ -524,7 +550,7 @@ onSnapshot(collection(db,'oaServizi'),snap=>{
   el.innerHTML=_servizi.map(s=>`
     <div class="servizio-row${s.conQuantita?' has-qta':''}">
       <input type="checkbox" id="serv-${esc(s.id)}" data-id="${esc(s.id)}" data-qta="${s.conQuantita?'1':'0'}" onchange="toggleServQta('${esc(s.id)}')">
-      <label for="serv-${esc(s.id)}">${esc(s.icona||'✨')} ${esc(s.nome)}${s.descrizione?`<span class="servizio-desc">${esc(s.descrizione)}</span>`:''}</label>
+      <label for="serv-${esc(s.id)}"><span class="servizio-row-icon">${s.icona?esc(s.icona):FALLBACK_ICON_SVG}</span> ${esc(s.nome)}${s.descrizione?`<span class="servizio-desc">${esc(s.descrizione)}</span>`:''}</label>
       ${s.conQuantita?`<input type="number" id="qta-${esc(s.id)}" min="${s.qtaMin||1}" max="${s.qtaMax||99}" value="${s.qtaMin||1}" placeholder="${esc(s.labelQuantita||'Quantità')}">`:''}
     </div>
   `).join('');
