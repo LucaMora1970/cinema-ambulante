@@ -256,49 +256,61 @@
     }
 
     /* ── Servizi extra ────────────────────────────────────────── */
-    .servizio-row {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px 0;
-      border-bottom: 1px solid var(--line);
+    .condizioni-text {
+      font-size: .86rem;
+      color: #c8c6c0;
+      line-height: 1.65;
+      background: var(--surf);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px 18px;
     }
-    .servizio-row:last-child { border-bottom: 0; }
-    .servizio-row input[type="checkbox"] {
+
+    .servizi-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+    }
+    .servizio-card {
+      position: relative;
+      display: block;
+      background: var(--surf);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 16px 32px 14px 16px;
+      cursor: pointer;
+      transition: border-color .2s var(--ease);
+    }
+    .servizio-card:hover { border-color: rgba(224,49,42,.5); }
+    .servizio-card.checked { border-color: var(--red); box-shadow: 0 0 0 1px var(--red) inset; }
+    .servizio-card input[type="checkbox"] {
+      position: absolute;
+      top: 14px;
+      right: 14px;
       width: 18px;
       height: 18px;
       accent-color: var(--red);
-      flex-shrink: 0;
       cursor: pointer;
     }
-    .servizio-row label {
-      flex: 1;
-      font-size: .92rem;
-      font-weight: 600;
+    .servizio-card-icon svg { width: 1.3rem; height: 1.3rem; color: var(--red); display: block; }
+    .servizio-card-nome {
+      margin-top: 10px;
+      font-size: .88rem;
+      font-weight: 700;
       color: var(--white);
-      text-transform: none;
-      letter-spacing: normal;
-      cursor: pointer;
     }
-    .servizio-row-icon {
-      display: inline-flex;
-      vertical-align: -3px;
-    }
-    .servizio-row-icon svg { width: 1rem; height: 1rem; color: var(--red); display: block; }
-    .servizio-row .servizio-desc {
-      display: block;
-      font-size: .78rem;
-      font-weight: 400;
+    .servizio-card-desc {
+      margin-top: 4px;
+      font-size: .76rem;
       color: var(--muted);
-      margin-top: 2px;
+      line-height: 1.45;
     }
-    .servizio-row input[type="number"] {
-      width: 80px;
-      margin-top: 0;
-      flex-shrink: 0;
+    .servizio-card input[type="number"] {
+      margin-top: 10px;
+      width: 100%;
       display: none;
     }
-    .servizio-row.has-qta input[type="number"] { display: block; }
+    .servizio-card.has-qta.checked input[type="number"] { display: block; }
 
     /* ── Film ─────────────────────────────────────────────────── */
     .radio-row {
@@ -510,6 +522,14 @@
           <label class="field">Spettatori previsti (circa)
             <input type="number" name="spettatori" min="1" style="max-width:220px">
           </label>
+          <div class="check-row" style="margin-top:18px">
+            <input type="checkbox" id="accessoCarrabile" required>
+            <span>Confermo che il luogo è carrabile su tutto il sedime e libero da ostacoli, per permettere l'accesso di furgone e rimorchio.</span>
+          </div>
+          <div class="check-row" style="margin-top:12px">
+            <input type="checkbox" id="batteryPack">
+            <span>Sul posto non c'è una presa elettrica disponibile (serviranno batterie/gruppo elettrogeno)</span>
+          </div>
         </fieldset>
 
         <fieldset>
@@ -525,35 +545,45 @@
 
         <fieldset>
           <div class="fs-title">Il film</div>
-          <label class="radio-row">
-            <input type="radio" name="filmScelta" value="definire" checked onchange="toggleFilmPref()">
+          <p class="date-hint" style="margin:0 0 14px">Scegli tra le uscite più recenti idonee per l'Open Air, cerca nell'intero archivio (anche titoli già usciti) o scrivi direttamente il titolo che vuoi.</p>
+          <div id="film-pick-wrap">
+            <div class="film-catalog" id="filmCatalog"><p style="color:var(--muted);font-size:.86rem">Caricamento…</p></div>
+            <label class="field" style="margin-top:4px">Oppure cerca nell'archivio completo
+              <select id="filmArchivioSelect" onchange="selectFilmFromArchive()">
+                <option value="">Caricamento…</option>
+              </select>
+            </label>
+            <label class="field" style="margin-top:14px">Titolo scelto (modificabile)
+              <input type="text" id="filmPreferenza" placeholder="Titolo o genere di film che vorresti">
+            </label>
+          </div>
+          <label class="check-row" style="margin-top:16px">
+            <input type="checkbox" id="filmNonSo" onchange="toggleFilmNonSo()">
             <span>Non ho ancora deciso, consigliatemi voi</span>
           </label>
-          <label class="radio-row">
-            <input type="radio" name="filmScelta" value="preferenza" onchange="toggleFilmPref()">
-            <span>Ho già un'idea</span>
-          </label>
-          <div id="film-pref-wrap">
-            <p class="date-hint" style="margin:0 0 10px">Scegli tra le uscite più recenti idonee per l'Open Air, oppure scrivi direttamente il titolo che vuoi</p>
-            <div class="film-catalog" id="filmCatalog"><p style="color:var(--muted);font-size:.86rem">Caricamento…</p></div>
-            <input type="text" id="filmPreferenza" placeholder="Titolo o genere di film che vorresti">
-          </div>
         </fieldset>
 
         <fieldset>
-          <div class="fs-title">Extra (facoltativi)</div>
-          <div id="serviziList"><p style="color:var(--muted);font-size:.86rem">Caricamento…</p></div>
+          <div class="fs-title">Opzioni richieste</div>
+          <div class="servizi-cards" id="serviziList"><p style="color:var(--muted);font-size:.86rem">Caricamento…</p></div>
         </fieldset>
 
         <fieldset>
-          <div class="fs-title">Altro</div>
-          <div class="check-row" style="margin-bottom:18px">
-            <input type="checkbox" id="batteryPack">
-            <span>Sul posto non c'è una presa elettrica disponibile (serviranno batterie/gruppo elettrogeno)</span>
-          </div>
-          <label class="field">Note
+          <div class="fs-title">Note</div>
+          <label class="field">
             <textarea name="note" placeholder="Altri dettagli utili per organizzare la serata…"></textarea>
           </label>
+        </fieldset>
+
+        <fieldset>
+          <div class="fs-title">Condizioni</div>
+          <p class="condizioni-text">
+            Le proiezioni hanno luogo anche in caso di tempo incerto o leggera pioggia. In caso di annullamento è comunque dovuto il 50% del costo pattuito, con possibilità di recupero nel corso della stessa stagione. Tra i servizi inclusi: l'informazione ai media della data dell'evento e la pubblicazione automatica nel portale di programmazione Cinetour.ch.
+          </p>
+          <div class="check-row" style="margin-top:14px">
+            <input type="checkbox" id="condizioni" required>
+            <span>Ho letto e accetto le condizioni sopra indicate.</span>
+          </div>
         </fieldset>
 
         <fieldset>
@@ -602,18 +632,29 @@ const OA_SERVIZIO_ICONS={
 };
 function oaServizioIconSvg(icona){return OA_SERVIZIO_ICONS[icona]||OA_SERVIZIO_ICONS.generico;}
 
-window.toggleFilmPref=function(){
-  const wrap=document.getElementById('film-pref-wrap');
-  const isPref=document.querySelector('input[name="filmScelta"]:checked').value==='preferenza';
-  wrap.style.display=isPref?'block':'none';
+// "Non ho ancora deciso": non nasconde la sezione (il catalogo resta
+// comunque consultabile), la attenua e ne disabilita i controlli così il
+// click su una card o sulla select non riattiva involontariamente una
+// preferenza quando l'utente ha detto di non averne una
+window.toggleFilmNonSo=function(){
+  const wrap=document.getElementById('film-pick-wrap');
+  const nonSo=document.getElementById('filmNonSo').checked;
+  wrap.style.opacity=nonSo?'.45':'1';
+  wrap.querySelectorAll('input,select,button').forEach(el=>{el.disabled=nonSo;});
+  if(nonSo){
+    document.querySelectorAll('.film-card-pick').forEach(b=>b.classList.remove('selected'));
+  }
 };
 
 // ── Catalogo film Open Air: stessa collezione pubblica "films" già letta
-// da index.html/sala-privata.html, filtrata sul flag f.openAir (gestione.html
-// → Archivio Film → "Idoneo per proiezioni Open Air estive") — stessa regola
-// di disponibilità già in uso in gestione.html → Catalogo Film Open Air
-// (oaFrom se impostata a mano, altrimenti uscita + 2 mesi), così pubblico e
-// admin mostrano sempre la stessa data ─────────────────────────────────────
+// da index.html/sala-privata.html. La griglia mostra solo i 15 più recenti
+// con f.openAir (gestione.html → Archivio Film → "Idoneo per proiezioni
+// Open Air estive"), con la stessa regola di disponibilità già in uso in
+// gestione.html → Catalogo Film Open Air (oaFrom se impostata a mano,
+// altrimenti uscita + 2 mesi) così pubblico e admin mostrano sempre la
+// stessa data. La select sotto elenca invece l'intero archivio (anche
+// film già usciti, senza filtro openAir) per chi vuole un titolo diverso
+// — un'unica lettura di "films" basta per entrambe ─────────────────────────
 function toLocalDate(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 function oaFilmDisponibileLabel(f){
   let d;
@@ -630,32 +671,40 @@ function oaFilmDisponibileLabel(f){
 }
 
 (async function loadFilmCatalog(){
-  const el=document.getElementById('filmCatalog');
-  if(!el)return;
+  const catEl=document.getElementById('filmCatalog');
+  const selEl=document.getElementById('filmArchivioSelect');
+  if(!catEl)return;
   try{
     const snap=await getDocs(collection(db,'films'));
-    const films=snap.docs.map(d=>({id:d.id,...d.data()}))
-      .filter(f=>f.openAir===true&&f.title)
-      .sort((a,b)=>(b.release||'').localeCompare(a.release||''))
-      .slice(0,15);
-    if(!films.length){
-      el.innerHTML='<p style="color:var(--muted);font-size:.86rem">Nessun titolo in evidenza al momento — scrivi comunque la tua preferenza qui sotto.</p>';
-      return;
+    const allFilms=snap.docs.map(d=>({id:d.id,...d.data()}))
+      .filter(f=>f.title)
+      .sort((a,b)=>(b.release||'').localeCompare(a.release||'')||a.title.localeCompare(b.title,'it'));
+
+    const openAirFilms=allFilms.filter(f=>f.openAir===true).slice(0,15);
+    if(!openAirFilms.length){
+      catEl.innerHTML='<p style="color:var(--muted);font-size:.86rem">Nessun titolo in evidenza al momento — cerca nell\'archivio qui sotto o scrivi la tua preferenza.</p>';
+    }else{
+      catEl.innerHTML=openAirFilms.map(f=>{
+        const avail=oaFilmDisponibileLabel(f);
+        const poster=f.poster
+          ?`<img src="${esc(f.poster)}" alt="" loading="lazy">`
+          :'<div class="fc-noposter">🎬</div>';
+        return `<button type="button" class="film-card-pick" data-title="${esc(f.title)}" onclick="selectFilmCard(this)">
+          ${poster}
+          <div class="fc-title">${esc(f.title)}</div>
+          ${avail?`<div class="fc-date">Dal ${esc(avail)}</div>`:''}
+        </button>`;
+      }).join('');
     }
-    el.innerHTML=films.map(f=>{
-      const avail=oaFilmDisponibileLabel(f);
-      const poster=f.poster
-        ?`<img src="${esc(f.poster)}" alt="" loading="lazy">`
-        :'<div class="fc-noposter">🎬</div>';
-      return `<button type="button" class="film-card-pick" data-title="${esc(f.title)}" onclick="selectFilmCard(this)">
-        ${poster}
-        <div class="fc-title">${esc(f.title)}</div>
-        ${avail?`<div class="fc-date">Dal ${esc(avail)}</div>`:''}
-      </button>`;
-    }).join('');
+
+    if(selEl){
+      selEl.innerHTML='<option value="">Seleziona un titolo…</option>'
+        +allFilms.map(f=>`<option value="${esc(f.title)}">${esc(f.title)}${f.release?' ('+f.release.slice(0,4)+')':''}</option>`).join('');
+    }
   }catch(e){
     console.error(e);
-    el.innerHTML='<p style="color:var(--muted);font-size:.86rem">Impossibile caricare il catalogo film al momento.</p>';
+    catEl.innerHTML='<p style="color:var(--muted);font-size:.86rem">Impossibile caricare il catalogo film al momento.</p>';
+    if(selEl)selEl.innerHTML='<option value="">Archivio non disponibile</option>';
   }
 })();
 
@@ -663,6 +712,15 @@ window.selectFilmCard=function(btn){
   document.querySelectorAll('.film-card-pick').forEach(b=>b.classList.remove('selected'));
   btn.classList.add('selected');
   document.getElementById('filmPreferenza').value=btn.dataset.title;
+  const selEl=document.getElementById('filmArchivioSelect');
+  if(selEl)selEl.value=[...selEl.options].some(o=>o.value===btn.dataset.title)?btn.dataset.title:'';
+};
+
+window.selectFilmFromArchive=function(){
+  const selEl=document.getElementById('filmArchivioSelect');
+  if(!selEl||!selEl.value)return;
+  document.getElementById('filmPreferenza').value=selEl.value;
+  document.querySelectorAll('.film-card-pick').forEach(b=>b.classList.toggle('selected',b.dataset.title===selEl.value));
 };
 
 // ── Servizi extra: stessa collezione "oaServizi" già gestita da
@@ -674,17 +732,23 @@ onSnapshot(collection(db,'oaServizi'),snap=>{
   if(!el)return;
   if(!_servizi.length){el.innerHTML='<p style="color:var(--muted);font-size:.86rem">Nessun extra configurato al momento — scrivici nelle note se ti serve qualcosa di specifico.</p>';return;}
   el.innerHTML=_servizi.map(s=>`
-    <div class="servizio-row${s.conQuantita?' has-qta':''}">
-      <input type="checkbox" id="serv-${esc(s.id)}" data-id="${esc(s.id)}" data-qta="${s.conQuantita?'1':'0'}" onchange="toggleServQta('${esc(s.id)}')">
-      <label for="serv-${esc(s.id)}"><span class="servizio-row-icon">${oaServizioIconSvg(s.icona)}</span> ${esc(s.nome)}${s.descrizione?`<span class="servizio-desc">${esc(s.descrizione)}</span>`:''}</label>
-      ${s.conQuantita?`<input type="number" id="qta-${esc(s.id)}" min="${s.qtaMin||1}" max="${s.qtaMax||99}" value="${s.qtaMin||1}" placeholder="${esc(s.labelQuantita||'Quantità')}">`:''}
-    </div>
+    <label class="servizio-card${s.conQuantita?' has-qta':''}" for="serv-${esc(s.id)}">
+      <input type="checkbox" id="serv-${esc(s.id)}" data-id="${esc(s.id)}" onchange="toggleServQta('${esc(s.id)}')">
+      <div class="servizio-card-icon">${oaServizioIconSvg(s.icona)}</div>
+      <div class="servizio-card-nome">${esc(s.nome)}</div>
+      ${s.descrizione?`<div class="servizio-card-desc">${esc(s.descrizione)}</div>`:''}
+      ${s.conQuantita?`<input type="number" id="qta-${esc(s.id)}" min="${s.qtaMin||1}" max="${s.qtaMax||99}" value="${s.qtaMin||1}" placeholder="${esc(s.labelQuantita||'Quantità')}" onclick="event.preventDefault()">`:''}
+    </label>
   `).join('');
 },()=>{
   const el=document.getElementById('serviziList');
   if(el)el.innerHTML='<p style="color:var(--muted);font-size:.86rem">Scrivici nelle note gli extra che ti interessano.</p>';
 });
-window.toggleServQta=function(id){};
+window.toggleServQta=function(id){
+  const cb=document.getElementById('serv-'+id);
+  if(!cb)return;
+  cb.closest('.servizio-card').classList.toggle('checked',cb.checked);
+};
 
 // ── Date multiple con indicatore di disponibilità ───────────────────────
 // Stessa logica già usata in gestione.html (oaRenderRichieste): slot
@@ -753,8 +817,14 @@ window.submitRequest=async function(ev){
   if(!ragione||!referente||!email||!tel||!luogo||!comune){
     msg.textContent='Compila tutti i campi obbligatori.';msg.className='form-msg err';return false;
   }
+  if(!document.getElementById('accessoCarrabile').checked){
+    msg.textContent='Conferma che il luogo è carrabile e libero da ostacoli per inviare la richiesta.';msg.className='form-msg err';return false;
+  }
   if(!_dates.length){
     msg.textContent='Aggiungi almeno una data.';msg.className='form-msg err';return false;
+  }
+  if(!document.getElementById('condizioni').checked){
+    msg.textContent='Devi accettare le condizioni per inviare la richiesta.';msg.className='form-msg err';return false;
   }
   if(!form.consenso.checked){
     msg.textContent='Serve il consenso al trattamento dei dati per inviare la richiesta.';msg.className='form-msg err';return false;
@@ -773,18 +843,22 @@ window.submitRequest=async function(ev){
     }
   });
 
-  const filmScelta=document.querySelector('input[name="filmScelta"]:checked').value;
-  const filmPreferenza=filmScelta==='preferenza'?(document.getElementById('filmPreferenza').value||'').trim():'';
+  const filmNonSo=document.getElementById('filmNonSo').checked;
+  const filmPreferenza=!filmNonSo?(document.getElementById('filmPreferenza').value||'').trim():'';
 
   const data={
     ragione,referente,email,tel,luogo,comune,
     spettatori:form.spettatori.value?parseInt(form.spettatori.value):null,
     date:_dates.slice(),
     servizi,
-    filmDaDefinire:filmScelta==='definire',
+    filmDaDefinire:filmNonSo,
     filmPreferenza:filmPreferenza||null,
     filmSelezionato:null,
-    requisitiConfermati:{batteryPackRichiesto:document.getElementById('batteryPack').checked},
+    requisitiConfermati:{
+      batteryPackRichiesto:document.getElementById('batteryPack').checked,
+      accessoCarrabileConfermato:document.getElementById('accessoCarrabile').checked
+    },
+    condizioniAccettate:document.getElementById('condizioni').checked,
     note:(form.note.value||'').trim(),
     consensoPrivacy:true,
     stato:'nuova',
