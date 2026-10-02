@@ -192,28 +192,66 @@
 
     textarea { resize: vertical; min-height: 90px; }
 
-    /* ── Date multiple con disponibilità ─────────────────────── */
-    .date-add-row {
-      display: flex;
-      gap: 10px;
-      align-items: flex-end;
-      flex-wrap: wrap;
-    }
-    .date-add-row input[type="date"] { margin-top: 0; width: auto; flex: 1; min-width: 160px; }
+    /* ── Date multiple con disponibilità — stesso calendario a tab
+       scorrevoli (mesi sopra, giorni sotto) di "Seleziona la data
+       desiderata" in prenota-sala-privata.html, qui multi-selezione:
+       toccare un giorno lo aggiunge/rimuove invece di sostituire la
+       scelta unica ───────────────────────────────────────────────── */
+    #dataWrap { overflow-x: hidden; overflow-y: clip; }
 
-    .btn-add-date {
-      flex-shrink: 0;
-      padding: 13px 18px;
-      background: var(--surf2);
-      border: 1px solid var(--line);
-      border-radius: 6px;
-      color: var(--white);
-      font-size: .82rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: border-color .2s var(--ease);
+    .day-tabs-scroll {
+      display: flex;
+      gap: 8px;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      cursor: grab;
+      user-select: none;
     }
-    .btn-add-date:hover { border-color: var(--red); }
+    .day-tabs-scroll::-webkit-scrollbar { display: none; }
+    .day-tabs-scroll.dragging { cursor: grabbing; }
+
+    .day-tab {
+      flex: 0 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      border: 1px solid var(--line);
+      background: var(--surf);
+      color: var(--muted);
+      font: inherit;
+      font-size: .74rem;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      padding: 10px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: border-color .2s var(--ease), color .2s var(--ease), background .2s var(--ease);
+    }
+    .day-tab .num { font-size: 1rem; color: var(--white); }
+    .day-tab .dot { width: 6px; height: 6px; border-radius: 50%; margin-top: 1px; }
+    .day-tab:hover { border-color: var(--red); }
+    .day-tab.on { border-color: var(--red); background: var(--red); }
+    .day-tab.on .num, .day-tab.on { color: var(--white); }
+
+    .day-tabs-track {
+      position: relative;
+      height: 3px;
+      margin-top: 8px;
+      background: var(--line);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .day-tabs-thumb {
+      position: relative;
+      height: 100%;
+      width: 30%;
+      background: var(--red);
+      border-radius: 2px;
+    }
 
     .date-chips {
       margin-top: 14px;
@@ -534,13 +572,12 @@
 
         <fieldset>
           <div class="fs-title">Quando</div>
-          <label class="field">Date desiderate</label>
-          <div class="date-add-row">
-            <input type="date" id="dateInput">
-            <button type="button" class="btn-add-date" onclick="addDate()">+ Aggiungi data</button>
+          <label class="field">Seleziona la data desiderata</label>
+          <div id="dataWrap">
+            <div id="dataMonths"></div>
           </div>
           <div class="date-chips" id="dateChips"></div>
-          <p class="date-hint" id="dateHint">Puoi aggiungere più date: scegliamo insieme quella migliore in base alla disponibilità.</p>
+          <p class="date-hint" id="dateHint">Tocca uno o più giorni per aggiungerli: scegliamo insieme quella migliore in base alla disponibilità.</p>
         </fieldset>
 
         <fieldset>
@@ -757,38 +794,156 @@ window.toggleServQta=function(id){
 // comunque inviabile: la conferma finale la dà sempre lo staff
 let _oaSlots=[];
 let _bookings=[];
-onSnapshot(collection(db,'oaSlots'),snap=>{_oaSlots=snap.docs.map(d=>({id:d.id,...d.data()}));renderDateChips();});
-onSnapshot(collection(db,'bookings'),snap=>{_bookings=snap.docs.map(d=>({id:d.id,...d.data()})).filter(b=>b.type==='openair');renderDateChips();});
+onSnapshot(collection(db,'oaSlots'),snap=>{_oaSlots=snap.docs.map(d=>({id:d.id,...d.data()}));renderDateChips();renderDataMonths();});
+onSnapshot(collection(db,'bookings'),snap=>{_bookings=snap.docs.map(d=>({id:d.id,...d.data()})).filter(b=>b.type==='openair');renderDateChips();renderDataMonths();});
 
 let _dates=[];
+// Le date non disponibili (passate, bloccate dallo staff o già al completo)
+// non si mostrano affatto nel calendario — hide:true — invece di comparire
+// in rosso: più chiaro per chi guarda, ed evita una griglia quasi tutta
+// rossa quando molti giorni non hanno ancora uno slot configurato (assenza
+// di slot ≠ non disponibile, è solo non ancora pianificato)
 function dateAvailability(d){
   const today=new Date().toISOString().slice(0,10);
-  if(d<today)return{color:'#888',label:'Data passata'};
+  if(d<today)return{hide:true};
   const slot=_oaSlots.find(s=>s.data===d);
+  if(slot&&slot.bloccata)return{hide:true};
   const pren=_bookings.filter(b=>(b.dates||[]).some(bd=>bd.date===d)).length;
-  if(slot&&slot.bloccata)return{color:'#e0312a',label:'Non disponibile'};
-  if(!slot)return{color:'#e0312a',label:'Da verificare',faint:true};
-  const max=slot.maxPren||2;
-  if(pren>=max)return{color:'#e0312a',label:'Già al completo'};
+  const max=(slot&&slot.maxPren)||2;
+  if(pren>=max)return{hide:true};
   if(pren>=1)return{color:'#f0801a',label:pren+' prenotazione già presente'};
   return{color:'#4ade80',label:'Disponibile'};
 }
 
-window.addDate=function(){
-  const input=document.getElementById('dateInput');
-  const d=input.value;
-  if(!d)return;
-  if(_dates.includes(d)){input.value='';return;}
-  _dates.push(d);
-  _dates.sort();
-  input.value='';
+// ── Calendario a tab scorrevoli — stesso componente/interazione di
+// "Seleziona la data desiderata" in prenota-sala-privata.html (mesi sopra,
+// giorni sotto, trascinabile, con indicatore di scorrimento), portato qui
+// con multi-selezione: toccare un giorno lo aggiunge/rimuove dalle date
+// scelte invece di sostituire un'unica data ─────────────────────────────
+const CAL_MESI=['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+const CAL_GIORNI_SHORT=['DOM','LUN','MAR','MER','GIO','VEN','SAB'];
+
+function setupDragScroll(el){
+  let isDown=false,startX=0,startScroll=0,moved=false;
+  el.addEventListener('mousedown',e=>{
+    isDown=true;moved=false;
+    el.classList.add('dragging');
+    startX=e.pageX;
+    startScroll=el.scrollLeft;
+    e.preventDefault();
+  });
+  window.addEventListener('mouseup',()=>{isDown=false;el.classList.remove('dragging');});
+  window.addEventListener('mousemove',e=>{
+    if(!isDown)return;
+    const dx=e.pageX-startX;
+    if(Math.abs(dx)>3)moved=true;
+    el.scrollLeft=startScroll-dx;
+  });
+  el.addEventListener('click',e=>{if(moved){e.preventDefault();e.stopPropagation();moved=false;}},true);
+}
+
+function updateDateScrollThumb(scrollEl,thumbEl){
+  const sw=scrollEl.scrollWidth,cw=scrollEl.clientWidth;
+  if(sw<=cw+1){thumbEl.style.width='100%';thumbEl.style.left='0';return;}
+  const ratio=cw/sw;
+  const pos=scrollEl.scrollLeft/(sw-cw);
+  thumbEl.style.width=(ratio*100)+'%';
+  thumbEl.style.left=(pos*(100-ratio*100))+'%';
+}
+
+// Stagione Open Air: solo maggio–settembre, l'anno in corso se non è ancora
+// finita, altrimenti quello successivo — così il calendario mostra sempre
+// "le prossime date libere" reali invece di mesi autunno/inverno dove non
+// si programma mai nulla, senza bisogno di aggiornare un anno hardcoded
+function getSeasonWindow(){
+  const now=new Date();now.setHours(0,0,0,0);
+  let year=now.getFullYear();
+  let seasonEnd=new Date(year,8,30);
+  if(now>seasonEnd)year++;
+  return{start:new Date(year,4,1),end:new Date(year,8,30)};
+}
+
+let _dataActiveMonthIdx=0;
+function renderDataMonths(){
+  const wrap=document.getElementById('dataMonths');
+  if(!wrap)return;
+  const{start,end}=getSeasonWindow();
+  const months=[];
+  let lastKey=null;
+  for(let d=new Date(start);d<=end;d.setDate(d.getDate()+1)){
+    const dateStr=toLocalDate(d);
+    const av=dateAvailability(dateStr);
+    // Una data già scelta resta comunque visibile (si toglie solo dalla
+    // chip), anche se nel frattempo è diventata non disponibile
+    if(av.hide&&!_dates.includes(dateStr))continue;
+    const key=d.getFullYear()+'-'+d.getMonth();
+    if(key!==lastKey){
+      months.push({label:CAL_MESI[d.getMonth()]+' '+d.getFullYear(),days:[]});
+      lastKey=key;
+    }
+    months[months.length-1].days.push({dateStr,dow:CAL_GIORNI_SHORT[d.getDay()],dayNum:d.getDate(),av});
+  }
+  if(!months.length){
+    wrap.innerHTML='<p style="color:var(--muted);font-size:.86rem">Nessuna data libera al momento — scrivici a info@cinema-ambulante.ch.</p>';
+    return;
+  }
+  if(_dataActiveMonthIdx>=months.length)_dataActiveMonthIdx=months.length-1;
+  const monthTabs=months.map((m,mi)=>`<button type="button" class="day-tab${mi===_dataActiveMonthIdx?' on':''}" onclick="selectDataMonth(${mi})">${esc(m.label)}</button>`).join('');
+  const activeDays=months[_dataActiveMonthIdx].days;
+  const dayTabs=activeDays.map(x=>{
+    const selected=_dates.includes(x.dateStr);
+    return `<button type="button" class="day-tab${selected?' on':''}" onclick="toggleCalendarDate('${x.dateStr}')" title="${esc(x.av.label||'')}">
+      <span>${x.dow}</span><span class="num">${x.dayNum}</span><span class="dot" style="background:${x.av.color||'#888'}"></span>
+    </button>`;
+  }).join('');
+  wrap.innerHTML=
+    `<div class="day-tabs-scroll" id="monthScroll">${monthTabs}</div>`
+    +`<div class="day-tabs-track"><div class="day-tabs-thumb" id="monthThumb"></div></div>`
+    +`<div class="day-tabs-scroll" id="dayScroll" style="margin-top:12px">${dayTabs}</div>`
+    +`<div class="day-tabs-track"><div class="day-tabs-thumb" id="dayThumb"></div></div>`;
+  [['monthScroll','monthThumb'],['dayScroll','dayThumb']].forEach(([sId,tId])=>{
+    const scrollEl=document.getElementById(sId);
+    const thumbEl=document.getElementById(tId);
+    if(!scrollEl||!thumbEl)return;
+    const update=()=>updateDateScrollThumb(scrollEl,thumbEl);
+    scrollEl.addEventListener('scroll',update,{passive:true});
+    window.addEventListener('resize',update);
+    update();
+    setupDragScroll(scrollEl);
+  });
+}
+
+window.selectDataMonth=function(mi){
+  _dataActiveMonthIdx=mi;
+  renderDataMonths();
+};
+
+window.toggleCalendarDate=function(d){
+  if(_dates.includes(d)){_dates=_dates.filter(x=>x!==d);}
+  else{_dates.push(d);_dates.sort();}
+  renderDataMonths();
   renderDateChips();
 };
 
 window.removeDate=function(d){
   _dates=_dates.filter(x=>x!==d);
+  renderDataMonths();
   renderDateChips();
 };
+
+// Arrivo dalla home (sezione Disponibilità, richiedi.html?data=YYYY-MM-DD):
+// pre-seleziona quella data invece di far ripartire la scelta da zero
+(function preselectDateFromQuery(){
+  const d=new URLSearchParams(location.search).get('data');
+  if(d&&/^\d{4}-\d{2}-\d{2}$/.test(d)&&!_dates.includes(d)){
+    _dates.push(d);
+    const target=new Date(d+'T12:00:00');
+    const{start}=getSeasonWindow();
+    _dataActiveMonthIdx=(target.getFullYear()-start.getFullYear())*12+(target.getMonth()-start.getMonth());
+  }
+})();
+renderDataMonths();
+renderDateChips();
 
 function renderDateChips(){
   const el=document.getElementById('dateChips');

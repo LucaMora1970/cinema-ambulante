@@ -366,6 +366,76 @@
       line-height: 1.6;
     }
 
+    /* ── Disponibilità — stesso calendario a tab scorrevoli di
+       richiedi.html/"Seleziona la data desiderata" di
+       prenota-sala-privata.html, qui di sola consultazione: toccare un
+       giorno porta dritti al modulo con quella data già scelta ───────── */
+    #homeDataWrap { overflow-x: hidden; overflow-y: clip; }
+
+    .day-tabs-scroll {
+      display: flex;
+      gap: 8px;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      cursor: grab;
+      user-select: none;
+    }
+    .day-tabs-scroll::-webkit-scrollbar { display: none; }
+    .day-tabs-scroll.dragging { cursor: grabbing; }
+
+    .day-tab {
+      flex: 0 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      border: 1px solid var(--line);
+      background: var(--surf);
+      color: var(--muted);
+      font: inherit;
+      font-size: .74rem;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      padding: 10px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: border-color .2s var(--ease), background .2s var(--ease);
+    }
+    .day-tab .num { font-size: 1rem; color: var(--white); }
+    .day-tab .dot { width: 6px; height: 6px; border-radius: 50%; margin-top: 1px; }
+    .day-tab:hover { border-color: var(--red); }
+    .day-tab.active-month { border-color: var(--red); background: var(--red); }
+
+    .day-tabs-track {
+      position: relative;
+      height: 3px;
+      margin-top: 8px;
+      background: var(--line);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .day-tabs-thumb {
+      position: relative;
+      height: 100%;
+      width: 30%;
+      background: var(--red);
+      border-radius: 2px;
+    }
+
+    .avail-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+      margin-top: 18px;
+      font-size: .78rem;
+      color: var(--muted);
+    }
+    .avail-legend span { display: inline-flex; align-items: center; gap: 7px; }
+    .avail-legend .dot { width: 8px; height: 8px; border-radius: 50%; }
+
     /* ── Servizi ──────────────────────────────────────────────── */
     #servizi { background: var(--surf); }
 
@@ -528,6 +598,7 @@
         <span>Cinematografo<br>Ambulante</span>
       </a>
       <nav class="site-nav">
+        <a href="#disponibilita">Disponibilità</a>
         <a href="#come-funziona">Come funziona</a>
         <a href="#servizi">Servizi</a>
         <a href="#chi-siamo">Chi siamo</a>
@@ -589,6 +660,15 @@
           <p>Pronti per la proiezione in 30 minuti. Ci adattiamo alle vostre esigenze e al vostro luogo — energeticamente indipendenti, liberi di proiettare anche dove non c'è alcun allacciamento elettrico.</p>
         </div>
       </div>
+    </div>
+  </section>
+
+  <section class="panel" id="disponibilita">
+    <div class="panel-inner">
+      <div class="eyebrow reveal">Disponibilità</div>
+      <h2 class="title reveal">Trova la tua<br><span class="accent">serata libera.</span></h2>
+      <p class="section-sub reveal">Tocca una data per iniziare subito la richiesta — verde libera, arancione quasi al completo. Le date non disponibili non sono mostrate.</p>
+      <div id="homeDataWrap" class="reveal" style="margin-top:40px"><div id="homeDataMonths"></div></div>
     </div>
   </section>
 
@@ -698,6 +778,125 @@ const app=initializeApp(FB);
 const db=getFirestore(app);
 
 function esc(s){return(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+
+// ── Disponibilità date — stesso calendario a tab scorrevoli di
+// richiedi.html, qui di sola consultazione: toccare un giorno porta
+// direttamente al modulo con quella data già scelta (richiedi.html?data=…)
+function toLocalDate(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+const CAL_MESI=['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+const CAL_GIORNI_SHORT=['DOM','LUN','MAR','MER','GIO','VEN','SAB'];
+
+function setupDragScroll(el){
+  let isDown=false,startX=0,startScroll=0,moved=false;
+  el.addEventListener('mousedown',e=>{
+    isDown=true;moved=false;
+    el.classList.add('dragging');
+    startX=e.pageX;
+    startScroll=el.scrollLeft;
+    e.preventDefault();
+  });
+  window.addEventListener('mouseup',()=>{isDown=false;el.classList.remove('dragging');});
+  window.addEventListener('mousemove',e=>{
+    if(!isDown)return;
+    const dx=e.pageX-startX;
+    if(Math.abs(dx)>3)moved=true;
+    el.scrollLeft=startScroll-dx;
+  });
+  el.addEventListener('click',e=>{if(moved){e.preventDefault();e.stopPropagation();moved=false;}},true);
+}
+
+function updateDateScrollThumb(scrollEl,thumbEl){
+  const sw=scrollEl.scrollWidth,cw=scrollEl.clientWidth;
+  if(sw<=cw+1){thumbEl.style.width='100%';thumbEl.style.left='0';return;}
+  const ratio=cw/sw;
+  const pos=scrollEl.scrollLeft/(sw-cw);
+  thumbEl.style.width=(ratio*100)+'%';
+  thumbEl.style.left=(pos*(100-ratio*100))+'%';
+}
+
+let _homeOaSlots=[],_homeBookings=[];
+onSnapshot(collection(db,'oaSlots'),snap=>{_homeOaSlots=snap.docs.map(d=>({id:d.id,...d.data()}));renderHomeDataMonths();});
+onSnapshot(collection(db,'bookings'),snap=>{_homeBookings=snap.docs.map(d=>({id:d.id,...d.data()})).filter(b=>b.type==='openair');renderHomeDataMonths();});
+
+// Le date non disponibili (passate, bloccate dallo staff o già al completo)
+// non si mostrano affatto — hide:true — stesso criterio di richiedi.html
+function homeDateAvailability(d){
+  const today=new Date().toISOString().slice(0,10);
+  if(d<today)return{hide:true};
+  const slot=_homeOaSlots.find(s=>s.data===d);
+  if(slot&&slot.bloccata)return{hide:true};
+  const pren=_homeBookings.filter(b=>(b.dates||[]).some(bd=>bd.date===d)).length;
+  const max=(slot&&slot.maxPren)||2;
+  if(pren>=max)return{hide:true};
+  if(pren>=1)return{color:'#f0801a',label:pren+' prenotazione già presente'};
+  return{color:'#4ade80',label:'Disponibile'};
+}
+
+// Stagione Open Air: solo maggio–settembre, l'anno in corso se non è ancora
+// finita, altrimenti quello successivo — così il calendario mostra sempre
+// "le prossime date libere" reali invece di mesi autunno/inverno dove non
+// si programma mai nulla, senza bisogno di aggiornare un anno hardcoded
+function getSeasonWindow(){
+  const now=new Date();now.setHours(0,0,0,0);
+  let year=now.getFullYear();
+  let seasonEnd=new Date(year,8,30);
+  if(now>seasonEnd)year++;
+  return{start:new Date(year,4,1),end:new Date(year,8,30)};
+}
+
+let _homeDataActiveMonthIdx=0;
+function renderHomeDataMonths(){
+  const wrap=document.getElementById('homeDataMonths');
+  if(!wrap)return;
+  const{start,end}=getSeasonWindow();
+  const months=[];
+  let lastKey=null;
+  for(let d=new Date(start);d<=end;d.setDate(d.getDate()+1)){
+    const dateStr=toLocalDate(d);
+    const av=homeDateAvailability(dateStr);
+    if(av.hide)continue;
+    const key=d.getFullYear()+'-'+d.getMonth();
+    if(key!==lastKey){
+      months.push({label:CAL_MESI[d.getMonth()]+' '+d.getFullYear(),days:[]});
+      lastKey=key;
+    }
+    months[months.length-1].days.push({dateStr,dow:CAL_GIORNI_SHORT[d.getDay()],dayNum:d.getDate(),av});
+  }
+  if(!months.length){
+    wrap.innerHTML='<p style="color:var(--muted);font-size:.9rem">Nessuna data libera al momento — scrivici a info@cinema-ambulante.ch.</p>';
+    return;
+  }
+  if(_homeDataActiveMonthIdx>=months.length)_homeDataActiveMonthIdx=months.length-1;
+  const monthTabs=months.map((m,mi)=>`<button type="button" class="day-tab${mi===_homeDataActiveMonthIdx?' active-month':''}" onclick="selectHomeDataMonth(${mi})">${esc(m.label)}</button>`).join('');
+  const activeDays=months[_homeDataActiveMonthIdx].days;
+  const dayTabs=activeDays.map(x=>{
+    return `<a class="day-tab" href="richiedi.html?data=${x.dateStr}" title="${esc(x.av.label||'')}">
+      <span>${x.dow}</span><span class="num">${x.dayNum}</span><span class="dot" style="background:${x.av.color||'#888'}"></span>
+    </a>`;
+  }).join('');
+  wrap.innerHTML=
+    `<div class="day-tabs-scroll" id="homeMonthScroll">${monthTabs}</div>`
+    +`<div class="day-tabs-track"><div class="day-tabs-thumb" id="homeMonthThumb"></div></div>`
+    +`<div class="day-tabs-scroll" id="homeDayScroll" style="margin-top:12px">${dayTabs}</div>`
+    +`<div class="day-tabs-track"><div class="day-tabs-thumb" id="homeDayThumb"></div></div>`
+    +`<div class="avail-legend"><span><span class="dot" style="background:#4ade80"></span>Disponibile</span><span><span class="dot" style="background:#f0801a"></span>Quasi al completo</span></div>`;
+  [['homeMonthScroll','homeMonthThumb'],['homeDayScroll','homeDayThumb']].forEach(([sId,tId])=>{
+    const scrollEl=document.getElementById(sId);
+    const thumbEl=document.getElementById(tId);
+    if(!scrollEl||!thumbEl)return;
+    const update=()=>updateDateScrollThumb(scrollEl,thumbEl);
+    scrollEl.addEventListener('scroll',update,{passive:true});
+    window.addEventListener('resize',update);
+    update();
+    setupDragScroll(scrollEl);
+  });
+}
+window.selectHomeDataMonth=function(mi){
+  _homeDataActiveMonthIdx=mi;
+  renderHomeDataMonths();
+};
+renderHomeDataMonths();
+
 // Icona di riserva quando un servizio extra (oaServizi, da gestione.html)
 // non ha un'icona propria — SVG pulito invece di un emoji di sistema
 // Stessa libreria icone di gestione.html (CineTour Open Air → Servizi,
