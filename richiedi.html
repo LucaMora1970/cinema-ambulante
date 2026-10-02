@@ -811,8 +811,9 @@ function dateAvailability(d){
   const pren=_bookings.filter(b=>(b.dates||[]).some(bd=>bd.date===d)).length;
   const max=(slot&&slot.maxPren)||2;
   if(pren>=max)return{hide:true};
-  if(pren>=1)return{color:'#f0801a',label:pren+' prenotazione già presente'};
-  return{color:'#4ade80',label:'Disponibile'};
+  const remaining=max-pren;
+  if(remaining===1)return{color:'#f0801a',label:'1 postazione disponibile'};
+  return{color:'#4ade80',label:remaining+' postazioni disponibili'};
 }
 
 // ── Calendario a tab scorrevoli — stesso componente/interazione di

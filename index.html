@@ -828,8 +828,9 @@ function homeDateAvailability(d){
   const pren=_homeBookings.filter(b=>(b.dates||[]).some(bd=>bd.date===d)).length;
   const max=(slot&&slot.maxPren)||2;
   if(pren>=max)return{hide:true};
-  if(pren>=1)return{color:'#f0801a',label:pren+' prenotazione già presente'};
-  return{color:'#4ade80',label:'Disponibile'};
+  const remaining=max-pren;
+  if(remaining===1)return{color:'#f0801a',label:'1 postazione disponibile'};
+  return{color:'#4ade80',label:remaining+' postazioni disponibili'};
 }
 
 // Stagione Open Air: solo maggio–settembre, l'anno in corso se non è ancora
@@ -879,7 +880,7 @@ function renderHomeDataMonths(){
     +`<div class="day-tabs-track"><div class="day-tabs-thumb" id="homeMonthThumb"></div></div>`
     +`<div class="day-tabs-scroll" id="homeDayScroll" style="margin-top:12px">${dayTabs}</div>`
     +`<div class="day-tabs-track"><div class="day-tabs-thumb" id="homeDayThumb"></div></div>`
-    +`<div class="avail-legend"><span><span class="dot" style="background:#4ade80"></span>Disponibile</span><span><span class="dot" style="background:#f0801a"></span>Quasi al completo</span></div>`;
+    +`<div class="avail-legend"><span><span class="dot" style="background:#4ade80"></span>Verde (2 postazioni disponibili)</span><span><span class="dot" style="background:#f0801a"></span>Arancione (1 postazione disponibile)</span></div>`;
   [['homeMonthScroll','homeMonthThumb'],['homeDayScroll','homeDayThumb']].forEach(([sId,tId])=>{
     const scrollEl=document.getElementById(sId);
     const thumbEl=document.getElementById(tId);
