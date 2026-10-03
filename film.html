@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0a0a0a">
+  <title>Scheda film — Cinematografo Ambulante</title>
+  <meta name="description" content="Scheda del film: trama, cast e disponibilità per una proiezione open air.">
+  <link rel="canonical" href="https://www.cinema-ambulante.ch/film.html">
+
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="img/favicon-16x16.png">
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+
+  <style>
+    :root {
+      --black: #0a0a0a;
+      --surf: #161616;
+      --surf2: #1e1e1e;
+      --white: #f7f4ef;
+      --muted: #9a9a95;
+      --red: #e0312a;
+      --red-deep: #8c1f1a;
+      --line: rgba(247,244,239,.16);
+      --ease: cubic-bezier(.16,1,.3,1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { background: var(--black); }
+
+    body {
+      background: var(--black);
+      color: var(--white);
+      font-family: 'DM Sans', Arial, Helvetica, sans-serif;
+      line-height: 1.5;
+      overflow-x: clip;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      height: 76px;
+      padding: 0 max(5vw, 20px);
+      background: rgba(10,10,10,.92);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--line);
+    }
+    .header-inner {
+      width: min(100%, 1000px);
+      height: 100%;
+      margin-inline: auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      font-size: .74rem;
+      letter-spacing: .02em;
+      text-transform: uppercase;
+      text-decoration: none;
+    }
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+    .brand-mark img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .back-link {
+      font-size: .78rem;
+      font-weight: 600;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-decoration: none;
+    }
+    .back-link:hover { color: var(--white); }
+
+    /* object-fit:contain, non cover: l'immagine non viene mai ritagliata —
+       stessa scelta fatta per la foto dell'hero in home */
+    .hero {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16/9;
+      max-height: 58vh;
+      background: linear-gradient(135deg, var(--surf), var(--surf2));
+      overflow: hidden;
+    }
+    .hero img { width: 100%; height: 100%; object-fit: contain; object-position: center bottom; display: block; }
+    .hero .scrim {
+      position: absolute; inset: 0;
+      background: linear-gradient(180deg, var(--black) 0%, rgba(10,10,10,0) 18%, rgba(10,10,10,.15) 50%, rgba(10,10,10,.55) 76%, var(--black) 100%);
+    }
+    .hero-content {
+      position: absolute; left: 0; right: 0; bottom: 0;
+      width: min(100%, 1000px);
+      margin: 0 auto;
+      padding: 0 max(5vw, 20px) 26px;
+    }
+    .hero-content .title {
+      font-size: clamp(1.5rem, 4vw, 2.4rem);
+      font-weight: 800;
+      text-wrap: balance;
+      text-shadow: 0 2px 8px rgba(0,0,0,.6);
+    }
+    .hero-content .meta {
+      display: flex; gap: 8px; flex-wrap: wrap;
+      margin-top: 10px; font-size: .72rem; color: var(--muted);
+    }
+    .hero-content .meta span {
+      background: rgba(247,244,239,.1);
+      padding: 4px 11px;
+      border-radius: 20px;
+    }
+
+    main { width: min(100%, 1000px); margin: 0 auto; padding: 34px max(5vw, 20px) 90px; }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+      grid-template-areas: "poster info";
+      gap: 40px;
+    }
+    .poster-col { grid-area: poster; }
+    .info-col { grid-area: info; }
+    .poster-col img {
+      width: 100%; border-radius: 14px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.4);
+      display: block;
+    }
+    .poster-col .no-poster {
+      width: 100%; aspect-ratio: 2/3; border-radius: 14px;
+      background: linear-gradient(135deg, var(--surf), var(--surf2));
+      display: flex; align-items: center; justify-content: center; font-size: 3rem;
+    }
+
+    .avail-box {
+      margin-bottom: 18px;
+      padding: 16px;
+      background: var(--surf);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+    }
+    .avail-row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+    .avail-row + .avail-row { margin-top: 8px; }
+    .avail-label { font-size: .68rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+    .avail-value { font-size: .85rem; font-weight: 700; color: var(--red); text-align: right; }
+    .avail-row.promo .avail-value { color: var(--muted); font-weight: 600; }
+
+    .book-btn {
+      margin-top: 16px; width: 100%;
+      display: flex; align-items: center; justify-content: center; gap: 7px;
+      background: var(--red); color: var(--white);
+      font-size: .85rem; font-weight: 800; letter-spacing: .03em;
+      padding: 14px 16px; border-radius: 10px;
+      transition: transform .2s var(--ease), box-shadow .2s var(--ease), background-color .2s var(--ease);
+    }
+    .book-btn:hover { background: var(--red-deep); transform: translateY(-2px); box-shadow: 0 10px 26px rgba(224,49,42,.35); }
+
+    .layout h2 {
+      font-size: .78rem; font-weight: 800; text-transform: uppercase; letter-spacing: .1em;
+      color: var(--red); margin: 26px 0 12px;
+    }
+    .layout h2:first-child { margin-top: 0; }
+    .plot { font-size: .9rem; color: var(--white); opacity: .9; line-height: 1.65; }
+    .credits { font-size: .82rem; color: var(--muted); }
+    .credits b { color: var(--white); font-weight: 700; }
+
+    .trailer-wrap {
+      position: relative; width: 100%; aspect-ratio: 16/9;
+      border-radius: 14px; overflow: hidden; background: var(--surf2);
+    }
+    .trailer-wrap iframe { width: 100%; height: 100%; border: 0; display: block; }
+
+    .loading, .empty-msg { text-align: center; color: var(--muted); padding: 80px 20px; font-size: .88rem; }
+    .spinner {
+      width: 30px; height: 30px; border: 3px solid var(--line); border-top-color: var(--red);
+      border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 16px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 720px) {
+      .layout { grid-template-columns: 1fr; grid-template-areas: "info" "poster"; }
+      .poster-col { margin-top: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-inner">
+      <a href="index.html" class="brand">
+        <span class="brand-mark"><img src="img/logo.png" alt="Cinematografo Ambulante"></span>
+        <span>Cinematografo<br>Ambulante</span>
+      </a>
+      <a href="index.html#film-consigliati" class="back-link">← Torna al sito</a>
+    </div>
+  </header>
+
+  <div id="root">
+    <div class="loading"><div class="spinner"></div>Caricamento della scheda…</div>
+  </div>
+
+  <script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import{getFirestore,doc,getDoc}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const FB={apiKey:"AIzaSyCYM1tZsUI-pz3D0J6EWEMqyDxrk9hep1o",authDomain:"cinemanager-4c67c.firebaseapp.com",projectId:"cinemanager-4c67c",storageBucket:"cinemanager-4c67c.firebasestorage.app",messagingSenderId:"730874662111",appId:"1:730874662111:web:8a4a501dd81644bc96ed6a"};
+const app=initializeApp(FB);
+const db=getFirestore(app);
+
+function esc(s){return(s||'').toString().replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function tmdbSize(url,size){return url?url.replace(/\/t\/p\/(original|w\d+)\//,'/t/p/'+size+'/'):url;}
+function dur(m){return m?(Math.floor(m/60)+'h'+String(m%60).padStart(2,'0')):'';}
+function toLocalDate(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+
+// Stessa regola di disponibilità già in uso in index.html/richiedi.html —
+// oaFrom se impostata a mano, altrimenti uscita + 2 mesi; "promuovibile"
+// è sempre disponibile meno 3 settimane
+function oaFilmDates(f){
+  let d;
+  if(f.oaFrom){
+    d=f.oaFrom;
+  }else if(f.release){
+    const rd=new Date(f.release+'T12:00:00');
+    rd.setMonth(rd.getMonth()+2);
+    d=toLocalDate(rd);
+  }else{
+    return null;
+  }
+  const fmt=dt=>dt.toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'});
+  const disp=new Date(d+'T12:00:00');
+  const prom=new Date(disp);prom.setDate(prom.getDate()-21);
+  return{disponibile:fmt(disp),promuovibile:fmt(prom)};
+}
+
+function render(f){
+  const backdrop=f.backdrop||f.poster||'';
+  const dStr=dur(f.duration);
+  const dates=oaFilmDates(f);
+  const credits=[f.director?`<div class="credits"><b>Regia:</b> ${esc(f.director)}</div>`:'',f.cast?`<div class="credits" style="margin-top:4px"><b>Cast:</b> ${esc(f.cast)}</div>`:''].join('');
+  const plot=f.desc||f.description||'';
+
+  document.title=f.title+' — Cinematografo Ambulante';
+
+  document.getElementById('root').innerHTML=`
+    <div class="hero">
+      ${backdrop?`<img src="${esc(tmdbSize(backdrop,'w1280'))}" alt="${esc(f.title)}">`:''}
+      <div class="scrim"></div>
+      <div class="hero-content">
+        <div class="title">${esc(f.title)}</div>
+        <div class="meta">${dStr?`<span>${dStr}</span>`:''}</div>
+      </div>
+    </div>
+    <main>
+      <div class="layout">
+        <div class="poster-col">
+          ${dates?`<div class="avail-box">
+            <div class="avail-row"><span class="avail-label">Disponibile dal</span><span class="avail-value">${esc(dates.disponibile)}</span></div>
+            <div class="avail-row promo"><span class="avail-label">Promuovibile dal</span><span class="avail-value">${esc(dates.promuovibile)}</span></div>
+          </div>`:''}
+          ${f.poster?`<img src="${esc(tmdbSize(f.poster,'w500'))}" alt="${esc(f.title)}">`:'<div class="no-poster">🎬</div>'}
+          <a class="book-btn" href="richiedi.html?film=${encodeURIComponent(f.title)}">Richiedi questa serata →</a>
+        </div>
+        <div class="info-col">
+          ${credits?`<h2>Cast &amp; regia</h2>${credits}`:''}
+          ${plot?`<h2>Trama</h2><div class="plot">${esc(plot)}</div>`:''}
+          ${f.trailer?`<h2>Trailer</h2><div class="trailer-wrap"><iframe src="https://www.youtube.com/embed/${esc(f.trailer)}" title="Trailer" allow="accelerometer;autoplay;clipboard-write;encrypted-media;gyroscope;picture-in-picture" allowfullscreen loading="lazy"></iframe></div>`:''}
+        </div>
+      </div>
+    </main>`;
+}
+
+async function init(){
+  const id=new URLSearchParams(location.search).get('id');
+  if(!id){
+    document.getElementById('root').innerHTML='<div class="empty-msg">⚠️ Film non specificato.</div>';
+    return;
+  }
+  try{
+    const snap=await getDoc(doc(db,'films',id));
+    if(!snap.exists()){
+      document.getElementById('root').innerHTML='<div class="empty-msg">⚠️ Film non trovato.</div>';
+      return;
+    }
+    render({id:snap.id,...snap.data()});
+  }catch(e){
+    console.error(e);
+    document.getElementById('root').innerHTML='<div class="empty-msg">⚠️ Impossibile caricare la scheda. Riprova tra qualche minuto.</div>';
+  }
+}
+init();
+  </script>
+</body>
+</html>

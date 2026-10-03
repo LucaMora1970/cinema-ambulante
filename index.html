@@ -71,7 +71,7 @@
       align-items: center;
       gap: 10px;
       font-weight: 800;
-      font-size: .95rem;
+      font-size: .74rem;
       letter-spacing: .02em;
       text-transform: uppercase;
     }
@@ -542,10 +542,9 @@
       width: 16px;
       height: 16px;
       border-radius: 50%;
-      background: var(--black);
-      border: 2px solid var(--line);
+      background: var(--red);
+      border: 2px solid var(--red);
     }
-    .timeline-item-marked .timeline-dot { border-color: var(--red); background: var(--red); }
     .timeline-when {
       display: block;
       font-size: .72rem;
@@ -835,7 +834,7 @@
         <div class="step">
           <div class="step-num">04</div>
           <h3>Il giorno dell'evento</h3>
-          <p>Porti tu le sedie, se non le hai richieste a noi — al resto pensiamo noi fino alla fine della proiezione. Arriviamo due ore prima dell'inizio e ripartiamo entro 45 minuti dalla fine del film.</p>
+          <p>I collaboratori partono con i veicoli da Mendrisio e in genere arrivano sul posto due ore prima dell'orario di inizio: posizionano i mezzi, allestiscono la struttura, calibrano le attrezzature e tarano l'impianto. All'ora stabilita e non appena l'oscurità lo permette, la proiezione ha inizio. A proiezione ultimata, in circa 45 minuti tutto è smontato e i collaboratori rientrano in sede.</p>
         </div>
       </div>
     </div>
@@ -849,7 +848,7 @@
         <div class="step">
           <div class="step-num">01</div>
           <h3>Luogo accessibile</h3>
-          <p>Lo spazio dev'essere raggiungibile con furgoni e rimorchi.</p>
+          <p>Lo spazio dev'essere raggiungibile e carrabile con i furgoni e con i rimorchi che sono la struttura portante dell'allestimento.</p>
         </div>
         <div class="step">
           <div class="step-num">02</div>
@@ -874,7 +873,12 @@
         <div class="step">
           <div class="step-num">06</div>
           <h3>Allacciamento elettrico</h3>
-          <p>Presa CEE 16A 5 poli. Se non disponibile, possiamo fornire un Battery Pack come optional a pagamento.</p>
+          <p>Presa CEE 16A 5 poli disponibile sul luogo della proiezione. Se non disponibile, possiamo fornire un Battery Pack come optional.</p>
+        </div>
+        <div class="step">
+          <div class="step-num">07</div>
+          <h3>Sedie</h3>
+          <p>La disponibilità delle sedie, che l'organizzatore dovrà posare dopo l'arrivo dei nostri collaboratori e non appena parcheggiati i veicoli. Le sedie possono essere a noi richieste come optional.</p>
         </div>
       </div>
     </div>
@@ -1096,7 +1100,7 @@ function oaFilmDates(f){
       const dates=oaFilmDates(f);
       const metaParts=[];
       if(f.director)metaParts.push('di '+esc(f.director));
-      return `<a class="cinewow-card" href="richiedi.html?film=${encodeURIComponent(f.title)}">
+      return `<a class="cinewow-card" href="film.html?id=${encodeURIComponent(f.id)}">
         <div class="cinewow-card-media">${imgTag}</div>
         <div class="cinewow-card-body">
           <div class="cinewow-card-title">${esc(f.title)}</div>
@@ -1313,7 +1317,7 @@ const revealObserver=new IntersectionObserver(entries=>{
       revealObserver.unobserve(entry.target);
     }
   });
-},{threshold:.15});
+},{threshold:0});
 document.querySelectorAll('.reveal').forEach(el=>revealObserver.observe(el));
 
 // Menu mobile minimale: mostra/nasconde la nav come pannello a tutta larghezza
