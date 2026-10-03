@@ -82,14 +82,19 @@
       display: block;
     }
     .back-link {
-      font-size: .78rem;
-      font-weight: 600;
-      letter-spacing: .04em;
-      text-transform: uppercase;
-      color: var(--muted);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: rgba(247,244,239,.06);
+      border: 1px solid var(--line);
+      color: var(--white);
       text-decoration: none;
+      transition: background-color .2s var(--ease), border-color .2s var(--ease), color .2s var(--ease);
     }
-    .back-link:hover { color: var(--white); }
+    .back-link:hover { background: rgba(247,244,239,.12); border-color: var(--red); color: var(--red); }
 
     /* object-fit:contain, non cover: l'immagine non viene mai ritagliata —
        stessa scelta fatta per la foto dell'hero in home */
@@ -208,7 +213,7 @@
         <span class="brand-mark"><img src="img/logo.png" alt="Cinematografo Ambulante"></span>
         <span>Cinematografo<br>Ambulante</span>
       </a>
-      <a href="index.html#film-consigliati" class="back-link">← Torna al sito</a>
+      <a href="index.html#film-consigliati" class="back-link" aria-label="Torna al sito"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></a>
     </div>
   </header>
 
