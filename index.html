@@ -566,6 +566,53 @@
       color: var(--muted);
     }
 
+    /* ── Attrezzatura ─────────────────────────────────────────── */
+    .equipment-grid {
+      margin-top: 52px;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 2px;
+      background: var(--line);
+      border: 1px solid var(--line);
+    }
+    .equipment-card {
+      background: var(--black);
+      padding: 34px 30px;
+    }
+    .equipment-card .eq-label {
+      font-size: .68rem;
+      font-weight: 800;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--red);
+      margin-bottom: 10px;
+    }
+    .equipment-card h3 {
+      font-size: 1.3rem;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
+    .equipment-card .eq-intro {
+      font-size: .9rem;
+      color: var(--muted);
+      line-height: 1.55;
+      margin-bottom: 20px;
+    }
+    .spec-list { display: flex; flex-direction: column; gap: 10px; }
+    .spec-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: .88rem;
+      line-height: 1.5;
+    }
+    .spec-item .dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--red);
+      flex-shrink: 0;
+      margin-top: 7px;
+    }
+
     /* ── Servizi ──────────────────────────────────────────────── */
     #servizi { background: var(--surf); }
 
@@ -730,7 +777,7 @@
       <nav class="site-nav">
         <a href="#disponibilita">Disponibilità</a>
         <a href="#come-funziona">Come funziona</a>
-        <a href="#servizi">Servizi</a>
+        <a href="#prestazioni">Servizi</a>
         <a href="#chi-siamo">Chi siamo</a>
         <a href="#contatti">Contatti</a>
         <a href="richiedi.html" class="cta">Richiedi una serata</a>
@@ -904,12 +951,45 @@
     </div>
   </section>
 
+  <section class="panel" id="attrezzatura">
+    <div class="panel-inner">
+      <div class="eyebrow reveal">Attrezzatura</div>
+      <h2 class="title reveal">La nostra<br><span class="accent">attrezzatura.</span></h2>
+      <p class="section-sub reveal">Due mezzi, equipaggiati con tecnologia cinema professionale, bastano per portare una vera sala all'aperto ovunque.</p>
+      <div class="equipment-grid reveal">
+        <div class="equipment-card">
+          <div class="eq-label">Furgone</div>
+          <h3>Furgone Schermo</h3>
+          <p class="eq-intro">Il furgone che trasporta ed eleva lo schermo gigante.</p>
+          <div class="spec-list">
+            <div class="spec-item"><span class="dot"></span>Struttura portante integrata e automatizzata per il montaggio dello schermo</div>
+            <div class="spec-item"><span class="dot"></span>Tenuta al vento</div>
+            <div class="spec-item"><span class="dot"></span>Impianto audio integrato</div>
+          </div>
+        </div>
+        <div class="equipment-card">
+          <div class="eq-label">Rimorchio</div>
+          <h3>Rimorchio telescopico</h3>
+          <p class="eq-intro">Il cuore tecnico della proiezione, su un unico rimorchio.</p>
+          <div class="spec-list">
+            <div class="spec-item"><span class="dot"></span>Proiettore professionale cinema Barco DP2K</div>
+            <div class="spec-item"><span class="dot"></span>Server Alchemy</div>
+            <div class="spec-item"><span class="dot"></span>Processore audio Dolby</div>
+            <div class="spec-item"><span class="dot"></span>Amplificatori professionali cinema QSC</div>
+            <div class="spec-item"><span class="dot"></span>Trasmettitore microfono wireless Sennheiser</div>
+            <div class="spec-item"><span class="dot"></span>Impianto di illuminazione del sedime</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section class="panel" id="servizi">
     <div class="panel-inner">
       <div class="eyebrow reveal">Servizi</div>
       <h2 class="title reveal">Sempre inclusi<br><span class="accent">nella serata.</span></h2>
       <div class="include-list reveal">
-        <div class="include-item"><span class="dot"></span>Schermo gonfiabile o rigido, dimensionato sullo spazio</div>
+        <div class="include-item"><span class="dot"></span>Schermo gigante su struttura automatizzata con tenuta al vento</div>
         <div class="include-item"><span class="dot"></span>Proiezione digitale ad alta luminosità</div>
         <div class="include-item"><span class="dot"></span>Impianto audio per esterni</div>
         <div class="include-item"><span class="dot"></span>Tecnico presente per tutta la serata</div>
