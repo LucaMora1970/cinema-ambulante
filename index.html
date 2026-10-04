@@ -332,81 +332,131 @@
     }
     .reveal.in { opacity: 1; transform: translateY(0); }
 
-    /* ── Come funziona ────────────────────────────────────────── */
-    .steps {
-      margin-top: 60px;
+    /* ── Card "feature" — stesso linguaggio visivo delle cinewow-card di
+       "Film consigliati": foto in alto (aspect-ratio fissa, fade-in),
+       corpo con titolo + breve testo sotto. Usata in "Perché il
+       Cinematografo Ambulante", "Cosa devi fare tu" e "La nostra
+       attrezzatura" — dove il testo originale è troppo lungo per stare
+       nella card, resta solo un teaser breve + pulsante che apre un popup
+       con il testo/elenco completo (stesso pattern dei popup info di
+       cinemamultisalateatro.ch) ──────────────────────────────────────── */
+    .feature-grid {
+      margin-top: 52px;
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
-      gap: 2px;
-      background: var(--line);
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 18px;
+    }
+    .feature-card {
+      display: flex;
+      flex-direction: column;
+      border-radius: 10px;
+      overflow: hidden;
+      background: var(--surf);
       border: 1px solid var(--line);
     }
-
-    .step {
-      background: var(--black);
-      padding: 36px 28px;
+    .feature-card-media {
       position: relative;
+      aspect-ratio: 16 / 10;
+      background: linear-gradient(135deg, #222, #161616);
+      overflow: hidden;
     }
-    /* Le card di "Perché il Cinematografo Ambulante" possono avere
-       un'immagine di sfondo (sfumata sotto una scrim scura, come l'hero) —
-       il resto della card (icona, titolo, testo) deve restare leggibile
-       sopra, quindi va portato sopra la scrim con z-index */
-    #perche-noi .step { background-size: cover; background-position: center; }
-    #perche-noi .step::before {
-      content: "";
+    .feature-card-media img {
       position: absolute;
       inset: 0;
-      background: linear-gradient(180deg, rgba(10,10,10,.35) 0%, rgba(10,10,10,.75) 55%, var(--black) 100%);
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity .4s var(--ease);
     }
-    #perche-noi .step-icon, #perche-noi .step h3, #perche-noi .step p {
-      position: relative;
-      z-index: 1;
-    }
-    /* Stesso trattamento della sezione "Perché noi": lo sfondo scuro di
-       .step resta identico sulle card senza immagine, la scrim sopra una
-       card nera piena è semplicemente invisibile */
-    #come-funziona .step { background-size: cover; background-position: center; }
-    #come-funziona .step::before {
-      content: "";
+    .feature-card-media img.img-loaded { opacity: 1; }
+    .feature-card-num {
       position: absolute;
-      inset: 0;
-      background: linear-gradient(180deg, rgba(10,10,10,.35) 0%, rgba(10,10,10,.75) 55%, var(--black) 100%);
-    }
-    #come-funziona .step-num, #come-funziona .step h3, #come-funziona .step p {
-      position: relative;
-      z-index: 1;
-    }
-
-    .step-num {
-      font-size: .78rem;
+      top: 10px;
+      left: 10px;
+      font-size: .7rem;
       font-weight: 800;
-      color: var(--red);
-      letter-spacing: .08em;
+      letter-spacing: .06em;
+      color: var(--white);
+      background: rgba(10,10,10,.6);
+      padding: 3px 9px;
+      border-radius: 20px;
     }
-
-    /* Icone dei pilastri (sezione Perché noi) — stesso .step, ma al posto
-       del numero un'icona SVG pulita invece di emoji (resa incoerente tra
-       sistemi operativi/browser) */
-    .step-icon {
-      width: 30px;
-      height: 30px;
-      color: var(--red);
+    .feature-card-body {
+      padding: 16px 18px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
     }
-    .step-icon svg { width: 100%; height: 100%; display: block; }
-
-    .step h3 {
-      margin-top: 18px;
-      font-size: 1.2rem;
-      text-transform: uppercase;
-      letter-spacing: -.01em;
+    .feature-card-title {
+      font-size: 1.05rem;
+      font-weight: 800;
+      line-height: 1.3;
     }
-
-    .step p {
-      margin-top: 12px;
-      font-size: .9rem;
+    .feature-card-text {
+      font-size: .85rem;
       color: var(--muted);
-      line-height: 1.6;
+      line-height: 1.55;
     }
+    .feature-more {
+      margin-top: 8px;
+      align-self: flex-start;
+      background: none;
+      border: none;
+      color: var(--red);
+      font-weight: 700;
+      font-size: .82rem;
+      cursor: pointer;
+      padding: 0;
+      font-family: inherit;
+    }
+    .feature-more:hover { text-decoration: underline; }
+
+    /* Popup "Scopri di più" — stesso linguaggio dei popup info già in uso
+       su cinemamultisalateatro.ch (overlay scuro, card centrata) */
+    .feature-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(10,10,10,.85);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      padding: 24px;
+    }
+    .feature-modal.on { display: flex; }
+    .feature-modal-inner {
+      position: relative;
+      width: min(92vw, 520px);
+      max-height: 85vh;
+      overflow-y: auto;
+      background: var(--surf);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 34px 28px;
+    }
+    .feature-modal-close {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: rgba(247,244,239,.08);
+      border: none;
+      color: var(--white);
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .feature-modal-inner h3 { font-size: 1.3rem; margin-bottom: 14px; padding-right: 30px; }
+    .feature-modal-inner p { color: var(--muted); font-size: .92rem; line-height: 1.65; }
+    .feature-modal-inner ul { margin-top: 2px; padding-left: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
+    .feature-modal-inner li { display: flex; align-items: flex-start; gap: 10px; font-size: .88rem; color: var(--white); }
+    .feature-modal-inner li::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--red); margin-top: 7px; flex-shrink: 0; }
 
     /* ── Disponibilità — stesso calendario a tab scorrevoli di
        richiedi.html/"Seleziona la data desiderata" di
@@ -611,65 +661,6 @@
       color: var(--muted);
     }
 
-    /* ── Attrezzatura ─────────────────────────────────────────── */
-    .equipment-grid {
-      margin-top: 52px;
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 2px;
-      background: var(--line);
-      border: 1px solid var(--line);
-    }
-    .equipment-card {
-      background: var(--black);
-      background-size: cover;
-      background-position: center;
-      padding: 34px 30px;
-      position: relative;
-    }
-    .equipment-card::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(180deg, rgba(10,10,10,.35) 0%, rgba(10,10,10,.75) 55%, var(--black) 100%);
-    }
-    .equipment-card .eq-label, .equipment-card h3, .equipment-card .eq-intro, .equipment-card .spec-list {
-      position: relative;
-      z-index: 1;
-    }
-    .equipment-card .eq-label {
-      font-size: .68rem;
-      font-weight: 800;
-      letter-spacing: .1em;
-      text-transform: uppercase;
-      color: var(--red);
-      margin-bottom: 10px;
-    }
-    .equipment-card h3 {
-      font-size: 1.3rem;
-      font-weight: 800;
-      margin-bottom: 10px;
-    }
-    .equipment-card .eq-intro {
-      font-size: .9rem;
-      color: var(--muted);
-      line-height: 1.55;
-      margin-bottom: 20px;
-    }
-    .spec-list { display: flex; flex-direction: column; gap: 10px; }
-    .spec-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 10px;
-      font-size: .88rem;
-      line-height: 1.5;
-    }
-    .spec-item .dot {
-      width: 6px; height: 6px; border-radius: 50%;
-      background: var(--red);
-      flex-shrink: 0;
-      margin-top: 7px;
-    }
 
     /* ── Servizi ──────────────────────────────────────────────── */
     #servizi { background: var(--surf); }
@@ -878,21 +869,28 @@
     <div class="panel-inner">
       <div class="eyebrow reveal">Perché il Cinematografo Ambulante</div>
       <h2 class="title reveal">Un servizio<br><span class="accent">professionale.</span></h2>
-      <div class="steps reveal">
-        <div class="step" id="stepFilmBg">
-          <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M3 10h18v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-9Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M2.5 10 4 5.5 20 8l-1 2.5H2.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M7 6.3 8 9M12 7 13 9.7" stroke="currentColor" stroke-width="1.7"/></svg></div>
-          <h3>Tutti i film che vuoi</h3>
-          <p>Ampia disponibilità di film nuovi e storici, concessi in licenza dai principali distributori di Hollywood ed indipendenti. Voi scegliete il film, al resto pensiamo noi.</p>
+      <div class="feature-grid reveal">
+        <div class="feature-card">
+          <div class="feature-card-media"><img id="stepFilmBg" alt=""></div>
+          <div class="feature-card-body">
+            <div class="feature-card-title">Tutti i film che vuoi</div>
+            <div class="feature-card-text">Ampia disponibilità di film nuovi e storici, concessi in licenza dai principali distributori. Voi scegliete il film, al resto pensiamo noi.</div>
+          </div>
         </div>
-        <div class="step" id="stepAllestimentoBg" style="background-image:url('img/hero-bg.jpg')">
-          <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 4.9L3 17.5 6.5 21l6.3-6.3a4 4 0 0 0 4.9-5.4l-2.8 2.8-2.1-2.1 2.8-2.8Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/></svg></div>
-          <h3>Allestimento personalizzato</h3>
-          <p>Allestimento tecnico con strutture solide e sicure anche in caso di vento e pioggia. Apparecchiature di riproduzione solo da supporti professionali esclusivi per il settore cinematografico creati per la migliore qualità. Pianificazione, verifica tecnica e gestione amministrativa e logistica delle licenze, dei supporti di riproduzione e del materiale richiesto.</p>
+        <div class="feature-card">
+          <div class="feature-card-media"><img id="stepAllestimentoBg" alt=""></div>
+          <div class="feature-card-body">
+            <div class="feature-card-title">Allestimento personalizzato</div>
+            <div class="feature-card-text">Strutture solide e sicure anche in caso di vento e pioggia, con apparecchiature professionali esclusive per il cinema.</div>
+            <button type="button" class="feature-more" onclick="openFeatureModal('allestimento')">Scopri di più →</button>
+          </div>
         </div>
-        <div class="step" id="stepIndipendenteBg">
-          <div class="step-icon"><svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"/></svg></div>
-          <h3>Veloce, Flessibile, ed energeticamente indipendente</h3>
-          <p>Pronti per la proiezione in 30 minuti. Ci adattiamo alle vostre esigenze e al vostro luogo — energeticamente indipendenti, liberi di proiettare anche dove non c'è alcun allacciamento elettrico.</p>
+        <div class="feature-card">
+          <div class="feature-card-media"><img id="stepIndipendenteBg" alt=""></div>
+          <div class="feature-card-body">
+            <div class="feature-card-title">Veloce, Flessibile, ed energeticamente indipendente</div>
+            <div class="feature-card-text">Pronti per la proiezione in 30 minuti, liberi di proiettare anche dove non c'è alcun allacciamento elettrico.</div>
+          </div>
         </div>
       </div>
     </div>
@@ -920,21 +918,28 @@
     <div class="panel-inner">
       <div class="eyebrow reveal">Come funziona</div>
       <h2 class="title reveal">Cosa devi<br><span class="accent">fare tu.</span></h2>
-      <div class="steps reveal">
-        <div class="step" id="stepLuogoBg" style="background-image:url('img/hero-bg.jpg')">
-          <div class="step-num">01</div>
-          <h3>Trovi un luogo idoneo</h3>
-          <p>Dimensione 20 × 10 metri circa, altezza libera fino a 5.50 metri, raggiungibile su strada e carrabile su tutto il sedime, libero da ostacoli e senza gradini o elementi che ostacolino la visione della proiezione. Verifica se è disponibile l'allacciamento elettrico con presa CEE 5 poli 16A e se l'area è illuminata, con la possibilità di spegnere le luci durante la proiezione. Verifica anche la disponibilità delle sedie, che potrai posare dopo l'arrivo dei nostri collaboratori — o che puoi richiedere a noi come optional.</p>
+      <div class="feature-grid reveal">
+        <div class="feature-card">
+          <div class="feature-card-media"><img id="stepLuogoBg" alt=""><div class="feature-card-num">01</div></div>
+          <div class="feature-card-body">
+            <div class="feature-card-title">Trovi un luogo idoneo</div>
+            <div class="feature-card-text">I requisiti del luogo: dimensioni, accesso carrabile, allacciamento elettrico e illuminazione.</div>
+            <button type="button" class="feature-more" onclick="openFeatureModal('luogo')">Scopri di più →</button>
+          </div>
         </div>
-        <div class="step" id="stepSceltaFilmBg">
-          <div class="step-num">02</div>
-          <h3>Scegli il film</h3>
-          <p>Hai già un titolo in mente o preferisci decidere insieme a noi? Entrambe le strade vanno bene.</p>
+        <div class="feature-card">
+          <div class="feature-card-media"><img id="stepSceltaFilmBg" alt=""><div class="feature-card-num">02</div></div>
+          <div class="feature-card-body">
+            <div class="feature-card-title">Scegli il film</div>
+            <div class="feature-card-text">Hai già un titolo in mente o preferisci decidere insieme a noi? Entrambe le strade vanno bene.</div>
+          </div>
         </div>
-        <div class="step">
-          <div class="step-num">03</div>
-          <h3>Ti procuri l'autorizzazione comunale</h3>
-          <p>Il permesso del Comune per l'occupazione dello spazio pubblico è a tuo carico — ti aiutiamo con le informazioni necessarie.</p>
+        <div class="feature-card">
+          <div class="feature-card-media"><img id="stepAutorizzazioneBg" alt=""><div class="feature-card-num">03</div></div>
+          <div class="feature-card-body">
+            <div class="feature-card-title">Ti procuri l'autorizzazione comunale</div>
+            <div class="feature-card-text">Il permesso del Comune per l'occupazione dello spazio pubblico è a tuo carico — ti aiutiamo con le informazioni necessarie.</div>
+          </div>
         </div>
       </div>
     </div>
@@ -1022,28 +1027,20 @@
       <div class="eyebrow reveal">Attrezzatura</div>
       <h2 class="title reveal">La nostra<br><span class="accent">attrezzatura.</span></h2>
       <p class="section-sub reveal">Due mezzi, equipaggiati con tecnologia cinema professionale, bastano per portare una vera sala all'aperto ovunque.</p>
-      <div class="equipment-grid reveal">
-        <div class="equipment-card" id="stepFurgoneBg">
-          <div class="eq-label">Furgone</div>
-          <h3>Furgone Schermo</h3>
-          <p class="eq-intro">Il furgone che trasporta ed eleva lo schermo gigante.</p>
-          <div class="spec-list">
-            <div class="spec-item"><span class="dot"></span>Struttura portante integrata e automatizzata per il montaggio dello schermo</div>
-            <div class="spec-item"><span class="dot"></span>Tenuta al vento</div>
-            <div class="spec-item"><span class="dot"></span>Impianto audio integrato</div>
+      <div class="feature-grid reveal">
+        <div class="feature-card">
+          <div class="feature-card-media"><img id="stepFurgoneBg" alt=""></div>
+          <div class="feature-card-body">
+            <div class="feature-card-title">Furgone Schermo</div>
+            <div class="feature-card-text">Struttura automatizzata con tenuta al vento e impianto audio integrato.</div>
           </div>
         </div>
-        <div class="equipment-card" id="stepRimorchioBg">
-          <div class="eq-label">Rimorchio</div>
-          <h3>Rimorchio telescopico</h3>
-          <p class="eq-intro">Il cuore tecnico della proiezione, su un unico rimorchio.</p>
-          <div class="spec-list">
-            <div class="spec-item"><span class="dot"></span>Proiettore professionale cinema Barco DP2K</div>
-            <div class="spec-item"><span class="dot"></span>Server Alchemy</div>
-            <div class="spec-item"><span class="dot"></span>Processore audio Dolby</div>
-            <div class="spec-item"><span class="dot"></span>Amplificatori professionali cinema QSC</div>
-            <div class="spec-item"><span class="dot"></span>Trasmettitore microfono wireless Sennheiser</div>
-            <div class="spec-item"><span class="dot"></span>Impianto di illuminazione del sedime</div>
+        <div class="feature-card">
+          <div class="feature-card-media"><img id="stepRimorchioBg" alt=""></div>
+          <div class="feature-card-body">
+            <div class="feature-card-title">Rimorchio telescopico</div>
+            <div class="feature-card-text">Il cuore tecnico della proiezione: proiettore, audio e illuminazione professionali.</div>
+            <button type="button" class="feature-more" onclick="openFeatureModal('rimorchio')">Scopri di più →</button>
           </div>
         </div>
       </div>
@@ -1117,6 +1114,14 @@
     </div>
   </footer>
 
+  <div class="feature-modal" id="featureModal" role="dialog" aria-modal="true" onclick="if(event.target===this)closeFeatureModal()">
+    <div class="feature-modal-inner">
+      <button type="button" class="feature-modal-close" onclick="closeFeatureModal()" aria-label="Chiudi">✕</button>
+      <h3 id="featureModalTitle"></h3>
+      <div id="featureModalBody"></div>
+    </div>
+  </div>
+
   <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import{getFirestore,collection,getDocs,onSnapshot,doc}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -1152,24 +1157,27 @@ function oaFilmDates(f){
   return{disponibile:fmt(disp),promuovibile:fmt(prom)};
 }
 
-// Foto di sfondo delle card "Allestimento personalizzato" e "Veloce,
-// Flessibile, ed energeticamente indipendente" e "Trovi un luogo idoneo" —
-// configurabili dallo staff da gestione.html (settings/ambulanteHome), con
-// fallback sull'immagine hero già impostata inline nell'HTML finché non
-// viene caricata una foto
+// Imposta la foto di una feature-card (stesso fade-in delle cinewow-card:
+// opacità 0 finché l'immagine non ha finito di caricare)
+function setFeatureImg(el,url){
+  if(!el||!url)return;
+  el.src=url;
+  el.onload=()=>el.classList.add('img-loaded');
+}
+
+// Foto di sfondo delle card con testo breve, configurabili dallo staff da
+// gestione.html (settings/ambulanteHome) — nessun fallback via CSS stavolta
+// (le feature-card usano un vero <img>, non un background-image): finché
+// non viene caricata una foto resta il gradiente vuoto di .feature-card-media
 onSnapshot(doc(db,'settings','ambulanteHome'),snap=>{
   if(!snap.exists())return;
   const data=snap.data();
-  const elA=document.getElementById('stepAllestimentoBg');
-  if(elA&&data.allestimento)elA.style.backgroundImage=`url('${data.allestimento}')`;
-  const elI=document.getElementById('stepIndipendenteBg');
-  if(elI&&data.indipendente)elI.style.backgroundImage=`url('${data.indipendente}')`;
-  const elL=document.getElementById('stepLuogoBg');
-  if(elL&&data.luogo)elL.style.backgroundImage=`url('${data.luogo}')`;
-  const elF=document.getElementById('stepFurgoneBg');
-  if(elF&&data.furgone)elF.style.backgroundImage=`url('${data.furgone}')`;
-  const elR=document.getElementById('stepRimorchioBg');
-  if(elR&&data.rimorchio)elR.style.backgroundImage=`url('${data.rimorchio}')`;
+  setFeatureImg(document.getElementById('stepAllestimentoBg'),data.allestimento);
+  setFeatureImg(document.getElementById('stepIndipendenteBg'),data.indipendente);
+  setFeatureImg(document.getElementById('stepLuogoBg'),data.luogo);
+  setFeatureImg(document.getElementById('stepFurgoneBg'),data.furgone);
+  setFeatureImg(document.getElementById('stepRimorchioBg'),data.rimorchio);
+  setFeatureImg(document.getElementById('stepAutorizzazioneBg'),data.autorizzazione);
 },e=>console.error(e));
 
 // Sfondo dinamico della card "Tutti i film che vuoi" — foto di un film in
@@ -1195,7 +1203,7 @@ onSnapshot(doc(db,'settings','ambulanteHome'),snap=>{
       const in30Str=toLocalDate(in30);
       pick=films.filter(f=>f.release>=todayStr&&f.release<=in30Str).sort((a,b)=>a.release.localeCompare(b.release))[0];
     }
-    if(pick)el.style.backgroundImage=`url('${tmdbSize(pick.backdrop,'w780')}')`;
+    if(pick)setFeatureImg(el,tmdbSize(pick.backdrop,'w780'));
   }catch(e){console.error(e);}
 })();
 
@@ -1216,9 +1224,40 @@ onSnapshot(doc(db,'settings','ambulanteHome'),snap=>{
       films.sort((a,b)=>Math.abs(new Date(a.release+'T12:00:00')-target)-Math.abs(new Date(b.release+'T12:00:00')-target));
       pick=films[0];
     }
-    if(pick)el.style.backgroundImage=`url('${tmdbSize(pick.backdrop,'w780')}')`;
+    if(pick)setFeatureImg(el,tmdbSize(pick.backdrop,'w780'));
   }catch(e){console.error(e);}
 })();
+
+// Popup "Scopri di più" delle feature-card con testo troppo lungo per la
+// card — stesso contenuto completo rimosso dalle card, nessuna chiamata
+// Firestore: è testo statico, tenuto qui in un unico punto
+const FEATURE_MODALS={
+  allestimento:{
+    title:'Allestimento personalizzato',
+    body:'<p>Allestimento tecnico con strutture solide e sicure anche in caso di vento e pioggia. Apparecchiature di riproduzione solo da supporti professionali esclusivi per il settore cinematografico creati per la migliore qualità. Pianificazione, verifica tecnica e gestione amministrativa e logistica delle licenze, dei supporti di riproduzione e del materiale richiesto.</p>'
+  },
+  luogo:{
+    title:'Trovi un luogo idoneo',
+    body:"<p>Dimensione 20 × 10 metri circa, altezza libera fino a 5.50 metri, raggiungibile su strada e carrabile su tutto il sedime, libero da ostacoli e senza gradini o elementi che ostacolino la visione della proiezione. Verifica se è disponibile l'allacciamento elettrico con presa CEE 5 poli 16A e se l'area è illuminata, con la possibilità di spegnere le luci durante la proiezione. Verifica anche la disponibilità delle sedie, che potrai posare dopo l'arrivo dei nostri collaboratori — o che puoi richiedere a noi come optional.</p>"
+  },
+  rimorchio:{
+    title:'Rimorchio telescopico',
+    body:'<ul><li>Proiettore professionale cinema Barco DP2K</li><li>Server Alchemy</li><li>Processore audio Dolby</li><li>Amplificatori professionali cinema QSC</li><li>Trasmettitore microfono wireless Sennheiser</li><li>Impianto di illuminazione del sedime</li></ul>'
+  }
+};
+window.openFeatureModal=function(key){
+  const m=FEATURE_MODALS[key];
+  if(!m)return;
+  document.getElementById('featureModalTitle').textContent=m.title;
+  document.getElementById('featureModalBody').innerHTML=m.body;
+  document.getElementById('featureModal').classList.add('on');
+  document.body.style.overflow='hidden';
+};
+window.closeFeatureModal=function(){
+  document.getElementById('featureModal').classList.remove('on');
+  document.body.style.overflow='';
+};
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeFeatureModal();});
 
 (async function loadFilmConsigliati(){
   const el=document.getElementById('filmConsigliatiGrid');
