@@ -622,7 +622,20 @@
     }
     .equipment-card {
       background: var(--black);
+      background-size: cover;
+      background-position: center;
       padding: 34px 30px;
+      position: relative;
+    }
+    .equipment-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(10,10,10,.35) 0%, rgba(10,10,10,.75) 55%, var(--black) 100%);
+    }
+    .equipment-card .eq-label, .equipment-card h3, .equipment-card .eq-intro, .equipment-card .spec-list {
+      position: relative;
+      z-index: 1;
     }
     .equipment-card .eq-label {
       font-size: .68rem;
@@ -871,12 +884,12 @@
           <h3>Tutti i film che vuoi</h3>
           <p>Ampia disponibilità di film nuovi e storici, concessi in licenza dai principali distributori di Hollywood ed indipendenti. Voi scegliete il film, al resto pensiamo noi.</p>
         </div>
-        <div class="step" style="background-image:url('img/hero-bg.jpg')">
+        <div class="step" id="stepAllestimentoBg" style="background-image:url('img/hero-bg.jpg')">
           <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 4.9L3 17.5 6.5 21l6.3-6.3a4 4 0 0 0 4.9-5.4l-2.8 2.8-2.1-2.1 2.8-2.8Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/></svg></div>
           <h3>Allestimento personalizzato</h3>
           <p>Allestimento tecnico con strutture solide e sicure anche in caso di vento e pioggia. Apparecchiature di riproduzione solo da supporti professionali esclusivi per il settore cinematografico creati per la migliore qualità. Pianificazione, verifica tecnica e gestione amministrativa e logistica delle licenze, dei supporti di riproduzione e del materiale richiesto.</p>
         </div>
-        <div class="step">
+        <div class="step" id="stepIndipendenteBg">
           <div class="step-icon"><svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"/></svg></div>
           <h3>Veloce, Flessibile, ed energeticamente indipendente</h3>
           <p>Pronti per la proiezione in 30 minuti. Ci adattiamo alle vostre esigenze e al vostro luogo — energeticamente indipendenti, liberi di proiettare anche dove non c'è alcun allacciamento elettrico.</p>
@@ -908,7 +921,7 @@
       <div class="eyebrow reveal">Come funziona</div>
       <h2 class="title reveal">Cosa devi<br><span class="accent">fare tu.</span></h2>
       <div class="steps reveal">
-        <div class="step" style="background-image:url('img/hero-bg.jpg')">
+        <div class="step" id="stepLuogoBg" style="background-image:url('img/hero-bg.jpg')">
           <div class="step-num">01</div>
           <h3>Trovi un luogo idoneo</h3>
           <p>Dimensione 20 × 10 metri circa, altezza libera fino a 5.50 metri, raggiungibile su strada e carrabile su tutto il sedime, libero da ostacoli e senza gradini o elementi che ostacolino la visione della proiezione. Verifica se è disponibile l'allacciamento elettrico con presa CEE 5 poli 16A e se l'area è illuminata, con la possibilità di spegnere le luci durante la proiezione. Verifica anche la disponibilità delle sedie, che potrai posare dopo l'arrivo dei nostri collaboratori — o che puoi richiedere a noi come optional.</p>
@@ -1010,7 +1023,7 @@
       <h2 class="title reveal">La nostra<br><span class="accent">attrezzatura.</span></h2>
       <p class="section-sub reveal">Due mezzi, equipaggiati con tecnologia cinema professionale, bastano per portare una vera sala all'aperto ovunque.</p>
       <div class="equipment-grid reveal">
-        <div class="equipment-card">
+        <div class="equipment-card" id="stepFurgoneBg">
           <div class="eq-label">Furgone</div>
           <h3>Furgone Schermo</h3>
           <p class="eq-intro">Il furgone che trasporta ed eleva lo schermo gigante.</p>
@@ -1020,7 +1033,7 @@
             <div class="spec-item"><span class="dot"></span>Impianto audio integrato</div>
           </div>
         </div>
-        <div class="equipment-card">
+        <div class="equipment-card" id="stepRimorchioBg">
           <div class="eq-label">Rimorchio</div>
           <h3>Rimorchio telescopico</h3>
           <p class="eq-intro">Il cuore tecnico della proiezione, su un unico rimorchio.</p>
@@ -1106,7 +1119,7 @@
 
   <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import{getFirestore,collection,getDocs,onSnapshot}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import{getFirestore,collection,getDocs,onSnapshot,doc}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const FB={apiKey:"AIzaSyCYM1tZsUI-pz3D0J6EWEMqyDxrk9hep1o",authDomain:"cinemanager-4c67c.firebaseapp.com",projectId:"cinemanager-4c67c",storageBucket:"cinemanager-4c67c.firebasestorage.app",messagingSenderId:"730874662111",appId:"1:730874662111:web:8a4a501dd81644bc96ed6a"};
 const app=initializeApp(FB);
@@ -1138,6 +1151,26 @@ function oaFilmDates(f){
   const prom=new Date(disp);prom.setDate(prom.getDate()-21);
   return{disponibile:fmt(disp),promuovibile:fmt(prom)};
 }
+
+// Foto di sfondo delle card "Allestimento personalizzato" e "Veloce,
+// Flessibile, ed energeticamente indipendente" e "Trovi un luogo idoneo" —
+// configurabili dallo staff da gestione.html (settings/ambulanteHome), con
+// fallback sull'immagine hero già impostata inline nell'HTML finché non
+// viene caricata una foto
+onSnapshot(doc(db,'settings','ambulanteHome'),snap=>{
+  if(!snap.exists())return;
+  const data=snap.data();
+  const elA=document.getElementById('stepAllestimentoBg');
+  if(elA&&data.allestimento)elA.style.backgroundImage=`url('${data.allestimento}')`;
+  const elI=document.getElementById('stepIndipendenteBg');
+  if(elI&&data.indipendente)elI.style.backgroundImage=`url('${data.indipendente}')`;
+  const elL=document.getElementById('stepLuogoBg');
+  if(elL&&data.luogo)elL.style.backgroundImage=`url('${data.luogo}')`;
+  const elF=document.getElementById('stepFurgoneBg');
+  if(elF&&data.furgone)elF.style.backgroundImage=`url('${data.furgone}')`;
+  const elR=document.getElementById('stepRimorchioBg');
+  if(elR&&data.rimorchio)elR.style.backgroundImage=`url('${data.rimorchio}')`;
+},e=>console.error(e));
 
 // Sfondo dinamico della card "Tutti i film che vuoi" — foto di un film in
 // uscita questa settimana (lun-dom), per mostrare un catalogo vivo e
