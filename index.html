@@ -347,6 +347,35 @@
       padding: 36px 28px;
       position: relative;
     }
+    /* Le card di "Perché il Cinematografo Ambulante" possono avere
+       un'immagine di sfondo (sfumata sotto una scrim scura, come l'hero) —
+       il resto della card (icona, titolo, testo) deve restare leggibile
+       sopra, quindi va portato sopra la scrim con z-index */
+    #perche-noi .step { background-size: cover; background-position: center; }
+    #perche-noi .step::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(10,10,10,.35) 0%, rgba(10,10,10,.75) 55%, var(--black) 100%);
+    }
+    #perche-noi .step-icon, #perche-noi .step h3, #perche-noi .step p {
+      position: relative;
+      z-index: 1;
+    }
+    /* Stesso trattamento della sezione "Perché noi": lo sfondo scuro di
+       .step resta identico sulle card senza immagine, la scrim sopra una
+       card nera piena è semplicemente invisibile */
+    #come-funziona .step { background-size: cover; background-position: center; }
+    #come-funziona .step::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(10,10,10,.35) 0%, rgba(10,10,10,.75) 55%, var(--black) 100%);
+    }
+    #come-funziona .step-num, #come-funziona .step h3, #come-funziona .step p {
+      position: relative;
+      z-index: 1;
+    }
 
     .step-num {
       font-size: .78rem;
@@ -512,28 +541,42 @@
       font-weight: 400;
     }
 
-    /* ── Il nostro lavoro — percorso verticale invece di card: il punto è
-       mostrare la sequenza reale di lavoro prima della serata, non solo
-       elencarlo ──────────────────────────────────────────────────────── */
+    /* ── Il nostro servizio — percorso verticale animato allo scroll,
+       stesso meccanismo di "La nostra storia" sul sito del cinema: una
+       barra rossa che si allunga sopra la linea grigia man mano che si
+       scorre, ogni tappa che appare singolarmente invece che tutte insieme
+       ──────────────────────────────────────────────────────────────── */
     .timeline {
       position: relative;
       margin-top: 48px;
       max-width: 640px;
       padding-left: 36px;
     }
-    .timeline::before {
-      content: "";
+    .timeline-line, .timeline-progress {
       position: absolute;
       left: 7px;
       top: 8px;
-      bottom: 8px;
       width: 2px;
-      background: var(--line);
+    }
+    .timeline-line { bottom: 8px; background: var(--line); }
+    .timeline-progress { height: 0; background: var(--red); transition: height .4s var(--ease); }
+    .timeline-phase {
+      position: relative;
+      margin: 0 0 18px;
+      font-size: .72rem;
+      font-weight: 800;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--white);
     }
     .timeline-item {
       position: relative;
       padding-bottom: 30px;
+      opacity: 0;
+      transform: translateY(26px);
+      transition: opacity .7s var(--ease), transform .7s var(--ease);
     }
+    .timeline-item.in { opacity: 1; transform: translateY(0); }
     .timeline-item:last-child { padding-bottom: 0; }
     .timeline-dot {
       position: absolute;
@@ -542,9 +585,11 @@
       width: 16px;
       height: 16px;
       border-radius: 50%;
-      background: var(--red);
+      background: var(--black);
       border: 2px solid var(--red);
+      transition: background-color .3s var(--ease);
     }
+    .timeline-item.in .timeline-dot { background: var(--red); }
     .timeline-when {
       display: block;
       font-size: .72rem;
@@ -819,21 +864,21 @@
   <section class="panel" id="perche-noi">
     <div class="panel-inner">
       <div class="eyebrow reveal">Perché il Cinematografo Ambulante</div>
-      <h2 class="title reveal">Un servizio su misura<br><span class="accent">e professionale.</span></h2>
+      <h2 class="title reveal">Un servizio<br><span class="accent">professionale.</span></h2>
       <div class="steps reveal">
-        <div class="step">
+        <div class="step" id="stepFilmBg">
           <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M3 10h18v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-9Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M2.5 10 4 5.5 20 8l-1 2.5H2.5Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M7 6.3 8 9M12 7 13 9.7" stroke="currentColor" stroke-width="1.7"/></svg></div>
           <h3>Tutti i film che vuoi</h3>
           <p>Ampia disponibilità di film nuovi e storici, concessi in licenza dai principali distributori di Hollywood ed indipendenti. Voi scegliete il film, al resto pensiamo noi.</p>
         </div>
-        <div class="step">
+        <div class="step" style="background-image:url('img/hero-bg.jpg')">
           <div class="step-icon"><svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M14.7 6.3a4 4 0 0 0-5.4 4.9L3 17.5 6.5 21l6.3-6.3a4 4 0 0 0 4.9-5.4l-2.8 2.8-2.1-2.1 2.8-2.8Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round"/></svg></div>
           <h3>Allestimento personalizzato</h3>
           <p>Allestimento tecnico con strutture solide e sicure anche in caso di vento e pioggia. Apparecchiature di riproduzione solo da supporti professionali esclusivi per il settore cinematografico creati per la migliore qualità. Pianificazione, verifica tecnica e gestione amministrativa e logistica delle licenze, dei supporti di riproduzione e del materiale richiesto.</p>
         </div>
         <div class="step">
           <div class="step-icon"><svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8Z"/></svg></div>
-          <h3>Veloce, flessibile, indipendente</h3>
+          <h3>Veloce, Flessibile, ed energeticamente indipendente</h3>
           <p>Pronti per la proiezione in 30 minuti. Ci adattiamo alle vostre esigenze e al vostro luogo — energeticamente indipendenti, liberi di proiettare anche dove non c'è alcun allacciamento elettrico.</p>
         </div>
       </div>
@@ -863,12 +908,12 @@
       <div class="eyebrow reveal">Come funziona</div>
       <h2 class="title reveal">Cosa devi<br><span class="accent">fare tu.</span></h2>
       <div class="steps reveal">
-        <div class="step">
+        <div class="step" style="background-image:url('img/hero-bg.jpg')">
           <div class="step-num">01</div>
           <h3>Trovi un luogo idoneo</h3>
           <p>Dimensione 20 × 10 metri circa, altezza libera fino a 5.50 metri, raggiungibile su strada e carrabile su tutto il sedime, libero da ostacoli e senza gradini o elementi che ostacolino la visione della proiezione. Verifica se è disponibile l'allacciamento elettrico con presa CEE 5 poli 16A e se l'area è illuminata, con la possibilità di spegnere le luci durante la proiezione. Verifica anche la disponibilità delle sedie, che potrai posare dopo l'arrivo dei nostri collaboratori — o che puoi richiedere a noi come optional.</p>
         </div>
-        <div class="step">
+        <div class="step" id="stepSceltaFilmBg">
           <div class="step-num">02</div>
           <h3>Scegli il film</h3>
           <p>Hai già un titolo in mente o preferisci decidere insieme a noi? Entrambe le strade vanno bene.</p>
@@ -887,7 +932,11 @@
       <div class="eyebrow reveal">Il nostro servizio</div>
       <h2 class="title reveal">Cosa facciamo<br><span class="accent">noi.</span></h2>
       <p class="section-sub reveal">Organizzare una proiezione open air non è come accendere un televisore e scegliere un canale: richiede da parte nostra una lunga preparazione e l'impiego di veicoli, persone, competenze tecniche, tecnologia e materiale molto costoso, oltre a una gestione amministrativa che si protrae anche dopo il giorno della proiezione.</p>
-      <div class="timeline reveal">
+      <div class="timeline" id="serviceTimeline">
+        <div class="timeline-line"></div>
+        <div class="timeline-progress" id="serviceTimelineProgress"></div>
+
+        <div class="timeline-phase">Prima della serata</div>
         <div class="timeline-item">
           <div class="timeline-dot"></div>
           <div class="timeline-content">
@@ -916,10 +965,12 @@
             <h3>Preparazione dell'equipaggiamento</h3>
           </div>
         </div>
+
+        <div class="timeline-phase">Il giorno dell'evento</div>
         <div class="timeline-item timeline-item-marked">
           <div class="timeline-dot"></div>
           <div class="timeline-content">
-            <span class="timeline-when">Il giorno dell'evento, entro le 16:00</span>
+            <span class="timeline-when">Entro le 16:00</span>
             <h3>Decisione sullo svolgimento in base alle condizioni meteo</h3>
             <p>Se la meteo lo permette: partenza. Se non lo permette: verifica della data di recupero tra quelle ancora disponibili e comunicazione tempestiva dell'annullo nel portale Cinetour per il pubblico.</p>
           </div>
@@ -935,16 +986,18 @@
         <div class="timeline-item timeline-item-marked">
           <div class="timeline-dot"></div>
           <div class="timeline-content">
-            <span class="timeline-when">Il giorno dopo</span>
-            <h3>Chiusura amministrativa della pratica</h3>
-            <p>Inviamo le notifiche a Cantone, SUISA e licenzianti per il computo dei diritti e chiudiamo la pratica dell'organizzatore.</p>
+            <span class="timeline-when">Se non la permette</span>
+            <h3>Notifica della procedura, rientro del personale, sistemazione del materiale e attivazione del recupero</h3>
           </div>
         </div>
+
+        <div class="timeline-phase">Dopo la serata</div>
         <div class="timeline-item timeline-item-marked">
           <div class="timeline-dot"></div>
           <div class="timeline-content">
-            <span class="timeline-when">In caso di annullo</span>
-            <h3>Notifica della procedura, rientro del personale, sistemazione del materiale e attivazione del recupero</h3>
+            <span class="timeline-when">Il giorno dopo</span>
+            <h3>Chiusura amministrativa della pratica</h3>
+            <p>Inviamo le notifiche a Cantone, SUISA e licenzianti per il computo dei diritti e chiudiamo la pratica dell'organizzatore.</p>
           </div>
         </div>
       </div>
@@ -1085,6 +1138,54 @@ function oaFilmDates(f){
   const prom=new Date(disp);prom.setDate(prom.getDate()-21);
   return{disponibile:fmt(disp),promuovibile:fmt(prom)};
 }
+
+// Sfondo dinamico della card "Tutti i film che vuoi" — foto di un film in
+// uscita questa settimana (lun-dom), per mostrare un catalogo vivo e
+// aggiornato invece che statico. Fallback sulla prossima uscita entro 30
+// giorni se questa settimana non c'è nulla, altrimenti nessuna immagine
+(async function loadPercheNoiBg(){
+  const el=document.getElementById('stepFilmBg');
+  if(!el)return;
+  try{
+    const snap=await getDocs(collection(db,'films'));
+    const films=snap.docs.map(d=>({id:d.id,...d.data()})).filter(f=>f.backdrop&&f.release);
+    const now=new Date();
+    const dow=(now.getDay()+6)%7; // 0=lunedì
+    const weekStart=new Date(now);weekStart.setDate(now.getDate()-dow);
+    const weekStartStr=toLocalDate(weekStart);
+    const weekEnd=new Date(weekStart);weekEnd.setDate(weekStart.getDate()+6);
+    const weekEndStr=toLocalDate(weekEnd);
+    let pick=films.find(f=>f.release>=weekStartStr&&f.release<=weekEndStr);
+    if(!pick){
+      const todayStr=toLocalDate(now);
+      const in30=new Date(now);in30.setDate(in30.getDate()+30);
+      const in30Str=toLocalDate(in30);
+      pick=films.filter(f=>f.release>=todayStr&&f.release<=in30Str).sort((a,b)=>a.release.localeCompare(b.release))[0];
+    }
+    if(pick)el.style.backgroundImage=`url('${tmdbSize(pick.backdrop,'w780')}')`;
+  }catch(e){console.error(e);}
+})();
+
+// Sfondo dinamico della card "Scegli il film" — foto del film uscito circa
+// 30 giorni fa rispetto a oggi (un titolo già rodato, non più una novità
+// assoluta): se non c'è un'uscita esattamente 30 giorni fa, prende quella
+// più vicina nel tempo
+(async function loadSceltaFilmBg(){
+  const el=document.getElementById('stepSceltaFilmBg');
+  if(!el)return;
+  try{
+    const snap=await getDocs(collection(db,'films'));
+    const films=snap.docs.map(d=>({id:d.id,...d.data()})).filter(f=>f.backdrop&&f.release);
+    const target=new Date();target.setDate(target.getDate()-30);
+    const targetStr=toLocalDate(target);
+    let pick=films.find(f=>f.release===targetStr);
+    if(!pick){
+      films.sort((a,b)=>Math.abs(new Date(a.release+'T12:00:00')-target)-Math.abs(new Date(b.release+'T12:00:00')-target));
+      pick=films[0];
+    }
+    if(pick)el.style.backgroundImage=`url('${tmdbSize(pick.backdrop,'w780')}')`;
+  }catch(e){console.error(e);}
+})();
 
 (async function loadFilmConsigliati(){
   const el=document.getElementById('filmConsigliatiGrid');
@@ -1247,7 +1348,7 @@ function renderHomeDataMonths(){
     +`<div class="day-tabs-track"><div class="day-tabs-thumb" id="homeMonthThumb"></div></div>`
     +`<div class="day-tabs-scroll" id="homeDayScroll" style="margin-top:12px">${dayTabs}</div>`
     +`<div class="day-tabs-track"><div class="day-tabs-thumb" id="homeDayThumb"></div></div>`
-    +`<div class="avail-legend"><span><span class="dots"><span class="dot"></span><span class="dot"></span></span>Disponibile</span><span><span class="dots"><span class="dot"></span></span>Ultimo posto disponibile</span></div>`;
+    +`<div class="avail-legend"><span><span class="dots"><span class="dot"></span></span>Disponibile</span></div>`;
   [['homeMonthScroll','homeMonthThumb'],['homeDayScroll','homeDayThumb']].forEach(([sId,tId])=>{
     const scrollEl=document.getElementById(sId);
     const thumbEl=document.getElementById(tId);
@@ -1324,6 +1425,36 @@ const revealObserver=new IntersectionObserver(entries=>{
   });
 },{threshold:0});
 document.querySelectorAll('.reveal').forEach(el=>revealObserver.observe(el));
+
+// Timeline animata di "Il nostro servizio" — stesso meccanismo di "La
+// nostra storia" sul sito del cinema: ogni tappa osservata singolarmente
+// (non il blocco intero), e una barra rossa che si allunga fino al pallino
+// dell'ultima tappa rivelata, invece della linea statica di prima
+(function initServiceTimeline(){
+  const container=document.getElementById('serviceTimeline');
+  const progress=document.getElementById('serviceTimelineProgress');
+  if(!container||!progress)return;
+  const items=[...container.querySelectorAll('.timeline-item')];
+  function updateProgress(){
+    const revealed=items.filter(i=>i.classList.contains('in'));
+    if(!revealed.length){progress.style.height='0px';return;}
+    const dot=revealed[revealed.length-1].querySelector('.timeline-dot');
+    const containerRect=container.getBoundingClientRect();
+    const dotRect=dot.getBoundingClientRect();
+    const h=(dotRect.top+dotRect.height/2)-containerRect.top-8;
+    progress.style.height=Math.max(0,h)+'px';
+  }
+  const io=new IntersectionObserver(entries=>{
+    entries.forEach(entry=>{
+      if(entry.isIntersecting){
+        entry.target.classList.add('in');
+        io.unobserve(entry.target);
+        updateProgress();
+      }
+    });
+  },{threshold:.3,rootMargin:'0px 0px -10% 0px'});
+  items.forEach(item=>io.observe(item));
+})();
 
 // Menu mobile minimale: mostra/nasconde la nav come pannello a tutta larghezza
 const menuToggle=document.getElementById('menuToggle');
