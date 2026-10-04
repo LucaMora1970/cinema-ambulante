@@ -190,10 +190,10 @@
       width: 100%;
       margin-top: 8px;
       padding: 13px 14px;
-      background: var(--surf);
+      background: var(--white);
       border: 1px solid var(--line);
       border-radius: 6px;
-      color: var(--white);
+      color: #141414;
       font-family: inherit;
       font-size: .92rem;
       text-transform: none;
@@ -564,6 +564,14 @@
             </label>
             <label class="field">Telefono
               <input type="tel" name="tel" required>
+            </label>
+          </div>
+          <div class="row">
+            <label class="field">Indirizzo
+              <input type="text" name="indirizzo" required>
+            </label>
+            <label class="field">Indirizzo di fatturazione (se diverso)
+              <input type="text" name="indirizzoFatturazione">
             </label>
           </div>
         </fieldset>
@@ -1034,10 +1042,12 @@ window.submitRequest=async function(ev){
   const referente=(form.referente.value||'').trim();
   const email=(form.email.value||'').trim();
   const tel=(form.tel.value||'').trim();
+  const indirizzo=(form.indirizzo.value||'').trim();
+  const indirizzoFatturazione=(form.indirizzoFatturazione.value||'').trim();
   const luogo=(form.luogo.value||'').trim();
   const comune=(form.comune.value||'').trim();
 
-  if(!ragione||!referente||!email||!tel||!luogo||!comune){
+  if(!ragione||!referente||!email||!tel||!indirizzo||!luogo||!comune){
     msg.textContent='Compila tutti i campi obbligatori.';msg.className='form-msg err';return false;
   }
   if(!document.getElementById('accessoCarrabile').checked){
@@ -1070,7 +1080,7 @@ window.submitRequest=async function(ev){
   const filmPreferenza=!filmNonSo?(document.getElementById('filmPreferenza').value||'').trim():'';
 
   const data={
-    ragione,referente,email,tel,luogo,comune,
+    ragione,referente,email,tel,indirizzo,indirizzoFatturazione,luogo,comune,
     spettatori:form.spettatori.value?parseInt(form.spettatori.value):null,
     date:_dates.slice(),
     servizi,
@@ -1106,7 +1116,7 @@ window.submitRequest=async function(ev){
             to:staffEmails.join(','),
             nome:ragione+' ('+referente+')',
             tipoLabel:'Open Air — Cinematografo Ambulante',
-            riepilogo:'Email: '+email+'\nTelefono: '+tel+'\nLuogo: '+luogo+' — '+comune+'\nDate: '+_dates.join(', ')+(data.spettatori?'\nSpettatori: '+data.spettatori:''),
+            riepilogo:'Email: '+email+'\nTelefono: '+tel+'\nIndirizzo: '+indirizzo+(indirizzoFatturazione?'\nIndirizzo fatturazione: '+indirizzoFatturazione:'')+'\nLuogo: '+luogo+' — '+comune+'\nDate: '+_dates.join(', ')+(data.spettatori?'\nSpettatori: '+data.spettatori:''),
             link:'https://cinemamultisalateatro.ch/gestione.html'
           })
         }).catch(e=>console.error('notifica staff',e));
