@@ -871,13 +871,6 @@
       <h2 class="title reveal">Un servizio<br><span class="accent">professionale.</span></h2>
       <div class="feature-grid reveal">
         <div class="feature-card">
-          <div class="feature-card-media"><img id="stepFilmBg" alt=""></div>
-          <div class="feature-card-body">
-            <div class="feature-card-title">Tutti i film che vuoi</div>
-            <div class="feature-card-text">Ampia disponibilità di film nuovi e storici, concessi in licenza dai principali distributori. Voi scegliete il film, al resto pensiamo noi.</div>
-          </div>
-        </div>
-        <div class="feature-card">
           <div class="feature-card-media"><img id="stepAllestimentoBg" alt=""></div>
           <div class="feature-card-body">
             <div class="feature-card-title">Allestimento personalizzato</div>
@@ -893,10 +886,17 @@
           </div>
         </div>
         <div class="feature-card">
+          <div class="feature-card-media"><img id="stepFilmBg" alt=""></div>
+          <div class="feature-card-body">
+            <div class="feature-card-title">Tutti i film che vuoi</div>
+            <div class="feature-card-text">Ampia disponibilità di film nuovi e storici, concessi in licenza dai principali distributori. Voi scegliete il film, al resto pensiamo noi.</div>
+          </div>
+        </div>
+        <div class="feature-card">
           <div class="feature-card-media"><img id="stepCinetourBg" alt=""></div>
           <div class="feature-card-body">
             <div class="feature-card-title">Cinetour.ch</div>
-            <div class="feature-card-text">Il portale di tutte le proiezioni Open Air della Svizzera, promosse anche sui nostri social e con i nostri media partner.</div>
+            <div class="feature-card-text">Il portale informativo per il pubblico di tutte le nostre proiezioni Open Air, promosse anche sui nostri social.</div>
             <button type="button" class="feature-more" onclick="openFeatureModal('cinetour')">Scopri di più →</button>
           </div>
         </div>
@@ -1255,7 +1255,7 @@ const FEATURE_MODALS={
   },
   cinetour:{
     title:'Cinetour.ch',
-    body:"<p>Cinetour.ch è il portale informativo per il pubblico di tutte le proiezioni Open Air che creano il Tour più grande della Svizzera, aggiornato 24 ore su 24, 7 giorni su 7: vi figura lo status di ogni proiezione e tutte le informazioni su luogo, organizzatori, film e altro.</p><p>Cinetour.ch (Facebook e Instagram) sono i canali social che usiamo per la promozione attiva di ogni serata, insieme alla promozione integrata nei canali dei nostri partner Corriere del Ticino, Teleticino e Radio3i.</p>"
+    body:"<p><strong>Web &amp; Social Media &amp; Media Partner CdT, Radio3i e Teleticino.</strong></p><p>Il portale informativo per il pubblico e di promozione di tutte le proiezioni Open Air che creano il Tour più grande della Svizzera. Aggiornato 24 ore su 24, 7 giorni su 7 in tempo reale con lo status di ogni proiezione, dove figurano tutte le informazioni su luogo, film, servizi e organizzatori. È il cuore della promozione di tutte le serate che compongono il grande Tour di cinema all'aperto in Svizzera.</p>"
   }
 };
 window.openFeatureModal=function(key){
