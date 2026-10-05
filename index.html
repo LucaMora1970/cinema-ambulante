@@ -701,6 +701,7 @@
     @media (min-width: 780px) {
       #prestazioni .panel-inner { text-align: center; }
       #prestazioni .eyebrow { justify-content: center; }
+      #prestazioni h2.title { margin-inline: auto; }
       #prestazioni .section-sub { margin-inline: auto; }
       #prestazioni .timeline { margin-inline: auto; text-align: left; }
     }
@@ -962,14 +963,21 @@
           </div>
         </div>
         <div class="feature-card">
-          <div class="feature-card-media"><img id="stepSceltaFilmBg" alt=""><div class="feature-card-num">02</div></div>
+          <div class="feature-card-media"><img id="stepDataBg" alt=""><div class="feature-card-num">02</div></div>
+          <div class="feature-card-body">
+            <div class="feature-card-title">Scegli una data</div>
+            <div class="feature-card-text">Verifica il nostro calendario della disponibilità ed inviaci la tua richiesta compilando il modulo Richiedi una serata.</div>
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-card-media"><img id="stepSceltaFilmBg" alt=""><div class="feature-card-num">03</div></div>
           <div class="feature-card-body">
             <div class="feature-card-title">Scegli il film</div>
             <div class="feature-card-text">Hai già un titolo in mente o preferisci decidere insieme a noi? Entrambe le strade vanno bene.</div>
           </div>
         </div>
         <div class="feature-card">
-          <div class="feature-card-media"><img id="stepAutorizzazioneBg" alt=""><div class="feature-card-num">03</div></div>
+          <div class="feature-card-media"><img id="stepAutorizzazioneBg" alt=""><div class="feature-card-num">04</div></div>
           <div class="feature-card-body">
             <div class="feature-card-title">Ti procuri l'autorizzazione comunale</div>
             <div class="feature-card-text">Il permesso del Comune per l'occupazione dello spazio pubblico è a tuo carico — ti aiutiamo con le informazioni necessarie.</div>
@@ -1232,6 +1240,7 @@ onSnapshot(doc(db,'settings','ambulanteHome'),snap=>{
   setFeatureImg(document.getElementById('stepRimorchioBg'),data.rimorchio);
   setFeatureImg(document.getElementById('stepAutorizzazioneBg'),data.autorizzazione);
   setFeatureImg(document.getElementById('stepCinetourBg'),data.cinetour);
+  setFeatureImg(document.getElementById('stepDataBg'),data.scegliData);
 },e=>console.error(e));
 
 // Sfondo dinamico della card "Tutti i film che vuoi" — foto di un film in
