@@ -610,6 +610,17 @@
         </fieldset>
 
         <fieldset>
+          <div class="fs-title">Data di riserva (opzionale, a pagamento)</div>
+          <label class="check-row">
+            <input type="checkbox" id="riservaAttiva" onchange="toggleRiservaData()">
+            <span>Vogliamo fissare anche una data di riserva garantita, a pagamento: se la data principale salta per maltempo, la serata si recupera in quella data senza bisogno di trovare un nuovo accordo.</span>
+          </label>
+          <label class="field" id="riservaDataWrap" style="margin-top:14px;display:none">Data di riserva
+            <input type="date" id="riservaDataInput">
+          </label>
+        </fieldset>
+
+        <fieldset>
           <div class="fs-title">Il film</div>
           <p class="date-hint" style="margin:0 0 14px">Scegli tra le uscite più recenti idonee per l'Open Air, cerca nell'intero archivio (anche titoli già usciti) o scrivi direttamente il titolo che vuoi.</p>
           <div id="film-pick-wrap">
@@ -767,8 +778,49 @@ function oaFilmDates(f){
   const fmt=dt=>dt.toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric'});
   const disp=new Date(d+'T12:00:00');
   const prom=new Date(disp);prom.setDate(prom.getDate()-21);
-  return{disponibile:fmt(disp),promuovibile:fmt(prom)};
+  return{disponibile:fmt(disp),promuovibile:fmt(prom),disponibileRaw:d};
 }
+
+let _allFilms=[];
+let _openAirFilms=[];
+
+// La griglia in evidenza si ri-filtra ad ogni cambio di _dates (vedi
+// toggleCalendarDate/removeDate), usando la più vicina tra le date scelte
+// come riferimento: se un film non è ancora "disponibile" per quella data
+// non ha senso proporlo, anche se lo sarà per date scelte più lontane
+function renderFilmCatalog(){
+  const catEl=document.getElementById('filmCatalog');
+  if(!catEl)return;
+  const cutoff=_dates.length?_dates[0]:null;
+  let list=_openAirFilms;
+  if(cutoff){
+    list=list.filter(f=>{
+      const dates=oaFilmDates(f);
+      return dates&&dates.disponibileRaw<=cutoff;
+    });
+  }
+  list=list.slice(0,15);
+  const prevSelected=document.querySelector('.film-card-pick.selected')?.dataset.title;
+  if(!list.length){
+    catEl.innerHTML=cutoff
+      ?'<p style="color:var(--muted);font-size:.86rem">Nessun titolo risulta ancora disponibile per la data scelta — cerca nell\'archivio qui sotto o scrivi la tua preferenza.</p>'
+      :'<p style="color:var(--muted);font-size:.86rem">Nessun titolo in evidenza al momento — cerca nell\'archivio qui sotto o scrivi la tua preferenza.</p>';
+    return;
+  }
+  catEl.innerHTML=list.map(f=>{
+    const dates=oaFilmDates(f);
+    const poster=f.poster
+      ?`<img src="${esc(f.poster)}" alt="" loading="lazy">`
+      :'<div class="fc-noposter">🎬</div>';
+    const selected=f.title===prevSelected?' selected':'';
+    return `<button type="button" class="film-card-pick${selected}" data-title="${esc(f.title)}" onclick="selectFilmCard(this)">
+      ${poster}
+      <div class="fc-title">${esc(f.title)}</div>
+      ${dates?`<div class="fc-date">Disponibile dal ${esc(dates.disponibile)}</div><div class="fc-date fc-date-promo">Promuovibile dal ${esc(dates.promuovibile)}</div>`:''}
+    </button>`;
+  }).join('');
+}
+window.renderFilmCatalog=renderFilmCatalog;
 
 (async function loadFilmCatalog(){
   const catEl=document.getElementById('filmCatalog');
@@ -776,35 +828,20 @@ function oaFilmDates(f){
   if(!catEl)return;
   try{
     const snap=await getDocs(collection(db,'films'));
-    const allFilms=snap.docs.map(d=>({id:d.id,...d.data()}))
+    _allFilms=snap.docs.map(d=>({id:d.id,...d.data()}))
       .filter(f=>f.title)
       .sort((a,b)=>(b.release||'').localeCompare(a.release||'')||a.title.localeCompare(b.title,'it'));
-
-    const openAirFilms=allFilms.filter(f=>f.openAir===true).slice(0,15);
-    if(!openAirFilms.length){
-      catEl.innerHTML='<p style="color:var(--muted);font-size:.86rem">Nessun titolo in evidenza al momento — cerca nell\'archivio qui sotto o scrivi la tua preferenza.</p>';
-    }else{
-      catEl.innerHTML=openAirFilms.map(f=>{
-        const dates=oaFilmDates(f);
-        const poster=f.poster
-          ?`<img src="${esc(f.poster)}" alt="" loading="lazy">`
-          :'<div class="fc-noposter">🎬</div>';
-        return `<button type="button" class="film-card-pick" data-title="${esc(f.title)}" onclick="selectFilmCard(this)">
-          ${poster}
-          <div class="fc-title">${esc(f.title)}</div>
-          ${dates?`<div class="fc-date">Disponibile dal ${esc(dates.disponibile)}</div><div class="fc-date fc-date-promo">Promuovibile dal ${esc(dates.promuovibile)}</div>`:''}
-        </button>`;
-      }).join('');
-    }
+    _openAirFilms=_allFilms.filter(f=>f.openAir===true);
+    renderFilmCatalog();
 
     if(selEl){
       selEl.innerHTML='<option value="">Seleziona un titolo…</option>'
-        +allFilms.map(f=>`<option value="${esc(f.title)}">${esc(f.title)}${f.release?' ('+f.release.slice(0,4)+')':''}</option>`).join('');
+        +_allFilms.map(f=>`<option value="${esc(f.title)}">${esc(f.title)}${f.release?' ('+f.release.slice(0,4)+')':''}</option>`).join('');
     }
 
     // Arrivo dalle card "Film consigliati" della home
     // (richiedi.html?film=Titolo): pre-seleziona quel titolo, nella
-    // griglia se è tra i 15 in evidenza, altrimenti solo nel campo testo
+    // griglia se è tra quelli in evidenza, altrimenti solo nel campo testo
     const filmQ=new URLSearchParams(location.search).get('film');
     if(filmQ){
       document.getElementById('filmPreferenza').value=filmQ;
@@ -997,13 +1034,22 @@ window.toggleCalendarDate=function(d){
   else{_dates.push(d);_dates.sort();}
   renderDataMonths();
   renderDateChips();
+  renderFilmCatalog();
 };
 
 window.removeDate=function(d){
   _dates=_dates.filter(x=>x!==d);
   renderDataMonths();
   renderDateChips();
+  renderFilmCatalog();
 };
+
+window.toggleRiservaData=function(){
+  const on=document.getElementById('riservaAttiva').checked;
+  document.getElementById('riservaDataWrap').style.display=on?'block':'none';
+  if(!on)document.getElementById('riservaDataInput').value='';
+};
+document.getElementById('riservaDataInput').min=new Date().toISOString().slice(0,10);
 
 // Arrivo dalla home (sezione Disponibilità, richiedi.html?data=YYYY-MM-DD):
 // pre-seleziona quella data invece di far ripartire la scelta da zero
@@ -1056,6 +1102,11 @@ window.submitRequest=async function(ev){
   if(!_dates.length){
     msg.textContent='Aggiungi almeno una data.';msg.className='form-msg err';return false;
   }
+  const riservaAttiva=document.getElementById('riservaAttiva').checked;
+  const riservaDataValue=document.getElementById('riservaDataInput').value;
+  if(riservaAttiva&&!riservaDataValue){
+    msg.textContent='Seleziona la data di riserva oppure disattiva l\'opzione.';msg.className='form-msg err';return false;
+  }
   if(!document.getElementById('condizioni').checked){
     msg.textContent='Devi accettare le condizioni per inviare la richiesta.';msg.className='form-msg err';return false;
   }
@@ -1083,6 +1134,7 @@ window.submitRequest=async function(ev){
     ragione,referente,email,tel,indirizzo,indirizzoFatturazione,luogo,comune,
     spettatori:form.spettatori.value?parseInt(form.spettatori.value):null,
     date:_dates.slice(),
+    dataRiserva:riservaAttiva&&riservaDataValue?riservaDataValue:null,
     servizi,
     filmDaDefinire:filmNonSo,
     filmPreferenza:filmPreferenza||null,
@@ -1116,7 +1168,7 @@ window.submitRequest=async function(ev){
             to:staffEmails.join(','),
             nome:ragione+' ('+referente+')',
             tipoLabel:'Open Air — Cinematografo Ambulante',
-            riepilogo:'Email: '+email+'\nTelefono: '+tel+'\nIndirizzo: '+indirizzo+(indirizzoFatturazione?'\nIndirizzo fatturazione: '+indirizzoFatturazione:'')+'\nLuogo: '+luogo+' — '+comune+'\nDate: '+_dates.join(', ')+(data.spettatori?'\nSpettatori: '+data.spettatori:''),
+            riepilogo:'Email: '+email+'\nTelefono: '+tel+'\nIndirizzo: '+indirizzo+(indirizzoFatturazione?'\nIndirizzo fatturazione: '+indirizzoFatturazione:'')+'\nLuogo: '+luogo+' — '+comune+'\nDate: '+_dates.join(', ')+(data.dataRiserva?'\nData di riserva (a pagamento): '+data.dataRiserva:'')+(data.spettatori?'\nSpettatori: '+data.spettatori:''),
             link:'https://cinemamultisalateatro.ch/gestione.html'
           })
         }).catch(e=>console.error('notifica staff',e));
