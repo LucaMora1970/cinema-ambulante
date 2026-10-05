@@ -73,7 +73,11 @@
        il link dentro il menu principale (usato solo per il drawer mobile)
        viene nascosto e sostituito da una copia dedicata del pulsante */
     .cta.cta-desktop { display: none; }
-    @media (min-width: 780px) {
+    /* Soglia più alta di quella usata altrove in pagina (780px): con 6
+       voci di menu, sotto ~1100px il blocco centrato del menu si
+       sovrapporrebbe a marchio e pulsante — meglio passare al drawer
+       mobile un po' prima piuttosto che mostrare un menu che collide */
+    @media (min-width: 1100px) {
       .site-nav {
         position: absolute;
         left: 50%;
@@ -111,11 +115,12 @@
     nav {
       display: flex;
       align-items: center;
-      gap: 30px;
-      font-size: .78rem;
+      gap: 22px;
+      font-size: .74rem;
       font-weight: 600;
-      letter-spacing: .08em;
+      letter-spacing: .06em;
       text-transform: uppercase;
+      white-space: nowrap;
     }
 
     nav a:not(.cta) {
@@ -155,7 +160,7 @@
       background: var(--white);
     }
 
-    @media (max-width: 780px) {
+    @media (max-width: 1099px) {
       nav.site-nav { display: none; }
       .menu-toggle { display: flex; }
     }
@@ -893,10 +898,12 @@
         <span>Cinematografo<br>Ambulante</span>
       </a>
       <nav class="site-nav">
+        <a href="#perche-noi">Il servizio</a>
+        <a href="#come-funziona">Come funziona</a>
         <a href="#disponibilita">Disponibilità</a>
-        <a href="#prestazioni">Servizi</a>
+        <a href="#attrezzatura">L'attrezzatura</a>
+        <a href="#film-consigliati">I film</a>
         <a href="#chi-siamo">Chi siamo</a>
-        <a href="#contatti">Contatti</a>
         <a href="richiedi.html" class="cta">Richiedi una serata</a>
       </nav>
       <a href="richiedi.html" class="cta cta-desktop">Richiedi una serata</a>
