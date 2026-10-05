@@ -519,6 +519,26 @@
     .feature-modal-inner ul { margin-top: 2px; padding-left: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
     .feature-modal-inner li { display: flex; align-items: flex-start; gap: 10px; font-size: .88rem; color: var(--white); }
     .feature-modal-inner li::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--red); margin-top: 7px; flex-shrink: 0; }
+    /* Riga di icone sopra il titolo — solo nei popup che la popolano
+       (es. "Trovi un luogo idoneo"), vuota altrimenti e quindi senza
+       spazio extra */
+    .feature-modal-icons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+      margin-bottom: 16px;
+    }
+    .feature-modal-icons:empty { display: none; }
+    .feature-modal-icon {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      width: 72px;
+      text-align: center;
+    }
+    .feature-modal-icon img { width: 48px; height: 48px; }
+    .feature-modal-icon span { font-size: .66rem; color: var(--muted); line-height: 1.3; }
 
     /* ── Disponibilità — stesso calendario a tab scorrevoli di
        richiedi.html/"Seleziona la data desiderata" di
@@ -1016,6 +1036,14 @@
             <div class="feature-card-text">Il permesso del Comune per l'occupazione dello spazio pubblico è a tuo carico — ti aiutiamo con le informazioni necessarie.</div>
           </div>
         </div>
+        <div class="feature-card">
+          <div class="feature-card-media"><img id="stepExtraBg" alt=""><div class="feature-card-num">05</div></div>
+          <div class="feature-card-body">
+            <div class="feature-card-title">Scegli gli optional del servizio</div>
+            <div class="feature-card-text">Fornitura di sedie, bibite, popcorn, gestione iscrizione clienti online, biglietteria, pratiche di autorizzazione, ricerca del luogo, promozione — pensiamo anche a questo, se lo richiedi.</div>
+            <button type="button" class="feature-more" onclick="openFeatureModal('extra')">Scopri di più →</button>
+          </div>
+        </div>
       </div>
       <p class="feature-closing reveal">…e a tutto il resto pensiamo noi.</p>
     </div>
@@ -1208,6 +1236,7 @@
   <div class="feature-modal" id="featureModal" role="dialog" aria-modal="true" onclick="if(event.target===this)closeFeatureModal()">
     <div class="feature-modal-inner">
       <button type="button" class="feature-modal-close" onclick="closeFeatureModal()" aria-label="Chiudi">✕</button>
+      <div id="featureModalIcons" class="feature-modal-icons"></div>
       <h3 id="featureModalTitle"></h3>
       <div id="featureModalBody"></div>
     </div>
@@ -1299,6 +1328,7 @@ onSnapshot(doc(db,'settings','ambulanteHome'),snap=>{
   setFeatureImg(document.getElementById('stepAutorizzazioneBg'),data.autorizzazione);
   setFeatureImg(document.getElementById('stepCinetourBg'),data.cinetour);
   setFeatureImg(document.getElementById('stepDataBg'),data.scegliData);
+  setFeatureImg(document.getElementById('stepExtraBg'),data.extra);
 },e=>console.error(e));
 
 // Sfondo dinamico della card "Tutti i film che vuoi" — foto di un film in
@@ -1359,11 +1389,21 @@ const FEATURE_MODALS={
   },
   luogo:{
     title:'Trovi un luogo idoneo',
+    icons:[
+      {src:'img/luogo/area-20x10.svg',alt:'Area minima 20 × 10 metri'},
+      {src:'img/luogo/altezza-min-5-50.svg',alt:"Altezza libera minima 5.50 metri"},
+      {src:'img/luogo/presa-cee-16a-5p.svg',alt:'Presa CEE 16A 5 poli'},
+      {src:'img/luogo/luci-spente.svg',alt:'Possibilità di spegnere le luci'}
+    ],
     body:"<p>Dimensione 20 × 10 metri circa, altezza libera fino a 5.50 metri, raggiungibile su strada e carrabile su tutto il sedime, libero da ostacoli e senza gradini o elementi che ostacolino la visione della proiezione. Verifica se è disponibile l'allacciamento elettrico con presa CEE 5 poli 16A e se l'area è illuminata, con la possibilità di spegnere le luci durante la proiezione. Verifica anche la disponibilità delle sedie, che potrai posare dopo l'arrivo dei nostri collaboratori — o che puoi richiedere a noi come optional.</p>"
   },
   rimorchio:{
     title:'Rimorchio di proiezione',
     body:'<ul><li>Proiettore professionale cinema Barco DP2K</li><li>Server Alchemy</li><li>Processore audio Dolby</li><li>Amplificatori professionali cinema QSC</li><li>Trasmettitore microfono wireless Sennheiser</li><li>Impianto di illuminazione del sedime</li></ul>'
+  },
+  extra:{
+    title:'Scegli gli optional del servizio',
+    body:"<ul><li>Sedie</li><li>Bibite</li><li>Popcorn</li><li>Proiezione di immagini vostre</li><li>Eventuale biglietteria o moduli di iscrizione online per il pubblico</li><li>Richiesta autorizzazioni comunali</li><li>Eventuale ricerca del luogo o servizio a chiavi in mano (pensiamo noi a tutto)</li></ul><p>Compilando il modulo di richiesta avrai la possibilità di selezionare ogni scelta e di ricevere il preventivo dettagliato.</p><a href='richiedi.html' class='feature-more'>Richiedi una serata →</a>"
   },
   cinetour:{
     title:'Cinetour.ch',
@@ -1373,6 +1413,9 @@ const FEATURE_MODALS={
 window.openFeatureModal=function(key){
   const m=FEATURE_MODALS[key];
   if(!m)return;
+  document.getElementById('featureModalIcons').innerHTML=(m.icons||[]).map(ic=>
+    `<div class="feature-modal-icon"><img src="${ic.src}" alt=""><span>${ic.alt}</span></div>`
+  ).join('');
   document.getElementById('featureModalTitle').textContent=m.title;
   document.getElementById('featureModalBody').innerHTML=m.body;
   document.getElementById('featureModal').classList.add('on');
