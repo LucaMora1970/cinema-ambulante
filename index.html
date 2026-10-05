@@ -65,6 +65,11 @@
       justify-content: space-between;
       align-items: center;
     }
+    /* Su desktop: marchio e menu centrati insieme nella finestra, invece
+       di marchio a sinistra e menu a destra agli estremi */
+    @media (min-width: 780px) {
+      .header-inner { justify-content: center; gap: 60px; }
+    }
 
     .brand {
       display: flex;
@@ -825,7 +830,6 @@
       </a>
       <nav class="site-nav">
         <a href="#disponibilita">Disponibilità</a>
-        <a href="#come-funziona">Come funziona</a>
         <a href="#prestazioni">Servizi</a>
         <a href="#chi-siamo">Chi siamo</a>
         <a href="#contatti">Contatti</a>
