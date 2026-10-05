@@ -64,11 +64,24 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      position: relative;
     }
-    /* Su desktop: marchio e menu centrati insieme nella finestra, invece
-       di marchio a sinistra e menu a destra agli estremi */
+    /* Su desktop: le voci del menu sono centrate esattamente al centro
+       della finestra (posizionate in assoluto rispetto a .header-inner,
+       indipendentemente dalla larghezza di marchio e pulsante), marchio
+       a sinistra e pulsante "Richiedi una serata" a destra agli estremi —
+       il link dentro il menu principale (usato solo per il drawer mobile)
+       viene nascosto e sostituito da una copia dedicata del pulsante */
+    .cta.cta-desktop { display: none; }
     @media (min-width: 780px) {
-      .header-inner { justify-content: center; gap: 60px; }
+      .site-nav {
+        position: absolute;
+        left: 50%;
+        top: 50%;
+        transform: translate(-50%, -50%);
+      }
+      .site-nav .cta { display: none; }
+      .cta.cta-desktop { display: inline-flex; }
     }
 
     .brand {
@@ -156,6 +169,14 @@
       position: relative;
       isolation: isolate;
     }
+    /* Su desktop: tutto il contenuto della hero (eyebrow, titolo,
+       sottotitolo, bottoni, statistiche) centrato nella finestra invece
+       di allineato a sinistra — su mobile resta a sinistra, dove il
+       centrato legge peggio su righe corte */
+    @media (min-width: 780px) {
+      .hero { justify-items: center; text-align: center; }
+      .hero-eyebrow, .hero-actions, .hero-stats { justify-content: center; }
+    }
 
     /* Foto di sfondo della hero — sotto al velo scuro di .hero::before,
        che ora fa anche da dissolvenza ai bordi (sopra/sotto/lati) così la
@@ -168,17 +189,18 @@
       background-size: cover;
       background-position: center 40%;
     }
-    /* Su schermi larghi la foto occupa solo la metà destra della hero
-       (ridotta di oltre il 30% rispetto al pieno sfondo) invece di coprire
-       tutta la larghezza — su mobile resta a piena larghezza, dove non
-       c'è spazio laterale da alleggerire. "contain" invece di "cover" per
-       non tagliare l'immagine: mantiene le proporzioni intere */
+    /* Su schermi larghi la foto è centrata nella hero (non più spostata a
+       destra, ora che anche il testo sopra è centrato) e ridotta rispetto
+       al pieno sfondo — su mobile resta a piena larghezza, dove non c'è
+       spazio laterale da alleggerire. "contain" invece di "cover" per non
+       tagliare l'immagine: mantiene le proporzioni intere */
     @media (min-width: 780px) {
       .hero-bg {
-        left: 30%;
+        left: 15%;
+        right: 15%;
         background-size: contain;
         background-repeat: no-repeat;
-        background-position: right center;
+        background-position: center center;
       }
     }
 
@@ -671,6 +693,17 @@
       line-height: 1.55;
       color: var(--muted);
     }
+    /* Su desktop: eyebrow/titolo/sottotitolo di "Il nostro servizio"
+       centrati nella finestra come il resto del sito — la timeline resta
+       un blocco centrato nella pagina, ma il testo al suo interno resta
+       allineato a sinistra (una lista si legge peggio centrata riga per
+       riga) */
+    @media (min-width: 780px) {
+      #prestazioni .panel-inner { text-align: center; }
+      #prestazioni .eyebrow { justify-content: center; }
+      #prestazioni .section-sub { margin-inline: auto; }
+      #prestazioni .timeline { margin-inline: auto; text-align: left; }
+    }
 
 
     /* ── Servizi ──────────────────────────────────────────────── */
@@ -841,6 +874,7 @@
         <a href="#contatti">Contatti</a>
         <a href="richiedi.html" class="cta">Richiedi una serata</a>
       </nav>
+      <a href="richiedi.html" class="cta cta-desktop">Richiedi una serata</a>
       <button type="button" class="menu-toggle" id="menuToggle" aria-label="Menu">
         <span></span><span></span><span></span>
       </button>
@@ -914,24 +948,6 @@
     </div>
   </section>
 
-  <section class="panel" id="disponibilita">
-    <div class="panel-inner">
-      <div class="eyebrow reveal">Disponibilità</div>
-      <h2 class="title reveal">Date libere<br><span class="accent">e prenotabili.</span></h2>
-      <p class="section-sub reveal">Le date non disponibili non sono mostrate. L'orario indicato corrisponde all'inizio possibile della proiezione, che richiede condizioni di oscurità.</p>
-      <div id="homeDataWrap" class="reveal" style="margin-top:40px"><div id="homeDataMonths"></div></div>
-    </div>
-  </section>
-
-  <section class="panel" id="film-consigliati">
-    <div class="panel-inner">
-      <div class="eyebrow reveal">Film consigliati</div>
-      <h2 class="title reveal">I migliori della stagione,<br><span class="accent">i più consigliati.</span></h2>
-      <p class="section-sub reveal">Possono essere quelli di maggior successo della stagione, ma anche quelli che trattano tematiche importanti per te o che hanno un messaggio importante da trasmettere.</p>
-      <div id="filmConsigliatiGrid" class="cinewow-titles reveal" style="margin-top:40px"><p style="color:var(--muted);font-size:.9rem">Caricamento…</p></div>
-    </div>
-  </section>
-
   <section class="panel" id="come-funziona">
     <div class="panel-inner">
       <div class="eyebrow reveal">Come funziona</div>
@@ -961,6 +977,31 @@
         </div>
       </div>
       <p class="feature-closing reveal">…e a tutto il resto pensiamo noi.</p>
+    </div>
+  </section>
+
+  <section class="panel" id="attrezzatura">
+    <div class="panel-inner">
+      <div class="eyebrow reveal">Attrezzatura</div>
+      <h2 class="title reveal">La nostra<br><span class="accent">attrezzatura.</span></h2>
+      <p class="section-sub reveal">Abbiamo in dotazione due postazioni complete per la proiezione cinematografica, allestite su due furgoni e due rimorchi progettati e modificati dal nostro ufficio tecnico per contenere tutte le apparecchiature professionali necessarie. Completano la flotta un furgone per il trasporto di 190 sedie e un rimorchio per il materiale opzionale.</p>
+      <div class="feature-grid reveal">
+        <div class="feature-card">
+          <div class="feature-card-media"><img id="stepFurgoneBg" alt=""></div>
+          <div class="feature-card-body">
+            <div class="feature-card-title">Furgone Schermo</div>
+            <div class="feature-card-text">Struttura ad elevazione elettrica per struttura schermo con area di proiezione di 21 mq, a tenuta al vento e senza ancoraggi al suolo. Impianto di diffusione audio JBL.</div>
+          </div>
+        </div>
+        <div class="feature-card">
+          <div class="feature-card-media"><img id="stepRimorchioBg" alt=""></div>
+          <div class="feature-card-body">
+            <div class="feature-card-title">Rimorchio telescopico</div>
+            <div class="feature-card-text">Il cuore tecnico della proiezione: proiettore, server, processore audio e illuminazione professionali.</div>
+            <button type="button" class="feature-more" onclick="openFeatureModal('rimorchio')">Scopri di più →</button>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -1041,28 +1082,38 @@
     </div>
   </section>
 
-  <section class="panel" id="attrezzatura">
+  <section class="panel" id="film-consigliati">
     <div class="panel-inner">
-      <div class="eyebrow reveal">Attrezzatura</div>
-      <h2 class="title reveal">La nostra<br><span class="accent">attrezzatura.</span></h2>
-      <p class="section-sub reveal">Abbiamo in dotazione due postazioni complete per la proiezione cinematografica, allestite su due furgoni e due rimorchi progettati e modificati dal nostro ufficio tecnico per contenere tutte le apparecchiature professionali necessarie. Completano la flotta un furgone per il trasporto di 190 sedie e un rimorchio per il materiale opzionale.</p>
-      <div class="feature-grid reveal">
-        <div class="feature-card">
-          <div class="feature-card-media"><img id="stepFurgoneBg" alt=""></div>
-          <div class="feature-card-body">
-            <div class="feature-card-title">Furgone Schermo</div>
-            <div class="feature-card-text">Struttura ad elevazione elettrica per struttura schermo con area di proiezione di 21 mq, a tenuta al vento e senza ancoraggi al suolo. Impianto di diffusione audio JBL.</div>
-          </div>
-        </div>
-        <div class="feature-card">
-          <div class="feature-card-media"><img id="stepRimorchioBg" alt=""></div>
-          <div class="feature-card-body">
-            <div class="feature-card-title">Rimorchio telescopico</div>
-            <div class="feature-card-text">Il cuore tecnico della proiezione: proiettore, server, processore audio e illuminazione professionali.</div>
-            <button type="button" class="feature-more" onclick="openFeatureModal('rimorchio')">Scopri di più →</button>
-          </div>
-        </div>
-      </div>
+      <div class="eyebrow reveal">Film consigliati</div>
+      <h2 class="title reveal">I migliori della stagione,<br><span class="accent">i più consigliati.</span></h2>
+      <p class="section-sub reveal">Possono essere quelli di maggior successo della stagione, ma anche quelli che trattano tematiche importanti per te o che hanno un messaggio importante da trasmettere.</p>
+      <div id="filmConsigliatiGrid" class="cinewow-titles reveal" style="margin-top:40px"><p style="color:var(--muted);font-size:.9rem">Caricamento…</p></div>
+    </div>
+  </section>
+
+  <section class="panel" id="disponibilita">
+    <div class="panel-inner">
+      <div class="eyebrow reveal">Disponibilità</div>
+      <h2 class="title reveal">Date libere<br><span class="accent">e prenotabili.</span></h2>
+      <p class="section-sub reveal">Le date non disponibili non sono mostrate. L'orario indicato corrisponde all'inizio possibile della proiezione, che richiede condizioni di oscurità.</p>
+      <div id="homeDataWrap" class="reveal" style="margin-top:40px"><div id="homeDataMonths"></div></div>
+    </div>
+  </section>
+
+  <section class="panel" id="chi-siamo">
+    <div class="panel-inner">
+      <div class="eyebrow reveal">Chi siamo</div>
+      <h2 class="title reveal">Dal 1996, la famiglia<br><span class="accent">Morandini.</span></h2>
+      <p class="section-sub reveal">
+        Il Cinematografo Ambulante è più di una semplice esperienza cinematografica: è la realizzazione di un sogno e la passione per l'arte del cinema. Fondata nel 1996 dalla famiglia Morandini, la nostra azienda è diventata un simbolo di cultura e intrattenimento nel Canton Ticino e oltre.
+      </p>
+      <p class="section-sub reveal">
+        Oggi, con oltre 30 anni di esperienza, continuiamo a portare avanti la nostra missione: diffondere la cultura cinematografica e creare momenti speciali. Sia che si tratti di un classico intramontabile o di un'anteprima esclusiva, il Cinematografo Ambulante rimane una scelta di qualità per una serata di cinema all'aperto eccezionale.
+      </p>
+      <blockquote class="quote reveal">
+        "Il cinema ha la capacità unica di essere popolare, ma anche un veicolo culturale che arricchisce luoghi e persone"
+        <span>— Luca Morandini</span>
+      </blockquote>
     </div>
   </section>
 
@@ -1084,23 +1135,6 @@
       <div class="servizi-grid reveal" id="servizi-grid">
         <div class="servizi-loading">Caricamento…</div>
       </div>
-    </div>
-  </section>
-
-  <section class="panel" id="chi-siamo">
-    <div class="panel-inner">
-      <div class="eyebrow reveal">Chi siamo</div>
-      <h2 class="title reveal">Dal 1996, la famiglia<br><span class="accent">Morandini.</span></h2>
-      <p class="section-sub reveal">
-        Il Cinematografo Ambulante è più di una semplice esperienza cinematografica: è la realizzazione di un sogno e la passione per l'arte del cinema. Fondata nel 1996 dalla famiglia Morandini, la nostra azienda è diventata un simbolo di cultura e intrattenimento nel Canton Ticino e oltre.
-      </p>
-      <p class="section-sub reveal">
-        Oggi, con oltre 30 anni di esperienza, continuiamo a portare avanti la nostra missione: diffondere la cultura cinematografica e creare momenti speciali. Sia che si tratti di un classico intramontabile o di un'anteprima esclusiva, il Cinematografo Ambulante rimane una scelta di qualità per una serata di cinema all'aperto eccezionale.
-      </p>
-      <blockquote class="quote reveal">
-        "Il cinema ha la capacità unica di essere popolare, ma anche un veicolo culturale che arricchisce luoghi e persone"
-        <span>— Luca Morandini</span>
-      </blockquote>
     </div>
   </section>
 
