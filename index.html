@@ -397,6 +397,30 @@
       transition: opacity .4s var(--ease);
     }
     .feature-card-media img.img-loaded { opacity: 1; }
+    /* Carosello di più foto (solo per "Trovi un luogo idoneo") — stesse
+       <img> impilate con opacity della card normale, un'unica "active" alla
+       volta ciclata via JS, pallini in basso solo se c'è più di una foto */
+    .feature-card-media img.active { opacity: 1; }
+    .feature-carousel-dots {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 18px 0 8px;
+      background: linear-gradient(0deg, rgba(10,10,10,.55), transparent);
+      display: flex;
+      justify-content: center;
+      gap: 6px;
+      z-index: 1;
+    }
+    .feature-carousel-dots span {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: rgba(247,244,239,.4);
+      transition: background .3s var(--ease);
+    }
+    .feature-carousel-dots span.active { background: var(--white); }
     .feature-card-num {
       position: absolute;
       top: 10px;
@@ -955,7 +979,7 @@
       <h2 class="title reveal">Cosa devi<br><span class="accent">fare tu.</span></h2>
       <div class="feature-grid reveal">
         <div class="feature-card">
-          <div class="feature-card-media"><img id="stepLuogoBg" alt=""><div class="feature-card-num">01</div></div>
+          <div class="feature-card-media" id="stepLuogoCarousel"><div class="feature-card-num">01</div></div>
           <div class="feature-card-body">
             <div class="feature-card-title">Trovi un luogo idoneo</div>
             <div class="feature-card-text">I requisiti del luogo: dimensioni, accesso carrabile, allacciamento elettrico e illuminazione.</div>
@@ -1226,6 +1250,33 @@ function setFeatureImg(el,url){
   el.onload=()=>el.classList.add('img-loaded');
 }
 
+// Carosello di più foto per la card "Trovi un luogo idoneo" — stesse <img>
+// assolute della card normale, una sola "active" alla volta, ciclata ogni
+// 3.5s. Chiamata ad ogni snapshot: se le foto non sono cambiate ricostruire
+// da zero andrebbe bene comunque (sono solo 1-5 immagini), nessun motivo
+// di confrontare array per un diff più fine
+let _luogoCarouselTimer=null;
+function initFeatureCarousel(containerId,urls){
+  const el=document.getElementById(containerId);
+  if(!el||!urls||!urls.length)return;
+  if(_luogoCarouselTimer){clearInterval(_luogoCarouselTimer);_luogoCarouselTimer=null;}
+  const imgsHtml=urls.map((u,i)=>`<img src="${u}" alt="" class="${i===0?'active':''}">`).join('');
+  const dotsHtml=urls.length>1?`<div class="feature-carousel-dots">${urls.map((_,i)=>`<span class="${i===0?'active':''}"></span>`).join('')}</div>`:'';
+  el.querySelectorAll('img, .feature-carousel-dots').forEach(e=>e.remove());
+  el.insertAdjacentHTML('afterbegin',imgsHtml+dotsHtml);
+  if(urls.length<=1)return;
+  let idx=0;
+  _luogoCarouselTimer=setInterval(()=>{
+    const imgs=el.querySelectorAll('img');
+    const dots=el.querySelectorAll('.feature-carousel-dots span');
+    imgs[idx]?.classList.remove('active');
+    dots[idx]?.classList.remove('active');
+    idx=(idx+1)%imgs.length;
+    imgs[idx]?.classList.add('active');
+    dots[idx]?.classList.add('active');
+  },3500);
+}
+
 // Foto di sfondo delle card con testo breve, configurabili dallo staff da
 // gestione.html (settings/ambulanteHome) — nessun fallback via CSS stavolta
 // (le feature-card usano un vero <img>, non un background-image): finché
@@ -1235,7 +1286,8 @@ onSnapshot(doc(db,'settings','ambulanteHome'),snap=>{
   const data=snap.data();
   setFeatureImg(document.getElementById('stepAllestimentoBg'),data.allestimento);
   setFeatureImg(document.getElementById('stepIndipendenteBg'),data.indipendente);
-  setFeatureImg(document.getElementById('stepLuogoBg'),data.luogo);
+  const luoghi=(data.luoghi&&data.luoghi.length)?data.luoghi:(data.luogo?[data.luogo]:[]);
+  initFeatureCarousel('stepLuogoCarousel',luoghi);
   setFeatureImg(document.getElementById('stepFurgoneBg'),data.furgone);
   setFeatureImg(document.getElementById('stepRimorchioBg'),data.rimorchio);
   setFeatureImg(document.getElementById('stepAutorizzazioneBg'),data.autorizzazione);
