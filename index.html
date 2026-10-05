@@ -892,6 +892,14 @@
             <div class="feature-card-text">Pronti per la proiezione in 30 minuti, liberi di proiettare anche dove non c'è alcun allacciamento elettrico.</div>
           </div>
         </div>
+        <div class="feature-card">
+          <div class="feature-card-media"><img id="stepCinetourBg" alt=""></div>
+          <div class="feature-card-body">
+            <div class="feature-card-title">Cinetour.ch</div>
+            <div class="feature-card-text">Il portale di tutte le proiezioni Open Air della Svizzera, promosse anche sui nostri social e con i nostri media partner.</div>
+            <button type="button" class="feature-more" onclick="openFeatureModal('cinetour')">Scopri di più →</button>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -1178,6 +1186,7 @@ onSnapshot(doc(db,'settings','ambulanteHome'),snap=>{
   setFeatureImg(document.getElementById('stepFurgoneBg'),data.furgone);
   setFeatureImg(document.getElementById('stepRimorchioBg'),data.rimorchio);
   setFeatureImg(document.getElementById('stepAutorizzazioneBg'),data.autorizzazione);
+  setFeatureImg(document.getElementById('stepCinetourBg'),data.cinetour);
 },e=>console.error(e));
 
 // Sfondo dinamico della card "Tutti i film che vuoi" — foto di un film in
@@ -1243,6 +1252,10 @@ const FEATURE_MODALS={
   rimorchio:{
     title:'Rimorchio telescopico',
     body:'<ul><li>Proiettore professionale cinema Barco DP2K</li><li>Server Alchemy</li><li>Processore audio Dolby</li><li>Amplificatori professionali cinema QSC</li><li>Trasmettitore microfono wireless Sennheiser</li><li>Impianto di illuminazione del sedime</li></ul>'
+  },
+  cinetour:{
+    title:'Cinetour.ch',
+    body:"<p>Cinetour.ch è il portale informativo per il pubblico di tutte le proiezioni Open Air che creano il Tour più grande della Svizzera, aggiornato 24 ore su 24, 7 giorni su 7: vi figura lo status di ogni proiezione e tutte le informazioni su luogo, organizzatori, film e altro.</p><p>Cinetour.ch (Facebook e Instagram) sono i canali social che usiamo per la promozione attiva di ogni serata, insieme alla promozione integrata nei canali dei nostri partner Corriere del Ticino, Teleticino e Radio3i.</p>"
   }
 };
 window.openFeatureModal=function(key){
