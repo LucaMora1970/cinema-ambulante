@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0a0a0a">
+  <title>Privacy Policy — Cinematografo Ambulante</title>
+  <meta name="description" content="Informativa sul trattamento dei dati personali raccolti tramite il sito cinema-ambulante.ch, in particolare con il modulo Richiedi una serata.">
+  <link rel="canonical" href="https://www.cinema-ambulante.ch/privacy.html">
+
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="img/favicon-16x16.png">
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+
+  <style>
+    :root {
+      --black: #0a0a0a;
+      --surf: #161616;
+      --white: #f7f4ef;
+      --muted: #9a9a95;
+      --red: #e0312a;
+      --red-deep: #8c1f1a;
+      --line: rgba(247,244,239,.16);
+      --ease: cubic-bezier(.16,1,.3,1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { background: var(--black); }
+
+    body {
+      background: var(--black);
+      color: var(--white);
+      font-family: 'DM Sans', Arial, Helvetica, sans-serif;
+      line-height: 1.5;
+      overflow-x: clip;
+    }
+
+    a { color: inherit; }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      height: 76px;
+      padding: 0 max(5vw, 20px);
+      background: rgba(10,10,10,.92);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .header-inner {
+      width: min(100%, 820px);
+      height: 100%;
+      margin-inline: auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      font-size: .9rem;
+      letter-spacing: .02em;
+      text-transform: uppercase;
+      text-decoration: none;
+    }
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+    .brand-mark img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: rgba(247,244,239,.06);
+      border: 1px solid var(--line);
+      color: var(--white);
+      text-decoration: none;
+      transition: background-color .2s var(--ease), border-color .2s var(--ease), color .2s var(--ease);
+    }
+    .back-link:hover { background: rgba(247,244,239,.12); border-color: var(--red); color: var(--red); }
+
+    main {
+      width: min(100%, 820px);
+      margin: 0 auto;
+      padding: 56px max(5vw, 20px) 100px;
+    }
+
+    .page-eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--red);
+      font-size: .74rem;
+      font-weight: 700;
+      letter-spacing: .24em;
+      text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+    .page-eyebrow::before { content:""; width: 40px; height: 2px; background: var(--red); }
+
+    h1 {
+      font-size: clamp(2rem, 5vw, 2.8rem);
+      line-height: 1.05;
+      letter-spacing: -.02em;
+      text-transform: uppercase;
+    }
+
+    .page-sub {
+      margin-top: 18px;
+      color: #c8c6c0;
+      font-size: 1.02rem;
+      max-width: 620px;
+    }
+
+    .pv-updated {
+      color: var(--muted);
+      font-size: .82rem;
+      margin-top: 28px;
+    }
+
+    .pv-section {
+      margin-top: 40px;
+    }
+
+    .pv-section h2 {
+      font-size: .9rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--red);
+      margin-bottom: 14px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .pv-section h3 {
+      font-size: .88rem;
+      font-weight: 700;
+      color: var(--white);
+      margin: 20px 0 8px;
+    }
+
+    .pv-section p {
+      color: #d6d4cd;
+      font-size: .92rem;
+      line-height: 1.7;
+      margin-bottom: 12px;
+    }
+
+    .pv-section ul {
+      margin: 0 0 12px 20px;
+      color: #d6d4cd;
+      font-size: .92rem;
+      line-height: 1.7;
+    }
+
+    .pv-section li { margin-bottom: 6px; }
+
+    .pv-section a { color: var(--red); text-decoration: underline; text-underline-offset: 2px; }
+
+    .pv-note {
+      background: rgba(224,49,42,.08);
+      border: 1px solid rgba(224,49,42,.3);
+      border-radius: 8px;
+      padding: 14px 16px;
+      font-size: .85rem;
+      color: #f0c6c3;
+      margin-bottom: 12px;
+    }
+
+    footer {
+      border-top: 1px solid var(--line);
+      padding: 28px max(5vw, 20px);
+      text-align: center;
+      font-size: .74rem;
+      color: var(--muted);
+      letter-spacing: .04em;
+    }
+    footer a:hover { color: var(--red); }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-inner">
+      <a href="index.html" class="brand">
+        <span class="brand-mark"><img src="img/logo.png" alt="Cinematografo Ambulante"></span>
+        <span>Cinematografo Ambulante</span>
+      </a>
+      <a href="index.html" class="back-link" aria-label="Torna al sito"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></a>
+    </div>
+  </header>
+
+  <main>
+    <div class="page-eyebrow">Privacy</div>
+    <h1>Informativa sulla privacy</h1>
+    <p class="page-sub">Come raccogliamo e trattiamo i dati personali su questo sito, in particolare quelli inviati tramite il modulo "Richiedi una serata".</p>
+    <p class="pv-updated">Ultimo aggiornamento: ottobre 2026</p>
+
+    <div class="pv-section">
+      <p>Le seguenti norme sulla privacy descrivono le modalità di gestione del sito <strong>cinema-ambulante.ch</strong> in merito al trattamento dei dati personali degli utenti che lo consultano o che inviano una richiesta tramite i suoi moduli, e sono rese anche quale informativa ai sensi dell'art. 13 del Regolamento europeo 2016/679 "GDPR".</p>
+      <p>Il Titolare potrà modificare o aggiornare, in tutto o in parte, la presente privacy policy. Le modifiche e gli aggiornamenti saranno vincolanti non appena pubblicati su questa pagina. L'utente è pertanto invitato a consultarla periodicamente.</p>
+    </div>
+
+    <div class="pv-section">
+      <h2>1. Principi</h2>
+      <p>I dati personali sono trattati secondo i principi di pertinenza, liceità e correttezza, attraverso l'utilizzo di misure di sicurezza idonee e a seguito del conferimento del consenso da parte degli utenti ove previsto.</p>
+      <p>Tali dati sono conservati in una forma che consenta l'identificazione dell'interessato per un periodo di tempo non superiore a quello necessario agli scopi per i quali essi sono stati raccolti o successivamente trattati.</p>
+    </div>
+
+    <div class="pv-section">
+      <h2>2. Titolare del trattamento</h2>
+      <p>Il titolare del trattamento dei dati è <strong>La Fabbrica dei Sogni Sagl</strong>, società di gestione del Cinematografo Ambulante, con sede in Via Vincenzo Vela 21, 6850 Mendrisio — contattabile all'indirizzo <a href="mailto:info@cinema-ambulante.ch">info@cinema-ambulante.ch</a> o al numero <a href="tel:+41916461654">+41 091 646 16 54</a> (di seguito il "Titolare").</p>
+      <p>I dati sono trattati presso le sedi operative del Titolare e dei fornitori tecnici di cui si avvale (vedi punto 7), e sono curati solo da personale autorizzato al trattamento.</p>
+    </div>
+
+    <div class="pv-section">
+      <h2>3. Finalità</h2>
+      <p>I dati personali sono forniti volontariamente dagli utenti, in particolare tramite il modulo "Richiedi una serata", per le seguenti finalità:</p>
+      <ul>
+        <li><strong>Gestione delle richieste di proiezione</strong>: valutare la fattibilità di una serata open air (luogo, data, requisiti tecnici), predisporre un preventivo, organizzare l'evento e restare in contatto con il richiedente fino alla sua conclusione.</li>
+        <li><strong>Comunicazioni di servizio</strong>: rispondere a domande inviate via email o telefono.</li>
+        <li><strong>Adempimento di eventuali obblighi di legge o contrattuali</strong> connessi all'organizzazione dell'evento.</li>
+      </ul>
+    </div>
+
+    <div class="pv-section">
+      <h2>4. Dati raccolti tramite il modulo "Richiedi una serata"</h2>
+      <p>Chi invia una richiesta fornisce volontariamente: ragione sociale o nome di chi richiede l'evento, nome del referente, email, telefono, indirizzo (ed eventuale indirizzo di fatturazione se diverso), luogo e comune dove si terrebbe la proiezione, numero indicativo di spettatori attesi, una o più date desiderate ed eventualmente una data di riserva a pagamento, gli eventuali servizi extra richiesti, il film preferito (o l'indicazione di voler essere consigliati) ed eventuali note libere.</p>
+      <p>Questi dati sono visibili solo al personale autorizzato del Titolare e utilizzati esclusivamente per gestire la richiesta e, in caso di conferma, l'evento stesso.</p>
+    </div>
+
+    <div class="pv-section">
+      <h2>5. Dati di navigazione</h2>
+      <p>I sistemi informatici preposti al funzionamento del sito acquisiscono, nel corso del loro normale esercizio, alcuni dati la cui trasmissione è implicita nell'uso dei protocolli di comunicazione internet (indirizzi IP, URL delle risorse richieste, orario della richiesta, ecc.). Questi dati sono usati solo per il corretto funzionamento del servizio e per eventuali finalità statistiche in forma aggregata.</p>
+    </div>
+
+    <div class="pv-section">
+      <h2>6. Cookie</h2>
+      <div class="pv-note">Il sito cinema-ambulante.ch non utilizza cookie di profilazione, pubblicitari o strumenti di analisi/tracciamento di terze parti: non raccoglie dati personali dalla semplice navigazione.</div>
+    </div>
+
+    <div class="pv-section">
+      <h2>7. Comunicazione dei dati e fornitori tecnici</h2>
+      <p>I dati inviati tramite il modulo "Richiedi una serata" sono conservati su infrastruttura cloud fornita da <strong>Google Firebase</strong> e la notifica di una nuova richiesta viene inoltrata via email al personale del Titolare tramite un servizio tecnico di invio email (<strong>Netlify</strong>). Questi fornitori agiscono come responsabili del trattamento per le sole operazioni tecniche necessarie al funzionamento del sito e non utilizzano i dati per finalità proprie.</p>
+      <p>I dati non sono comunicati ad altri soggetti terzi né diffusi pubblicamente, salvo obbligo di legge.</p>
+    </div>
+
+    <div class="pv-section">
+      <h2>8. Base giuridica e tempi di conservazione</h2>
+      <ul>
+        <li>Per la gestione della richiesta: consenso esplicito manifestato tramite la casella dedicata nel modulo, revocabile in ogni momento.</li>
+        <li>I dati di una richiesta non andata a buon fine (evento non confermato) sono conservati per il tempo necessario a valutarla e comunque non oltre 24 mesi dall'invio.</li>
+        <li>Se l'evento viene confermato, i dati sono conservati per tutta la durata del rapporto e, successivamente, per il tempo previsto dagli eventuali obblighi fiscali o contrattuali di legge.</li>
+      </ul>
+    </div>
+
+    <div class="pv-section">
+      <h2>9. Diritti degli interessati</h2>
+      <p>In relazione al trattamento dei dati, l'interessato può esercitare i diritti previsti dagli artt. 15-16-17-18-20-21 e 22 GDPR 679/16, in particolare il diritto di:</p>
+      <ul>
+        <li>ottenere la conferma dell'esistenza di dati personali che lo riguardano e la loro comunicazione in forma intelligibile;</li>
+        <li>chiedere l'accesso ai dati personali e la loro portabilità;</li>
+        <li>ottenere l'aggiornamento, la rettifica o l'integrazione dei dati;</li>
+        <li>opporsi, in tutto o in parte, al trattamento dei dati per motivi legittimi;</li>
+        <li>ottenere la cancellazione o la trasformazione in forma anonima dei dati trattati in violazione di legge;</li>
+        <li>revocare il consenso in qualsiasi momento, senza pregiudicare la liceità del trattamento svolto prima della revoca;</li>
+        <li>proporre reclamo a un'autorità di controllo.</li>
+      </ul>
+      <p>Le richieste possono essere trasmesse via e-mail all'indirizzo <a href="mailto:info@cinema-ambulante.ch">info@cinema-ambulante.ch</a>.</p>
+    </div>
+  </main>
+
+  <footer>
+    <a href="index.html">← Torna al sito</a>
+  </footer>
+
+</body>
+</html>
