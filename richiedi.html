@@ -361,27 +361,32 @@
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
       gap: 12px;
+      align-items: stretch;
     }
     .servizio-card {
       position: relative;
-      display: block;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
       background: var(--surf);
       border: 1px solid var(--line);
       border-radius: 8px;
-      padding: 16px 32px 14px 16px;
+      padding: 16px;
       cursor: pointer;
-      transition: border-color .2s var(--ease);
+      transition: border-color .2s var(--ease), transform .2s var(--ease);
     }
-    .servizio-card:hover { border-color: rgba(233,52,47,.5); }
+    .servizio-card:hover { border-color: rgba(233,52,47,.5); transform: translateY(-2px); }
+    /* Niente più "flag": la selezione si vede dal bordo/ombra rossa, stesso
+       linguaggio delle card film — la checkbox resta nel markup (serve al
+       toggle via label-for e alla semantica per chi naviga da tastiera/
+       screen reader) ma è resa visivamente invisibile */
     .servizio-card.checked { border-color: var(--red); box-shadow: 0 0 0 1px var(--red) inset; }
     .servizio-card input[type="checkbox"] {
       position: absolute;
-      top: 14px;
-      right: 14px;
-      width: 18px;
-      height: 18px;
-      accent-color: var(--red);
-      cursor: pointer;
+      opacity: 0;
+      width: 1px;
+      height: 1px;
+      pointer-events: none;
     }
     .servizio-card-icon svg { width: 1.3rem; height: 1.3rem; color: var(--red); display: block; }
     .servizio-card-nome {
@@ -389,19 +394,86 @@
       font-size: .88rem;
       font-weight: 700;
       color: var(--white);
+      line-height: 1.3;
+      min-height: 2.3em;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
     .servizio-card-desc {
       margin-top: 4px;
       font-size: .76rem;
       color: var(--muted);
       line-height: 1.45;
+      min-height: 3.9em;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
+    .servizio-card-more {
+      margin-top: 6px;
+      align-self: flex-start;
+      background: none;
+      border: none;
+      color: var(--amber);
+      font-weight: 700;
+      font-size: .72rem;
+      cursor: pointer;
+      padding: 0;
+      font-family: inherit;
+    }
+    .servizio-card-more:hover { text-decoration: underline; }
     .servizio-card input[type="number"] {
       margin-top: 10px;
       width: 100%;
       display: none;
     }
     .servizio-card.has-qta.checked input[type="number"] { display: block; }
+
+    /* Popup "Leggi tutto" per le descrizioni servizio troppo lunghe per la
+       card — stesso linguaggio dei popup "Scopri di più" della home
+       (index.html .feature-modal): overlay scuro, card centrata */
+    .servizio-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(11,11,11,.85);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      padding: 24px;
+    }
+    .servizio-modal.on { display: flex; }
+    .servizio-modal-inner {
+      position: relative;
+      width: min(92vw, 480px);
+      max-height: 85vh;
+      overflow-y: auto;
+      background: var(--surf);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 34px 28px;
+    }
+    .servizio-modal-close {
+      position: absolute;
+      top: 14px;
+      right: 14px;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: rgba(255,253,248,.08);
+      border: none;
+      color: var(--white);
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .servizio-modal-inner h3 { font-size: 1.2rem; margin-bottom: 14px; padding-right: 30px; }
+    .servizio-modal-inner p { color: var(--muted); font-size: .92rem; line-height: 1.65; white-space: pre-line; }
 
     /* ── Film ─────────────────────────────────────────────────── */
     .radio-row {
@@ -700,7 +772,7 @@
         </fieldset>
 
         <fieldset>
-          <div class="fs-title">Opzioni richieste</div>
+          <div class="fs-title">Opzioni del Servizio</div>
           <div class="servizi-cards" id="serviziList"><p style="color:var(--muted);font-size:.86rem">Caricamento…</p></div>
         </fieldset>
 
@@ -737,6 +809,14 @@
     </div>
   </main>
 
+  <div class="servizio-modal" id="servizioModal" onclick="if(event.target===this)closeServizioModal()">
+    <div class="servizio-modal-inner">
+      <button type="button" class="servizio-modal-close" onclick="closeServizioModal()" aria-label="Chiudi">✕</button>
+      <h3 id="servizioModalTitle"></h3>
+      <p id="servizioModalDesc"></p>
+    </div>
+  </div>
+
   <script type="module">
 import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import{getFirestore,collection,doc,getDoc,getDocs,addDoc,onSnapshot,serverTimestamp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -764,6 +844,10 @@ const OA_SERVIZIO_ICONS={
   trasporto:'<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M2 7h11v10H2V7Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M13 10h4l3 3v4h-7v-7Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><circle cx="6" cy="18" r="1.7" stroke="currentColor" stroke-width="1.5"/><circle cx="17" cy="18" r="1.7" stroke="currentColor" stroke-width="1.5"/></svg>',
   audio:'<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M4 9h3l5-4v14l-5-4H4V9Z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/><path d="M17 8.5a5 5 0 0 1 0 7M19.5 6a8.5 8.5 0 0 1 0 12" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
   schermo:'<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="2" y="4" width="20" height="13" rx="1" stroke="currentColor" stroke-width="1.7"/><path d="M9 20h6M12 17v3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>',
+  microfono:'<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="9" y="2" width="6" height="12" rx="3" stroke="currentColor" stroke-width="1.7"/><path d="M5 11a7 7 0 0 0 14 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M12 18v3M9 21h6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>',
+  sedialaterale:'<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M6 3v9h10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 12v8M16 12l2 8" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M6 8h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>',
+  batteria:'<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect x="2" y="7" width="18" height="10" rx="2" stroke="currentColor" stroke-width="1.7"/><rect x="21" y="10" width="2" height="4" rx="1" fill="currentColor"/><rect x="4.5" y="9.5" width="7" height="5" fill="currentColor"/></svg>',
+  tavolino:'<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M3 8l2-4h14l2 4" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 8h18" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M5.5 8v10M18.5 8v10" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>',
   generico:'<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M12 2c.6 3.6 2.4 5.4 6 6-3.6.6-5.4 2.4-6 6-.6-3.6-2.4-5.4-6-6 3.6-.6 5.4-2.4 6-6Z"/></svg>'
 };
 function oaServizioIconSvg(icona){return OA_SERVIZIO_ICONS[icona]||OA_SERVIZIO_ICONS.generico;}
@@ -929,8 +1013,15 @@ window.renderFilmCatalog=renderFilmCatalog;
     renderFilmCatalog();
 
     if(selEl){
+      // Solo i titoli idonei per l'Open Air, in ordine alfabetico (non più
+      // per data di uscita decrescente), con la data di uscita completa tra
+      // parentesi invece del solo anno
+      const archiveFilms=_openAirFilms.slice().sort((a,b)=>a.title.localeCompare(b.title,'it'));
       selEl.innerHTML='<option value="">Seleziona un titolo…</option>'
-        +_allFilms.map(f=>`<option value="${esc(f.title)}">${esc(f.title)}${f.release?' ('+f.release.slice(0,4)+')':''}</option>`).join('');
+        +archiveFilms.map(f=>{
+          const relFmt=f.release?f.release.split('-').reverse().join('.'):'';
+          return `<option value="${esc(f.title)}">${esc(f.title)}${relFmt?' ('+relFmt+')':''}</option>`;
+        }).join('');
     }
 
     // Arrivo dalle card "Film consigliati" della home
@@ -972,6 +1063,7 @@ onSnapshot(collection(db,'oaServizi'),snap=>{
       <div class="servizio-card-icon">${oaServizioIconSvg(s.icona)}</div>
       <div class="servizio-card-nome">${esc(s.nome)}</div>
       ${s.descrizione?`<div class="servizio-card-desc">${esc(s.descrizione)}</div>`:''}
+      ${(s.descrizione&&s.descrizione.length>70)?`<button type="button" class="servizio-card-more" onclick="event.preventDefault();event.stopPropagation();openServizioModal('${esc(s.id)}')">Leggi tutto</button>`:''}
       ${s.conQuantita?`<input type="number" id="qta-${esc(s.id)}" min="${s.qtaMin||1}" max="${s.qtaMax||99}" value="${s.qtaMin||1}" placeholder="${esc(s.labelQuantita||'Quantità')}" onclick="event.preventDefault()">`:''}
     </label>
   `).join('');
@@ -983,6 +1075,17 @@ window.toggleServQta=function(id){
   const cb=document.getElementById('serv-'+id);
   if(!cb)return;
   cb.closest('.servizio-card').classList.toggle('checked',cb.checked);
+};
+
+window.openServizioModal=function(id){
+  const s=_servizi.find(x=>x.id===id);
+  if(!s)return;
+  document.getElementById('servizioModalTitle').textContent=s.nome;
+  document.getElementById('servizioModalDesc').textContent=s.descrizione||'';
+  document.getElementById('servizioModal').classList.add('on');
+};
+window.closeServizioModal=function(){
+  document.getElementById('servizioModal').classList.remove('on');
 };
 
 // ── Date multiple con indicatore di disponibilità ───────────────────────
