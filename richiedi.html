@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#0a0a0a">
+  <meta name="theme-color" content="#0b0b0b">
   <title>Richiedi una serata — Cinematografo Ambulante</title>
   <meta name="description" content="Richiedi una serata di cinema open air: dicci dove, quando e che film vorresti vedere, ti rispondiamo con disponibilità e dettagli.">
   <link rel="canonical" href="https://www.cinema-ambulante.ch/richiedi.html">
@@ -15,14 +15,17 @@
 
   <style>
     :root {
-      --black: #0a0a0a;
+      --black: #0b0b0b;
       --surf: #161616;
       --surf2: #1e1e1e;
-      --white: #f7f4ef;
-      --muted: #9a9a95;
-      --red: #e0312a;
-      --red-deep: #8c1f1a;
-      --line: rgba(247,244,239,.16);
+      --white: #fffdf8;
+      --muted: #6e6963;
+      --red: #e9342f;
+      --red-deep: #92211d;
+      --amber: #d99a16;
+      --ivory: #f2ede4;
+      --green: #32d67a;
+      --line: rgba(255,253,248,.16);
       --ease: cubic-bezier(.16,1,.3,1);
     }
 
@@ -46,7 +49,7 @@
       z-index: 40;
       height: 76px;
       padding: 0 max(5vw, 20px);
-      background: rgba(10,10,10,.92);
+      background: rgba(11,11,11,.92);
       backdrop-filter: blur(8px);
       border-bottom: 1px solid var(--line);
     }
@@ -94,13 +97,13 @@
       width: 42px;
       height: 42px;
       border-radius: 50%;
-      background: rgba(247,244,239,.06);
+      background: rgba(255,253,248,.06);
       border: 1px solid var(--line);
       color: var(--white);
       text-decoration: none;
       transition: background-color .2s var(--ease), border-color .2s var(--ease), color .2s var(--ease);
     }
-    .back-link:hover { background: rgba(247,244,239,.12); border-color: var(--red); color: var(--red); }
+    .back-link:hover { background: rgba(255,253,248,.12); border-color: var(--red); color: var(--red); }
 
     main {
       width: min(100%, 720px);
@@ -190,10 +193,10 @@
       width: 100%;
       margin-top: 8px;
       padding: 13px 14px;
-      background: var(--white);
+      background: var(--ivory);
       border: 1px solid var(--line);
       border-radius: 6px;
-      color: #141414;
+      color: var(--black);
       font-family: inherit;
       font-size: .92rem;
       text-transform: none;
@@ -246,8 +249,8 @@
     }
     .day-tab .num { font-size: 1rem; color: var(--white); }
     .day-tab .dots { display: flex; gap: 3px; margin-top: 3px; }
-    .day-tab .dot { width: 6px; height: 6px; border-radius: 50%; background: #4ade80; }
-    .day-tab .hour { display: block; margin-top: 4px; font-size: .62rem; font-weight: 600; color: var(--muted); letter-spacing: normal; }
+    .day-tab .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+    .day-tab .hour { display: block; margin-top: 4px; font-size: .62rem; font-weight: 600; color: var(--amber); letter-spacing: normal; }
     .day-tab:hover { border-color: var(--red); }
     .day-tab.on { border-color: var(--red); background: var(--red); }
     .day-tab.on .num, .day-tab.on { color: var(--white); }
@@ -288,7 +291,7 @@
       color: var(--white);
     }
     .date-chip .dots { display: flex; gap: 3px; flex-shrink: 0; }
-    .date-chip .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; background: #4ade80; }
+    .date-chip .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; background: var(--green); }
     .date-chip .avail-label { color: var(--muted); font-size: .72rem; }
     .date-chip button {
       border: 0;
@@ -335,7 +338,7 @@
       cursor: pointer;
       transition: border-color .2s var(--ease);
     }
-    .servizio-card:hover { border-color: rgba(224,49,42,.5); }
+    .servizio-card:hover { border-color: rgba(233,52,47,.5); }
     .servizio-card.checked { border-color: var(--red); box-shadow: 0 0 0 1px var(--red) inset; }
     .servizio-card input[type="checkbox"] {
       position: absolute;
@@ -500,7 +503,7 @@
       font-weight: 600;
     }
     .form-msg.err { color: #ff6b61; }
-    .form-msg.ok { color: #4ade80; }
+    .form-msg.ok { color: var(--green); }
 
     .sent-state {
       text-align: center;
