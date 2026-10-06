@@ -304,6 +304,34 @@
     }
     .date-chip button:hover { color: var(--red); }
 
+    .film-chips {
+      margin-top: 14px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .film-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--surf);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 7px 8px 7px 14px;
+      font-size: .82rem;
+      color: var(--white);
+    }
+    .film-chip button {
+      border: 0;
+      background: none;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: .9rem;
+      padding: 4px 6px;
+      line-height: 1;
+    }
+    .film-chip button:hover { color: var(--red); }
+
     .date-hint {
       margin-top: 10px;
       font-size: .78rem;
@@ -613,11 +641,11 @@
         </fieldset>
 
         <fieldset>
-          <div class="fs-title">Data di riserva fissa (opzionale, a pagamento)</div>
-          <p class="date-hint" style="margin:0 0 14px">Il servizio prevede comunque la possibilità di recupero della data entro la fine del mese di settembre, senza supplementi di costo: la nuova data potrà essere decisa solo al momento dell'annullo, in base alle date disponibili a calendario.</p>
+          <div class="fs-title">Data di riserva</div>
+          <p class="date-hint" style="margin:0 0 14px">Il servizio prevede la possibilità di recupero della data entro la fine del mese di settembre, senza supplementi di costo ma potrà essere decisa solo al momento della decisione dell'annullo.</p>
           <label class="check-row">
             <input type="checkbox" id="riservaAttiva" onchange="toggleRiservaData()">
-            <span>Vogliamo fissare anche una data di riserva garantita, a pagamento: se la data principale salta per maltempo, la serata si recupera in quella data senza bisogno di trovare un nuovo accordo.</span>
+            <span><strong>Data fissa a pagamento:</strong> vogliamo fissare subito una data di riserva garantita, a pagamento: se la data principale salta per maltempo, la serata si recupera in quella data senza bisogno di trovare un nuovo accordo.</span>
           </label>
           <label class="field" id="riservaDataWrap" style="margin-top:14px;display:none">Data di riserva
             <input type="date" id="riservaDataInput">
@@ -626,7 +654,7 @@
 
         <fieldset>
           <div class="fs-title">Il film</div>
-          <p class="date-hint" style="margin:0 0 14px">Scegli tra le uscite più recenti idonee per l'Open Air, cerca nell'intero archivio (anche titoli già usciti) o scrivi direttamente il titolo che vuoi.</p>
+          <p class="date-hint" style="margin:0 0 14px">Scegli almeno 3 titoli papabili tra le uscite più recenti idonee per l'Open Air o cercando nell'intero archivio (anche titoli già usciti): così possiamo verificarne la disponibilità.</p>
           <div id="film-pick-wrap">
             <div class="film-catalog" id="filmCatalog"><p style="color:var(--muted);font-size:.86rem">Caricamento…</p></div>
             <label class="field" style="margin-top:4px">Oppure cerca nell'archivio completo
@@ -634,8 +662,9 @@
                 <option value="">Caricamento…</option>
               </select>
             </label>
-            <label class="field" style="margin-top:14px">Titolo scelto (modificabile)
-              <input type="text" id="filmPreferenza" placeholder="Titolo o genere di film che vorresti">
+            <div class="film-chips" id="filmChips"></div>
+            <label class="field" style="margin-top:14px">Altro titolo non in archivio (facoltativo)
+              <input type="text" id="filmAltro" placeholder="Un titolo che non trovi nell'archivio">
             </label>
           </div>
           <label class="check-row" style="margin-top:16px">
@@ -723,8 +752,40 @@ window.toggleFilmNonSo=function(){
   wrap.style.opacity=nonSo?'.45':'1';
   wrap.querySelectorAll('input,select,button').forEach(el=>{el.disabled=nonSo;});
   if(nonSo){
+    _selectedFilms=[];
+    renderFilmChips();
     document.querySelectorAll('.film-card-pick').forEach(b=>b.classList.remove('selected'));
   }
+};
+
+// ── Selezione multipla dei film papabili — almeno 3 titoli richiesti per
+// poterne verificare la disponibilità, stesso pattern a "chip" già usato
+// per le date multiple (_dates/renderDateChips) ───────────────────────
+let _selectedFilms=[];
+
+function renderFilmChips(){
+  const el=document.getElementById('filmChips');
+  if(!el)return;
+  el.innerHTML=_selectedFilms.map(t=>
+    `<span class="film-chip" data-title="${esc(t)}">${esc(t)}<button type="button" onclick="toggleFilmSelection(this.closest('.film-chip').dataset.title)" aria-label="Rimuovi">✕</button></span>`
+  ).join('');
+}
+window.renderFilmChips=renderFilmChips;
+
+function updateFilmCardSelection(){
+  document.querySelectorAll('.film-card-pick').forEach(b=>{
+    b.classList.toggle('selected',_selectedFilms.includes(b.dataset.title));
+  });
+}
+
+window.toggleFilmSelection=function(title){
+  if(_selectedFilms.includes(title)){
+    _selectedFilms=_selectedFilms.filter(t=>t!==title);
+  }else{
+    _selectedFilms.push(title);
+  }
+  renderFilmChips();
+  updateFilmCardSelection();
 };
 
 // ── Catalogo film Open Air: stessa collezione pubblica "films" già letta
@@ -803,8 +864,11 @@ function renderFilmCatalog(){
       return dates&&dates.disponibileRaw<=cutoff;
     });
   }
-  list=list.slice(0,15);
-  const prevSelected=document.querySelector('.film-card-pick.selected')?.dataset.title;
+  // _openAirFilms è ordinato dal più recente al più vecchio (serve a
+  // scegliere QUALI 15 titoli proporre, i più recenti disponibili); la
+  // griglia li mostra però dal più vecchio al più nuovo, quindi si
+  // inverte solo dopo aver scelto i 15 da mostrare
+  list=list.slice(0,15).reverse();
   if(!list.length){
     catEl.innerHTML=cutoff
       ?'<p style="color:var(--muted);font-size:.86rem">Nessun titolo risulta ancora disponibile per la data scelta — cerca nell\'archivio qui sotto o scrivi la tua preferenza.</p>'
@@ -816,8 +880,8 @@ function renderFilmCatalog(){
     const poster=f.poster
       ?`<img src="${esc(f.poster)}" alt="" loading="lazy">`
       :'<div class="fc-noposter">🎬</div>';
-    const selected=f.title===prevSelected?' selected':'';
-    return `<button type="button" class="film-card-pick${selected}" data-title="${esc(f.title)}" onclick="selectFilmCard(this)">
+    const selected=_selectedFilms.includes(f.title)?' selected':'';
+    return `<button type="button" class="film-card-pick${selected}" data-title="${esc(f.title)}" onclick="toggleFilmSelection(this.dataset.title)">
       ${poster}
       <div class="fc-title">${esc(f.title)}</div>
       ${dates?`<div class="fc-date">Disponibile dal ${esc(dates.disponibile)}</div><div class="fc-date fc-date-promo">Promuovibile dal ${esc(dates.promuovibile)}</div>`:''}
@@ -844,14 +908,12 @@ window.renderFilmCatalog=renderFilmCatalog;
     }
 
     // Arrivo dalle card "Film consigliati" della home
-    // (richiedi.html?film=Titolo): pre-seleziona quel titolo, nella
-    // griglia se è tra quelli in evidenza, altrimenti solo nel campo testo
+    // (richiedi.html?film=Titolo): pre-seleziona quel titolo tra i papabili
     const filmQ=new URLSearchParams(location.search).get('film');
     if(filmQ){
-      document.getElementById('filmPreferenza').value=filmQ;
-      if(selEl)selEl.value=[...selEl.options].some(o=>o.value===filmQ)?filmQ:'';
-      const matchCard=[...catEl.querySelectorAll('.film-card-pick')].find(b=>b.dataset.title===filmQ);
-      if(matchCard)matchCard.classList.add('selected');
+      if(!_selectedFilms.includes(filmQ))_selectedFilms.push(filmQ);
+      renderFilmChips();
+      updateFilmCardSelection();
     }
   }catch(e){
     console.error(e);
@@ -860,19 +922,14 @@ window.renderFilmCatalog=renderFilmCatalog;
   }
 })();
 
-window.selectFilmCard=function(btn){
-  document.querySelectorAll('.film-card-pick').forEach(b=>b.classList.remove('selected'));
-  btn.classList.add('selected');
-  document.getElementById('filmPreferenza').value=btn.dataset.title;
-  const selEl=document.getElementById('filmArchivioSelect');
-  if(selEl)selEl.value=[...selEl.options].some(o=>o.value===btn.dataset.title)?btn.dataset.title:'';
-};
-
 window.selectFilmFromArchive=function(){
   const selEl=document.getElementById('filmArchivioSelect');
   if(!selEl||!selEl.value)return;
-  document.getElementById('filmPreferenza').value=selEl.value;
-  document.querySelectorAll('.film-card-pick').forEach(b=>b.classList.toggle('selected',b.dataset.title===selEl.value));
+  const title=selEl.value;
+  if(!_selectedFilms.includes(title))_selectedFilms.push(title);
+  selEl.value='';
+  renderFilmChips();
+  updateFilmCardSelection();
 };
 
 // ── Servizi extra: stessa collezione "oaServizi" già gestita da
@@ -1106,6 +1163,9 @@ window.submitRequest=async function(ev){
   if(!_dates.length){
     msg.textContent='Aggiungi almeno una data.';msg.className='form-msg err';return false;
   }
+  if(!document.getElementById('filmNonSo').checked&&_selectedFilms.length<3){
+    msg.textContent='Seleziona almeno 3 titoli papabili, così possiamo verificarne la disponibilità (oppure spunta "Non ho ancora deciso").';msg.className='form-msg err';return false;
+  }
   const riservaAttiva=document.getElementById('riservaAttiva').checked;
   const riservaDataValue=document.getElementById('riservaDataInput').value;
   if(riservaAttiva&&!riservaDataValue){
@@ -1132,7 +1192,7 @@ window.submitRequest=async function(ev){
   });
 
   const filmNonSo=document.getElementById('filmNonSo').checked;
-  const filmPreferenza=!filmNonSo?(document.getElementById('filmPreferenza').value||'').trim():'';
+  const filmAltro=!filmNonSo?(document.getElementById('filmAltro').value||'').trim():'';
 
   const data={
     ragione,referente,email,tel,indirizzo,indirizzoFatturazione,luogo,comune,
@@ -1141,7 +1201,8 @@ window.submitRequest=async function(ev){
     dataRiserva:riservaAttiva&&riservaDataValue?riservaDataValue:null,
     servizi,
     filmDaDefinire:filmNonSo,
-    filmPreferenza:filmPreferenza||null,
+    filmPreferenze:filmNonSo?[]:_selectedFilms.slice(),
+    filmAltro:filmAltro||null,
     filmSelezionato:null,
     requisitiConfermati:{
       batteryPackRichiesto:document.getElementById('batteryPack').checked,
@@ -1172,7 +1233,7 @@ window.submitRequest=async function(ev){
             to:staffEmails.join(','),
             nome:ragione+' ('+referente+')',
             tipoLabel:'Open Air — Cinematografo Ambulante',
-            riepilogo:'Email: '+email+'\nTelefono: '+tel+'\nIndirizzo: '+indirizzo+(indirizzoFatturazione?'\nIndirizzo fatturazione: '+indirizzoFatturazione:'')+'\nLuogo: '+luogo+' — '+comune+'\nDate: '+_dates.join(', ')+(data.dataRiserva?'\nData di riserva (a pagamento): '+data.dataRiserva:'')+(data.spettatori?'\nSpettatori: '+data.spettatori:''),
+            riepilogo:'Email: '+email+'\nTelefono: '+tel+'\nIndirizzo: '+indirizzo+(indirizzoFatturazione?'\nIndirizzo fatturazione: '+indirizzoFatturazione:'')+'\nLuogo: '+luogo+' — '+comune+'\nDate: '+_dates.join(', ')+(data.dataRiserva?'\nData di riserva (a pagamento): '+data.dataRiserva:'')+(data.spettatori?'\nSpettatori: '+data.spettatori:'')+(data.filmDaDefinire?'\nFilm: da concordare':(data.filmPreferenze&&data.filmPreferenze.length?'\nFilm papabili: '+data.filmPreferenze.join(', '):''))+(data.filmAltro?'\nAltro titolo: '+data.filmAltro:''),
             link:'https://cinemamultisalateatro.ch/gestione.html'
           })
         }).catch(e=>console.error('notifica staff',e));
