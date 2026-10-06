@@ -412,6 +412,14 @@
       -webkit-box-orient: vertical;
       overflow: hidden;
     }
+    /* Alla selezione la descrizione si espande per intero (niente più
+       testo tagliato da scoprire altrove) e il pulsante info, ormai
+       ridondante, si nasconde */
+    .servizio-card.checked .servizio-card-desc {
+      -webkit-line-clamp: unset;
+      overflow: visible;
+    }
+    .servizio-card.checked .servizio-card-more { display: none; }
     .servizio-card-more {
       margin-top: 8px;
       align-self: flex-start;
@@ -419,10 +427,11 @@
       height: 24px;
       border-radius: 50%;
       background: none;
-      border: 1px solid var(--amber);
-      color: var(--amber);
+      border: 1px solid var(--red);
+      color: var(--red);
       font-weight: 700;
-      font-size: 15px;
+      font-style: italic;
+      font-size: 13px;
       line-height: 1;
       display: flex;
       align-items: center;
@@ -432,7 +441,7 @@
       font-family: inherit;
       transition: background-color .2s var(--ease), color .2s var(--ease);
     }
-    .servizio-card-more:hover { background: var(--amber); color: var(--black); }
+    .servizio-card-more:hover { background: var(--red); color: var(--white); }
     .servizio-card input[type="number"] {
       margin-top: 10px;
       width: 100%;
@@ -1075,7 +1084,7 @@ onSnapshot(collection(db,'oaServizi'),snap=>{
       <div class="servizio-card-icon">${oaServizioIconSvg(s.icona)}</div>
       <div class="servizio-card-nome">${esc(s.nome)}</div>
       ${s.descrizione?`<div class="servizio-card-desc">${esc(s.descrizione)}</div>`:''}
-      ${(s.descrizione&&s.descrizione.length>70)?`<button type="button" class="servizio-card-more" onclick="event.preventDefault();event.stopPropagation();openServizioModal('${esc(s.id)}')" aria-label="Leggi la descrizione completa">+</button>`:''}
+      ${(s.descrizione&&s.descrizione.length>70)?`<button type="button" class="servizio-card-more" onclick="event.preventDefault();event.stopPropagation();openServizioModal('${esc(s.id)}')" aria-label="Maggiori informazioni">i</button>`:''}
       ${s.conQuantita?`<input type="number" id="qta-${esc(s.id)}" min="${s.qtaMin||1}" max="${s.qtaMax||99}" value="${s.qtaMin||1}" placeholder="${esc(s.labelQuantita||'Quantità')}" onclick="event.preventDefault()">`:''}
     </label>
   `).join('');
