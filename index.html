@@ -188,12 +188,15 @@
 
     /* Foto di sfondo della hero — sotto al velo scuro di .hero::before,
        che ora fa anche da dissolvenza ai bordi (sopra/sotto/lati) così la
-       foto si fonde nel nero della pagina invece di avere un taglio netto */
+       foto si fonde nel nero della pagina invece di avere un taglio netto.
+       Due file distinti (mobile/desktop, vedi img/hero-bg-*.jpg) invece di
+       uno solo ridimensionato via CSS — stesso scatto per ora, pronti per
+       essere sostituiti con due inquadrature pensate per ciascuna proporzione */
     .hero-bg {
       position: absolute;
       inset: 0;
       z-index: -2;
-      background-image: url('img/hero-bg.jpg');
+      background-image: url('img/hero-bg-mobile.jpg');
       background-size: cover;
       background-position: center 40%;
     }
@@ -206,6 +209,7 @@
       .hero-bg {
         left: 15%;
         right: 15%;
+        background-image: url('img/hero-bg-desktop.jpg');
         background-size: contain;
         background-repeat: no-repeat;
         background-position: center center;
