@@ -13,6 +13,21 @@
   <link rel="icon" type="image/png" sizes="16x16" href="img/favicon-16x16.png">
   <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
 
+  <!-- Connessioni verso Firebase aperte in anticipo (DNS/TLS in parallelo
+       al parsing dell'HTML): la foto hero caricata dall'admin e i dati
+       delle sezioni dinamiche passano tutti da questi domini -->
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://firebasestorage.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://image.tmdb.org" crossorigin>
+
+  <!-- Foto di sfondo della hero: essendo un background-image CSS (non un
+       <img>), lo scanner del browser la scoprirebbe solo dopo aver
+       parsato il CSS — il preload la fa partire subito, migliorando il
+       tempo di comparsa dell'elemento più grande della pagina (LCP) -->
+  <link rel="preload" as="image" href="img/hero-bg-mobile.jpg" media="(max-width: 779px)">
+  <link rel="preload" as="image" href="img/hero-bg-desktop.jpg" media="(min-width: 780px)">
+
   <style>
     :root {
       --black: #0b0b0b;
@@ -1016,7 +1031,7 @@
       <h2 class="title reveal">Un servizio<br><span class="accent">professionale.</span></h2>
       <div class="feature-grid reveal">
         <div class="feature-card">
-          <div class="feature-card-media"><img id="stepAllestimentoBg" alt=""></div>
+          <div class="feature-card-media"><img id="stepAllestimentoBg" alt="" loading="lazy"></div>
           <div class="feature-card-body">
             <div class="feature-card-title">Allestimento personalizzato</div>
             <div class="feature-card-text">Strutture solide e sicure anche in caso di vento e pioggia, con apparecchiature professionali cinematografiche.</div>
@@ -1024,14 +1039,14 @@
           </div>
         </div>
         <div class="feature-card">
-          <div class="feature-card-media"><img id="stepIndipendenteBg" alt=""></div>
+          <div class="feature-card-media"><img id="stepIndipendenteBg" alt="" loading="lazy"></div>
           <div class="feature-card-body">
             <div class="feature-card-title">Energeticamente indipendente</div>
             <div class="feature-card-text">Pronti per la proiezione in 30 minuti, liberi di proiettare anche dove non c'è alcun allacciamento elettrico.</div>
           </div>
         </div>
         <div class="feature-card">
-          <div class="feature-card-media"><img id="stepFilmBg" alt=""></div>
+          <div class="feature-card-media"><img id="stepFilmBg" alt="" loading="lazy"></div>
           <div class="feature-card-body">
             <div class="feature-card-title">Tutti i film che vuoi</div>
             <div class="feature-card-text">Ampia disponibilità di film nuovi e storici, concessi in licenza dai principali distributori. Voi scegliete il film, al resto pensiamo noi.</div>
@@ -1039,7 +1054,7 @@
           </div>
         </div>
         <div class="feature-card">
-          <div class="feature-card-media"><img id="stepCinetourBg" alt=""></div>
+          <div class="feature-card-media"><img id="stepCinetourBg" alt="" loading="lazy"></div>
           <div class="feature-card-body">
             <div class="feature-card-title">Cinetour.ch</div>
             <div class="feature-card-text">Il portale informativo per il pubblico di tutte le nostre proiezioni Open Air, promosse anche sui nostri social.</div>
@@ -1064,7 +1079,7 @@
           </div>
         </div>
         <div class="feature-card">
-          <div class="feature-card-media"><img id="stepDataBg" alt=""><div class="feature-card-num">02</div></div>
+          <div class="feature-card-media"><img id="stepDataBg" alt="" loading="lazy"><div class="feature-card-num">02</div></div>
           <div class="feature-card-body">
             <div class="feature-card-title">Scegli una data</div>
             <div class="feature-card-text">Verifica il nostro calendario della disponibilità ed inviaci la tua richiesta compilando il modulo Richiedi una serata.</div>
@@ -1072,7 +1087,7 @@
           </div>
         </div>
         <div class="feature-card">
-          <div class="feature-card-media"><img id="stepSceltaFilmBg" alt=""><div class="feature-card-num">03</div></div>
+          <div class="feature-card-media"><img id="stepSceltaFilmBg" alt="" loading="lazy"><div class="feature-card-num">03</div></div>
           <div class="feature-card-body">
             <div class="feature-card-title">Scegli il film</div>
             <div class="feature-card-text">Hai già un titolo in mente o preferisci decidere insieme a noi? Entrambe le strade vanno bene.</div>
@@ -1080,14 +1095,14 @@
           </div>
         </div>
         <div class="feature-card" style="display:none">
-          <div class="feature-card-media"><img id="stepAutorizzazioneBg" alt=""><div class="feature-card-num">04</div></div>
+          <div class="feature-card-media"><img id="stepAutorizzazioneBg" alt="" loading="lazy"><div class="feature-card-num">04</div></div>
           <div class="feature-card-body">
             <div class="feature-card-title">Ti procuri l'autorizzazione comunale</div>
             <div class="feature-card-text">Il permesso del Comune per l'occupazione dello spazio pubblico è a tuo carico — ti aiutiamo con le informazioni necessarie.</div>
           </div>
         </div>
         <div class="feature-card">
-          <div class="feature-card-media"><img id="stepExtraBg" alt=""><div class="feature-card-num">04</div></div>
+          <div class="feature-card-media"><img id="stepExtraBg" alt="" loading="lazy"><div class="feature-card-num">04</div></div>
           <div class="feature-card-body">
             <div class="feature-card-title">Scegli gli optional del servizio</div>
             <div class="feature-card-text">Fornitura di sedie, bibite, popcorn, gestione iscrizione clienti online, biglietteria, pratiche di autorizzazione, ricerca del luogo, promozione — pensiamo anche a questo, se lo richiedi.</div>
@@ -1106,14 +1121,14 @@
       <p class="section-sub reveal">Abbiamo in dotazione due postazioni complete per la proiezione cinematografica, allestite su due furgoni e due rimorchi progettati e modificati dal nostro ufficio tecnico per contenere tutte le apparecchiature professionali necessarie. Completano la flotta un furgone per il trasporto di 190 sedie e un rimorchio per il materiale opzionale.</p>
       <div class="feature-grid reveal">
         <div class="feature-card">
-          <div class="feature-card-media"><img id="stepFurgoneBg" alt=""></div>
+          <div class="feature-card-media"><img id="stepFurgoneBg" alt="" loading="lazy"></div>
           <div class="feature-card-body">
             <div class="feature-card-title">Furgone Schermo</div>
             <div class="feature-card-text">Struttura ad elevazione elettrica per struttura schermo con area di proiezione di 21 mq, a tenuta al vento e senza ancoraggi al suolo. Impianto di diffusione audio JBL.</div>
           </div>
         </div>
         <div class="feature-card">
-          <div class="feature-card-media"><img id="stepRimorchioBg" alt=""></div>
+          <div class="feature-card-media"><img id="stepRimorchioBg" alt="" loading="lazy"></div>
           <div class="feature-card-body">
             <div class="feature-card-title">Rimorchio di proiezione</div>
             <div class="feature-card-text">Il cuore tecnico della proiezione: proiettore, server, processore audio e illuminazione professionali.</div>

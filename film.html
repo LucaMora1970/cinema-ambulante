@@ -13,6 +13,13 @@
   <link rel="icon" type="image/png" sizes="16x16" href="img/favicon-16x16.png">
   <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
 
+  <!-- Connessioni verso Firebase aperte in anticipo (DNS/TLS in parallelo
+       al parsing dell'HTML) -->
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://firebasestorage.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://image.tmdb.org" crossorigin>
+
   <style>
     :root {
       --black: #0b0b0b;
@@ -268,7 +275,7 @@ function render(f){
 
   document.getElementById('root').innerHTML=`
     <div class="hero">
-      ${backdrop?`<img src="${esc(tmdbSize(backdrop,'w1280'))}" alt="${esc(f.title)}">`:''}
+      ${backdrop?`<img src="${esc(tmdbSize(backdrop,'w1280'))}" alt="${esc(f.title)}" fetchpriority="high">`:''}
       <div class="scrim"></div>
       <div class="hero-content">
         <div class="title">${esc(f.title)}</div>
