@@ -69,13 +69,16 @@
       align-items: center;
       position: relative;
     }
-    /* Su desktop: le voci del menu sono centrate esattamente al centro
-       della finestra (posizionate in assoluto rispetto a .header-inner,
-       indipendentemente dalla larghezza di marchio e pulsante), marchio
-       a sinistra e pulsante "Richiedi una serata" a destra agli estremi —
-       il link dentro il menu principale (usato solo per il drawer mobile)
-       viene nascosto e sostituito da una copia dedicata del pulsante */
-    .cta.cta-desktop { display: none; }
+    /* Il pulsante "Richiedi una serata" nell'header è sempre visibile
+       (anche sotto i 1100px, tra marchio e menu-toggle — unico CTA
+       raggiungibile senza aprire il drawer, ora che quello in mezzo
+       all'immagine hero è stato tolto). Su desktop: le voci del menu
+       sono centrate esattamente al centro della finestra (posizionate in
+       assoluto rispetto a .header-inner, indipendentemente dalla
+       larghezza di marchio e pulsante) — il link dentro il menu
+       principale (usato solo per il drawer mobile) viene nascosto e
+       sostituito dalla copia dedicata del pulsante nell'header */
+    .cta.cta-desktop { display: inline-flex; }
     /* Soglia più alta di quella usata altrove in pagina (780px): con 6
        voci di menu, sotto ~1100px il blocco centrato del menu si
        sovrapporrebbe a marchio e pulsante — meglio passare al drawer
@@ -88,7 +91,6 @@
         transform: translate(-50%, -50%);
       }
       .site-nav .cta { display: none; }
-      .cta.cta-desktop { display: inline-flex; }
     }
 
     .brand {
@@ -142,9 +144,24 @@
       padding: 10px 20px;
       border-radius: 4px;
       font-weight: 700;
+      white-space: nowrap;
       transition: background .25s var(--ease), transform .25s var(--ease);
     }
     .cta:hover { background: var(--red-deep); transform: translateY(-1px); }
+
+    /* Nell'header mobile il pulsante sta tra marchio e menu-toggle, in
+       uno spazio stretto: etichetta abbreviata ("Richiedi" invece di
+       "Richiedi una serata") e padding ridotto sotto i 480px, altrimenti
+       andrebbe a capo o farebbe traboccare l'header a altezza fissa */
+    .cta-label-short { display: none; }
+    @media (max-width: 480px) {
+      .cta.cta-desktop {
+        padding: 8px 14px;
+        font-size: .7rem;
+      }
+      .cta.cta-desktop .cta-label-full { display: none; }
+      .cta.cta-desktop .cta-label-short { display: inline; }
+    }
 
     .menu-toggle {
       display: none;
@@ -183,7 +200,7 @@
        centrato legge peggio su righe corte */
     @media (min-width: 780px) {
       .hero { justify-items: center; text-align: center; }
-      .hero-eyebrow, .hero-actions, .hero-stats { justify-content: center; }
+      .hero-eyebrow, .hero-stats { justify-content: center; }
     }
 
     /* Foto di sfondo della hero — sotto al velo scuro di .hero::before,
@@ -214,19 +231,23 @@
         background-image: var(--hero-bg-desktop, url('img/hero-bg-desktop.jpg'));
         background-size: contain;
         background-repeat: no-repeat;
-        background-position: center center;
+        background-position: center bottom;
       }
     }
 
+    /* Dissolvenza scura dall'alto (dietro titolo/sottotitolo) verso il
+       basso sempre più chiara (dove la foto, ancorata in basso, è
+       visibile) — stessa logica su mobile e desktop: non è la dimensione
+       o la posizione della foto a doverla far sparire dietro al testo,
+       è questo velo */
     .hero::before {
       content: "";
       position: absolute;
       inset: 0;
       z-index: -1;
       background:
-        radial-gradient(circle at 80% 20%, rgba(233,52,47,.2), transparent 45%),
-        linear-gradient(180deg, #000 0%, rgba(11,11,11,.85) 10%, rgba(11,11,11,.48) 40%, rgba(11,11,11,.72) 68%, #000 100%),
-        linear-gradient(90deg, #000 0%, transparent 18%, transparent 82%, #000 100%);
+        linear-gradient(180deg, #000 0%, rgba(11,11,11,.95) 20%, rgba(11,11,11,.78) 36%, rgba(11,11,11,.42) 55%, rgba(11,11,11,.18) 75%, rgba(11,11,11,.3) 92%, #000 100%),
+        linear-gradient(90deg, #000 0%, transparent 10%, transparent 90%, #000 100%);
     }
 
     .hero-eyebrow {
@@ -261,13 +282,6 @@
       max-width: 560px;
       font-size: clamp(1rem, 1.6vw, 1.3rem);
       color: #d8d6d0;
-    }
-
-    .hero-actions {
-      margin-top: 44px;
-      display: flex;
-      gap: 16px;
-      flex-wrap: wrap;
     }
 
     .btn-outline {
@@ -924,21 +938,14 @@
       .hero-stat-label { font-size: .62rem; line-height: 1.35; }
     }
 
-    /* Sfondo hero mobile: più scuro, più piccolo e spostato verso il
-       basso, così la zona sopra "Dal 1996 la passione..." resta scura e
-       il soggetto della foto non compete più col titolo/sottotitolo —
-       dissolvenza dall'alto (scuro) verso il basso (sempre più chiara),
-       con solo un velo finale per fondersi nel nero della pagina */
+    /* Sfondo hero mobile: più piccolo e spostato verso il basso (la
+       dissolvenza che lo scurisce è ormai quella di base, condivisa con
+       il desktop, vedi .hero::before sopra) */
     @media (max-width: 780px) {
       .hero-bg {
-        background-size: 92% auto;
-        background-position: center 80%;
+        background-size: auto 55%;
+        background-position: center bottom;
         background-repeat: no-repeat;
-      }
-      .hero::before {
-        background:
-          linear-gradient(180deg, #000 0%, rgba(11,11,11,.95) 20%, rgba(11,11,11,.78) 36%, rgba(11,11,11,.42) 55%, rgba(11,11,11,.18) 75%, rgba(11,11,11,.3) 92%, #000 100%),
-          linear-gradient(90deg, #000 0%, transparent 10%, transparent 90%, #000 100%);
       }
     }
   </style>
@@ -960,7 +967,10 @@
         <a href="#chi-siamo">Chi siamo</a>
         <a href="richiedi.html" class="cta">Richiedi una serata</a>
       </nav>
-      <a href="richiedi.html" class="cta cta-desktop">Richiedi una serata</a>
+      <a href="richiedi.html" class="cta cta-desktop">
+        <span class="cta-label-full">Richiedi una serata</span>
+        <span class="cta-label-short">Richiedi</span>
+      </a>
       <button type="button" class="menu-toggle" id="menuToggle" aria-label="Menu">
         <span></span><span></span><span></span>
       </button>
@@ -975,9 +985,6 @@
       Dal 1996 la passione per il cinema Open Air itinerante: un servizio
       unico, professionale e rinomato per la qualità e l'innovazione.
     </p>
-    <div class="hero-actions">
-      <a href="richiedi.html" class="btn-solid">Richiedi una serata</a>
-    </div>
     <div class="hero-stats">
       <div>
         <div class="hero-stat-num">30+</div>
