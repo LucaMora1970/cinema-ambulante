@@ -912,6 +912,32 @@
       .footer-pill-sep { display: none; }
       .footer-pill { padding: 6px 16px; }
       .footer-bottom { flex-direction: column; align-items: center; text-align: center; gap: 10px; }
+      /* Le 3 statistiche su una sola fascia, mai tagliate: colonne a
+         larghezza fissa invece di flex-wrap (che prima spezzava "100+"
+         su una seconda riga) — l'etichetta più lunga va su due righe
+         invece di spingere la fascia fuori dallo schermo */
+      .hero-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px 10px; margin-top: 40px; }
+      .hero-stats > div { min-width: 0; }
+      .hero-stat-num { font-size: 1.35rem; }
+      .hero-stat-label { font-size: .62rem; line-height: 1.35; }
+    }
+
+    /* Sfondo hero mobile: più scuro, più piccolo e spostato verso il
+       basso, così la zona sopra "Dal 1996 la passione..." resta scura e
+       il soggetto della foto non compete più col titolo/sottotitolo —
+       dissolvenza dall'alto (scuro) verso il basso (sempre più chiara),
+       con solo un velo finale per fondersi nel nero della pagina */
+    @media (max-width: 780px) {
+      .hero-bg {
+        background-size: 92% auto;
+        background-position: center 80%;
+        background-repeat: no-repeat;
+      }
+      .hero::before {
+        background:
+          linear-gradient(180deg, #000 0%, rgba(11,11,11,.95) 20%, rgba(11,11,11,.78) 36%, rgba(11,11,11,.42) 55%, rgba(11,11,11,.18) 75%, rgba(11,11,11,.3) 92%, #000 100%),
+          linear-gradient(90deg, #000 0%, transparent 10%, transparent 90%, #000 100%);
+      }
     }
   </style>
 </head>
