@@ -150,17 +150,15 @@
     .cta:hover { background: var(--red-deep); transform: translateY(-1px); }
 
     /* Nell'header mobile il pulsante sta tra marchio e menu-toggle, in
-       uno spazio stretto: etichetta abbreviata ("Richiedi" invece di
-       "Richiedi una serata") e padding ridotto sotto i 480px, altrimenti
-       andrebbe a capo o farebbe traboccare l'header a altezza fissa */
-    .cta-label-short { display: none; }
+       uno spazio stretto: sotto i 480px il nome del marchio si nasconde
+       (resta solo il logo) per lasciare posto all'etichetta completa del
+       pulsante, con padding ridotto perché l'header ha altezza fissa */
     @media (max-width: 480px) {
+      .brand-text { display: none; }
       .cta.cta-desktop {
         padding: 5px 12px;
         font-size: .64rem;
       }
-      .cta.cta-desktop .cta-label-full { display: none; }
-      .cta.cta-desktop .cta-label-short { display: inline; }
     }
 
     .menu-toggle {
@@ -259,7 +257,7 @@
       font-weight: 700;
       letter-spacing: .24em;
       text-transform: uppercase;
-      margin-bottom: 28px;
+      margin-bottom: 22px;
     }
     .hero-eyebrow::before {
       content: "";
@@ -956,7 +954,7 @@
     <div class="header-inner">
       <a href="#home" class="brand">
         <span class="brand-mark"><img src="img/logo.png" alt="Cinematografo Ambulante"></span>
-        <span>Cinematografo<br>Ambulante</span>
+        <span class="brand-text">Cinematografo<br>Ambulante</span>
       </a>
       <nav class="site-nav">
         <a href="#perche-noi">Il servizio</a>
@@ -967,10 +965,7 @@
         <a href="#chi-siamo">Chi siamo</a>
         <a href="richiedi.html" class="cta">Richiedi una serata</a>
       </nav>
-      <a href="richiedi.html" class="cta cta-desktop">
-        <span class="cta-label-full">Richiedi una serata</span>
-        <span class="cta-label-short">Richiedi</span>
-      </a>
+      <a href="richiedi.html" class="cta cta-desktop">Richiedi una serata</a>
       <button type="button" class="menu-toggle" id="menuToggle" aria-label="Menu">
         <span></span><span></span><span></span>
       </button>
@@ -983,7 +978,7 @@
     <h1>La magia del cinema<br><span class="accent">all'aperto.</span></h1>
     <p class="hero-sub">
       Dal 1996 la passione per il cinema Open Air itinerante: un servizio
-      unico, professionale e rinomato per la qualità e l'innovazione.
+      unico, professionale e rinomato per la qualità e l'innovazione tecnologica.
     </p>
     <div class="hero-stats">
       <div>
@@ -1010,14 +1005,14 @@
           <div class="feature-card-media"><img id="stepAllestimentoBg" alt=""></div>
           <div class="feature-card-body">
             <div class="feature-card-title">Allestimento personalizzato</div>
-            <div class="feature-card-text">Strutture solide e sicure anche in caso di vento e pioggia, con apparecchiature professionali esclusive per il cinema.</div>
+            <div class="feature-card-text">Strutture solide e sicure anche in caso di vento e pioggia, con apparecchiature professionali cinematografiche.</div>
             <button type="button" class="feature-more" onclick="openFeatureModal('allestimento')">Scopri di più →</button>
           </div>
         </div>
         <div class="feature-card">
           <div class="feature-card-media"><img id="stepIndipendenteBg" alt=""></div>
           <div class="feature-card-body">
-            <div class="feature-card-title">Veloce, Flessibile, ed energeticamente indipendente</div>
+            <div class="feature-card-title">Energeticamente indipendente</div>
             <div class="feature-card-text">Pronti per la proiezione in 30 minuti, liberi di proiettare anche dove non c'è alcun allacciamento elettrico.</div>
           </div>
         </div>
