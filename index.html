@@ -199,6 +199,18 @@
     @media (min-width: 780px) {
       .hero { justify-items: center; text-align: center; }
       .hero-eyebrow, .hero-stats { justify-content: center; }
+      .hero-heading { align-items: center; }
+    }
+
+    /* Eyebrow e titolo raggruppati in un'unica riga della grid: senza
+       questo contenitore, la hero (grid a righe implicite "auto" che si
+       allargano per riempire i 100svh) distribuiva lo spazio in eccesso
+       dentro OGNI riga, allontanando eyebrow e titolo molto più dei 22px
+       di margin-bottom dichiarati — qui dentro restano due blocchi
+       normali, distanziati solo da quel margine, come nelle altre sezioni */
+    .hero-heading {
+      display: flex;
+      flex-direction: column;
     }
 
     /* Foto di sfondo della hero — sotto al velo scuro di .hero::before,
@@ -974,8 +986,10 @@
 
   <section class="hero" id="home">
     <div class="hero-bg"></div>
-    <div class="hero-eyebrow">Cinema open air dal 1996</div>
-    <h1>La magia del cinema<br><span class="accent">all'aperto.</span></h1>
+    <div class="hero-heading">
+      <div class="hero-eyebrow">Cinema open air dal 1996</div>
+      <h1>La magia del cinema<br><span class="accent">all'aperto.</span></h1>
+    </div>
     <p class="hero-sub">
       Dal 1996 la passione per il cinema Open Air itinerante: un servizio
       unico, professionale e rinomato per la qualità e l'innovazione tecnologica.

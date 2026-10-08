@@ -801,14 +801,10 @@
         </fieldset>
 
         <fieldset>
-          <div class="fs-title">Condizioni</div>
+          <div class="fs-title">Da considerare</div>
           <p class="condizioni-text">
-            Le proiezioni hanno luogo anche in caso di tempo incerto o leggera pioggia. In caso di maltempo valutiamo insieme la situazione: l'eventuale annullamento non comporta una percentuale fissa, ma il conteggio delle prestazioni già maturate secondo il preventivo, con possibilità di recupero nel corso della stessa stagione — <a href="meteo-annullamento.html" target="_blank" style="color:var(--red)">leggi la politica completa su maltempo e annullamento →</a>. Tra i servizi inclusi: l'informazione ai media della data dell'evento e la pubblicazione automatica nel portale di programmazione Cinetour.ch.
+            Una proiezione all'aperto dipende inevitabilmente dalle condizioni meteorologiche. Per questo è importante leggere — <a href="meteo-annullamento.html" target="_blank" style="color:var(--red)">la politica completa su maltempo e annullamento →</a>.
           </p>
-          <div class="check-row" style="margin-top:14px">
-            <input type="checkbox" id="condizioni" required>
-            <span>Ho letto e accetto le condizioni sopra indicate.</span>
-          </div>
         </fieldset>
 
         <fieldset>
@@ -1321,9 +1317,6 @@ window.submitRequest=async function(ev){
   if(riservaAttiva&&!riservaDataValue){
     msg.textContent='Seleziona la data di riserva oppure disattiva l\'opzione.';msg.className='form-msg err';return false;
   }
-  if(!document.getElementById('condizioni').checked){
-    msg.textContent='Devi accettare le condizioni per inviare la richiesta.';msg.className='form-msg err';return false;
-  }
   if(!form.consenso.checked){
     msg.textContent='Serve il consenso al trattamento dei dati per inviare la richiesta.';msg.className='form-msg err';return false;
   }
@@ -1363,7 +1356,6 @@ window.submitRequest=async function(ev){
       batteryPackRichiesto:document.getElementById('batteryPack').checked,
       accessoCarrabileConfermato:document.getElementById('accessoCarrabile').checked
     },
-    condizioniAccettate:document.getElementById('condizioni').checked,
     note:(form.note.value||'').trim(),
     consensoPrivacy:true,
     stato:'nuova',
