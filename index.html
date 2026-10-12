@@ -36,7 +36,7 @@
       --muted: #9c968e;
       --red: #e9342f;
       --red-deep: #92211d;
-      --amber: #d99a16;
+      --amber: #f0801a;
       --ivory: #f2ede4;
       --green: #32d67a;
       --line: rgba(255,253,248,.14);
@@ -207,16 +207,6 @@
       position: relative;
       isolation: isolate;
     }
-    /* Su desktop: tutto il contenuto della hero (eyebrow, titolo,
-       sottotitolo, bottoni, statistiche) centrato nella finestra invece
-       di allineato a sinistra — su mobile resta a sinistra, dove il
-       centrato legge peggio su righe corte */
-    @media (min-width: 780px) {
-      .hero { justify-items: center; text-align: center; }
-      .hero-eyebrow, .hero-stats { justify-content: center; }
-      .hero-heading { align-items: center; }
-    }
-
     /* Eyebrow e titolo raggruppati in un'unica riga della grid: senza
        questo contenitore, la hero (grid a righe implicite "auto" che si
        allargano per riempire i 100svh) distribuiva lo spazio in eccesso
@@ -236,29 +226,49 @@
        Homepage Cinema Ambulante (settings/ambulanteHome.heroDesktop/
        heroMobile), lo script più sotto imposta le custom property
        --hero-bg-mobile/--hero-bg-desktop che hanno qui la precedenza */
+    /* Su mobile l'immagine copre solo da sotto il titolo in giù (non
+       tutta la hero): un riquadro ancorato al fondo, non centrato, così
+       niente calcoli di posizione fragili che la spingono fuori vista —
+       "cover" riempie quel riquadro, nessun bordo laterale/inferiore.
+       NOTA: niente mask-image qui — le foto caricate da gestione.html
+       vengono da Firebase Storage senza header CORS, e Chrome nasconde
+       del tutto un'immagine cross-origin a cui si applica una maschera
+       (succede solo con la maschera, l'immagine da sola si vede benissimo).
+       Finché il bucket Storage non ha CORS configurato, usare mask-image
+       qui la farebbe sparire senza errori visibili in console */
+    /* Niente lampo tra la foto statica e quella caricata da gestione.html:
+       resta invisibile finché lo script più sotto non ha precaricato
+       l'immagine giusta (quella vera se configurata, altrimenti la
+       statica) e la rivela in dissolvenza — mai un'immagine "sbagliata"
+       mostrata per un istante prima di essere sostituita */
     .hero-bg {
       position: absolute;
-      inset: 0;
+      top: 350px;
+      right: 0;
+      bottom: 0;
+      left: 0;
       z-index: -2;
       background-image: var(--hero-bg-mobile, url('img/hero-bg-mobile.jpg'));
       background-size: cover;
-      background-position: center 40%;
+      background-position: center top;
+      background-repeat: no-repeat;
+      filter: grayscale(1);
+      opacity: 0;
+      transition: opacity .5s ease;
     }
-    /* Su schermi larghi la foto è centrata nella hero (non più spostata a
-       destra, ora che anche il testo sopra è centrato) e ridotta rispetto
-       al pieno sfondo — su mobile resta a piena larghezza, dove non c'è
-       spazio laterale da alleggerire. "contain" invece di "cover" per non
-       tagliare l'immagine: mantiene le proporzioni intere */
+    /* Su schermi larghi la foto ha un bordo del 5% su ogni lato ("contain"
+       la riduce in proporzione per starci intera) e usa l'asset desktop,
+       inquadrata verso destra — il testo ora è a sinistra, il velo sotto
+       scurisce quel lato e lascia leggibile l'immagine sulla destra */
     @media (min-width: 780px) {
       .hero-bg {
-        left: 15%;
-        right: 15%;
+        inset: 5%;
         background-image: var(--hero-bg-desktop, url('img/hero-bg-desktop.jpg'));
         background-size: contain;
-        background-repeat: no-repeat;
-        background-position: center bottom;
+        background-position: right center;
       }
     }
+    .hero-bg.loaded { opacity: 1; }
 
     /* Dissolvenza scura dall'alto (dietro titolo/sottotitolo) verso il
        basso sempre più chiara (dove la foto, ancorata in basso, è
@@ -271,7 +281,7 @@
       inset: 0;
       z-index: -1;
       background:
-        linear-gradient(180deg, #000 0%, rgba(11,11,11,.95) 20%, rgba(11,11,11,.78) 36%, rgba(11,11,11,.42) 55%, rgba(11,11,11,.18) 75%, rgba(11,11,11,.3) 92%, #000 100%),
+        linear-gradient(180deg, rgba(11,11,11,.55) 0%, rgba(11,11,11,.48) 20%, rgba(11,11,11,.38) 36%, rgba(11,11,11,.42) 55%, rgba(11,11,11,.18) 75%, rgba(11,11,11,.3) 92%, #000 100%),
         linear-gradient(90deg, #000 0%, transparent 10%, transparent 90%, #000 100%);
     }
 
@@ -307,6 +317,12 @@
       max-width: 560px;
       font-size: clamp(1rem, 1.6vw, 1.3rem);
       color: #d8d6d0;
+    }
+    /* Su mobile il testo scende di almeno 80px in più, per lasciare
+       spazio alla foto subito sopra (vedi .hero-bg) invece di incollarsi
+       al suo bordo inferiore */
+    @media (max-width: 779px) {
+      .hero-sub { margin-top: 210px; }
     }
 
     .btn-outline {
@@ -447,9 +463,16 @@
       height: 100%;
       object-fit: cover;
       opacity: 0;
-      transition: opacity .4s var(--ease);
+      filter: grayscale(1);
+      transition: opacity .4s var(--ease), filter .4s var(--ease);
     }
     .feature-card-media img.img-loaded { opacity: 1; }
+    /* A colori al passaggio del mouse (desktop) o al tocco (mobile, classe
+       "colorized" aggiunta via JS al click — vedi script più sotto) */
+    .feature-card:hover .feature-card-media img,
+    .feature-card.colorized .feature-card-media img {
+      filter: grayscale(0);
+    }
     /* Carosello di più foto (solo per "Trovi un luogo idoneo") — stesse
        <img> impilate con opacity della card normale, un'unica "active" alla
        volta ciclata via JS, pallini in basso solo se c'è più di una foto */
@@ -963,16 +986,6 @@
       .hero-stat-label { font-size: .62rem; line-height: 1.35; }
     }
 
-    /* Sfondo hero mobile: più piccolo e spostato verso il basso (la
-       dissolvenza che lo scurisce è ormai quella di base, condivisa con
-       il desktop, vedi .hero::before sopra) */
-    @media (max-width: 780px) {
-      .hero-bg {
-        background-size: auto 55%;
-        background-position: center bottom;
-        background-repeat: no-repeat;
-      }
-    }
   </style>
 </head>
 <body>
@@ -1371,6 +1384,28 @@ function initFeatureCarousel(containerId,urls){
   },3500);
 }
 
+// Hero: precarica l'immagine giusta per il viewport corrente (quella reale
+// se configurata, altrimenti la statica) e la rivela solo a caricamento
+// finito — altrimenti si vedrebbe per un istante la statica (impostata
+// subito da .hero-bg via CSS) sostituita poco dopo da quella vera appena
+// arriva la risposta di Firestore, il "lampo" di un'immagine sbagliata
+let _heroBgRevealed = false;
+function revealHeroBg(){
+  document.querySelector('.hero-bg')?.classList.add('loaded');
+}
+function preloadHeroBg(mobileUrl, desktopUrl){
+  const finalMobile = mobileUrl || 'img/hero-bg-mobile.jpg';
+  const finalDesktop = desktopUrl || 'img/hero-bg-desktop.jpg';
+  const urlToPreload = window.matchMedia('(min-width: 780px)').matches ? finalDesktop : finalMobile;
+  const img = new Image();
+  img.onload = revealHeroBg;
+  img.onerror = revealHeroBg;
+  img.src = urlToPreload;
+}
+// Rete lenta o Firestore irraggiungibile: non resta invisibile per sempre,
+// dopo un po' si rivela comunque con la statica
+setTimeout(() => { if(!_heroBgRevealed){ _heroBgRevealed = true; preloadHeroBg(null, null); } }, 2500);
+
 // Foto di sfondo delle card con testo breve, configurabili dallo staff da
 // gestione.html (settings/ambulanteHome) — nessun fallback via CSS stavolta
 // (le feature-card usano un vero <img>, non un background-image): finché
@@ -1383,6 +1418,7 @@ onSnapshot(doc(db,'settings','ambulanteHome'),snap=>{
   // imposta solo se lo staff ha davvero caricato una foto dedicata
   if(data.heroDesktop)document.documentElement.style.setProperty('--hero-bg-desktop','url("'+data.heroDesktop+'")');
   if(data.heroMobile)document.documentElement.style.setProperty('--hero-bg-mobile','url("'+data.heroMobile+'")');
+  if(!_heroBgRevealed){ _heroBgRevealed = true; preloadHeroBg(data.heroMobile, data.heroDesktop); }
   setFeatureImg(document.getElementById('stepAllestimentoBg'),data.allestimento);
   setFeatureImg(document.getElementById('stepIndipendenteBg'),data.indipendente);
   const luoghi=(data.luoghi&&data.luoghi.length)?data.luoghi:(data.luogo?[data.luogo]:[]);
@@ -1722,11 +1758,18 @@ if(menuToggle&&siteNav){
     if(open){
       siteNav.style.display='';
     }else{
-      siteNav.style.cssText='display:flex;position:fixed;inset:76px 0 auto;flex-direction:column;gap:0;background:#0b0b0b;border-bottom:1px solid rgba(255,253,248,.14);padding:8px 20px 20px;';
+      siteNav.style.cssText='display:flex;position:fixed;inset:76px 0 auto;flex-direction:column;align-items:stretch;gap:0;background:#0b0b0b;border-bottom:1px solid rgba(255,253,248,.14);padding:8px 20px 20px;';
       siteNav.querySelectorAll('a').forEach(a=>{a.style.padding='14px 0';a.style.borderBottom='1px solid rgba(255,253,248,.1)';});
     }
   });
 }
+
+// Foto delle card "Come funziona"/"Attrezzatura" in bianco e nero, a
+// colori al passaggio del mouse — su mobile (niente hover) il tocco fa
+// la stessa cosa, alternando ogni volta tra bianco e nero e colori
+document.querySelectorAll('.feature-card').forEach(card=>{
+  card.addEventListener('click',()=>{card.classList.toggle('colorized');});
+});
   </script>
 </body>
 </html>
