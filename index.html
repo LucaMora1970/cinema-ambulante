@@ -981,6 +981,9 @@
       .hero-stats > div { min-width: 0; }
       .hero-stat-num { font-size: 1.35rem; }
       .hero-stat-label { font-size: .62rem; line-height: 1.35; }
+      /* Film consigliati: 2 schede per riga invece di 1 (220px minimo non
+         ci stava due volte sotto i 620px) */
+      .cinewow-titles { grid-template-columns: repeat(2, 1fr); gap: 12px; }
     }
 
   </style>
@@ -1153,8 +1156,12 @@
     <div class="panel-inner">
       <div class="eyebrow reveal">Il nostro servizio</div>
       <h2 class="title reveal">Il nostro lavoro<br><span class="accent">in dettaglio.</span></h2>
-      <p class="section-sub reveal">Dietro ogni proiezione open air c'è molto più di quanto si vede sullo schermo. È un'attività stagionale che richiede esperienza nel settore cinematografico, accesso ai film e alle relative licenze di proiezione, oltre a una macchina organizzativa capace di gestire ogni dettaglio.</p>
-      <p class="section-sub reveal">Dalla preparazione alla logistica, dal personale qualificato alla tecnologia professionale, dalle attrezzature specialistiche alla gestione amministrativa: tutto viene coordinato con precisione, settimane prima dell'evento e fino alla sua conclusione.</p>
+      <p class="section-sub reveal">Dietro ogni proiezione open air c'è molto più di quanto si vede sullo schermo.</p>
+      <p class="section-sub reveal">Organizzare una proiezione cinematografica all'aperto significa mettere in campo una struttura complessa, che va ben oltre lo schermo, il proiettore e il personale presente durante l'evento.</p>
+      <p class="section-sub reveal">Servono mezzi e attrezzature professionali, investimenti importanti, competenze tecniche specifiche e una profonda conoscenza del settore cinematografico, indispensabile per accedere ai film e ottenere le relative licenze di proiezione.</p>
+      <p class="section-sub reveal">È un'attività stagionale che richiede una macchina organizzativa attiva tutto l'anno, con un lavoro di pianificazione che inizia settimane prima di ogni evento e il coordinamento di numerosi collaboratori durante i mesi operativi.</p>
+      <p class="section-sub reveal">A tutto questo si aggiungono i costi legati ai singoli eventi, che comprendono diritti cinematografici, licenze e prestazioni di fornitori esterni.</p>
+      <p class="section-sub reveal">Il prezzo di una proiezione professionale riflette quindi non soltanto ciò che serve per realizzarla, ma anche la struttura, le competenze e l'organizzazione necessarie per garantirne la riuscita.</p>
       <div class="timeline" id="serviceTimeline">
         <div class="timeline-line"></div>
         <div class="timeline-progress" id="serviceTimelineProgress"></div>
