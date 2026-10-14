@@ -246,7 +246,7 @@
       background-size: contain;
       background-position: center calc(50% + 100px);
       background-repeat: no-repeat;
-      filter: grayscale(1);
+      filter: grayscale(1) contrast(1.25) brightness(1.08);
       opacity: 0;
       transition: opacity .5s ease;
     }
@@ -461,6 +461,9 @@
       transition: opacity .4s var(--ease), filter .4s var(--ease);
     }
     .feature-card-media img.img-loaded { opacity: 1; }
+    /* "Tutti i film che vuoi" e "Scegli il film" restano sempre a colori,
+       non solo al passaggio del mouse come le altre card */
+    #stepFilmBg, #stepSceltaFilmBg { filter: grayscale(0); }
     /* A colori al passaggio del mouse (desktop) o al tocco (mobile, classe
        "colorized" aggiunta via JS al click — vedi script più sotto) */
     .feature-card:hover .feature-card-media img,
@@ -966,7 +969,7 @@
 
     @media (max-width: 620px) {
       section.panel { padding: 80px max(6vw, 20px); }
-      .hero { padding: 120px max(6vw, 20px) 60px; }
+      .hero { padding: 90px max(6vw, 20px) 60px; }
       .footer-pill-sep { display: none; }
       .footer-pill { padding: 6px 16px; }
       .footer-bottom { flex-direction: column; align-items: center; text-align: center; gap: 10px; }
