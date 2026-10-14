@@ -234,20 +234,17 @@
        l'immagine giusta (quella vera se configurata, altrimenti la
        statica) e la rivela in dissolvenza — mai un'immagine "sbagliata"
        mostrata per un istante prima di essere sostituita */
+    /* Un unico sfondo, stessa foto su tutta la hero (anche dietro al
+       titolo, scurita dal velo di .hero::before per restare leggibile) —
+       "contain" per vederla intera (schermo e pubblico insieme, niente
+       ritagli), centrata verticalmente nel riquadro */
     .hero-bg {
       position: absolute;
-      top: 350px;
-      right: 0;
-      bottom: 0;
-      left: 0;
+      inset: 0;
       z-index: -2;
       background-image: var(--hero-bg-mobile);
-      /* "contain" invece di "cover": si vede la foto intera (schermo e
-         pubblico insieme, niente ritagli), ridotta quanto serve per
-         entrare nella larghezza — ancorata in alto così lo schermo
-         compare subito sotto "ALL'APERTO." */
       background-size: contain;
-      background-position: center -50px;
+      background-position: center calc(50% + 100px);
       background-repeat: no-repeat;
       filter: grayscale(1);
       opacity: 0;
