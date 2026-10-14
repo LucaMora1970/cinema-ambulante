@@ -242,15 +242,12 @@
       left: 0;
       z-index: -2;
       background-image: var(--hero-bg-mobile);
-      /* "cover" da solo riempiva sempre il riquadro per l'altezza (la
-         foto è più larga che alta, il riquadro il contrario): zero
-         margine verticale per spostare l'inquadratura, lo schermo del
-         cinema nella foto restava sempre proprio dove inizia il testo
-         sotto. Ingrandendola oltre il 100% si crea margine verticale
-         vero, e "100%" la ancora al fondo per tagliare via lo schermo
-         dall'alto invece di mostrarlo in mezzo al testo */
-      background-size: auto 150%;
-      background-position: center 100%;
+      /* "contain" invece di "cover": si vede la foto intera (schermo e
+         pubblico insieme, niente ritagli), ridotta quanto serve per
+         entrare nella larghezza — ancorata in alto così lo schermo
+         compare subito sotto "ALL'APERTO." */
+      background-size: contain;
+      background-position: center -50px;
       background-repeat: no-repeat;
       filter: grayscale(1);
       opacity: 0;
