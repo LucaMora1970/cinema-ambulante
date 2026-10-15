@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f7f3ec">
+  <title>Disponibilità — Cinematografo Ambulante</title>
+  <meta name="description" content="Le prossime date libere e prenotabili per una serata di cinema open air itinerante in Ticino.">
+  <meta name="robots" content="noindex">
+  <link rel="canonical" href="https://www.cinema-ambulante.ch/">
+
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="img/favicon-16x16.png">
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+
+  <!-- Stessa pagina di disponibilita.html, versione a sfondo chiaro —
+       stesso calendario e stessa logica di disponibilità già in uso in
+       index.html (sezione #disponibilita) e richiedi.html — nessuna nuova
+       regola Firestore, oaSlots/bookings sono già "allow read: if true"
+       (vedi firestore.rules in cinemanager-core). Da rimuovere quando il
+       nuovo sito sarà pubblicato -->
+  <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://firestore.googleapis.com" crossorigin>
+
+  <style>
+    :root {
+      --bg: #f7f3ec;
+      --surf: #ffffff;
+      --ink: #0b0b0b;
+      --muted: #726b60;
+      --red: #e9342f;
+      --amber: #f0801a;
+      --green: #1f9e5a;
+      --line: rgba(11,11,11,.14);
+      --ease: cubic-bezier(.16,1,.3,1);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { background: var(--bg); }
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'DM Sans', Arial, Helvetica, sans-serif;
+      line-height: 1.5;
+    }
+    a { color: inherit; text-decoration: none; }
+
+    header {
+      padding: 20px max(5vw, 20px);
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .brand { display: flex; align-items: center; gap: 12px; cursor: default; }
+    .brand img { height: 36px; width: 36px; object-fit: contain; display: block; }
+    .brand span { font-size: .95rem; font-weight: 700; text-transform: uppercase; letter-spacing: .02em; }
+    .brand .accent { color: inherit; }
+
+    main { padding: 56px max(5vw, 20px) 80px; width: min(100%, 1100px); margin-inline: auto; }
+
+    .eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--amber);
+      font-size: .74rem;
+      font-weight: 700;
+      letter-spacing: .24em;
+      text-transform: uppercase;
+      margin-bottom: 22px;
+    }
+    .eyebrow::before { content: ""; width: 40px; height: 2px; background: var(--amber); }
+
+    h1 {
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      line-height: 1;
+      letter-spacing: -.02em;
+      text-transform: uppercase;
+      max-width: 900px;
+    }
+    h1 .accent { color: var(--red); }
+
+    .section-sub {
+      margin-top: 24px;
+      max-width: 620px;
+      color: #4a453d;
+      font-size: 1.05rem;
+    }
+
+    #homeDataWrap { overflow-x: hidden; overflow-y: clip; margin-top: 40px; }
+
+    .day-tabs-scroll {
+      display: flex;
+      gap: 8px;
+      flex-wrap: nowrap;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      cursor: grab;
+      user-select: none;
+    }
+    .day-tabs-scroll::-webkit-scrollbar { display: none; }
+    .day-tabs-scroll.dragging { cursor: grabbing; }
+
+    .day-tab {
+      flex: 0 0 auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      border: 1px solid var(--line);
+      background: var(--surf);
+      color: var(--muted);
+      font: inherit;
+      font-size: .74rem;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      padding: 10px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 1px 3px rgba(11,11,11,.06);
+      transition: border-color .2s var(--ease), background .2s var(--ease);
+    }
+    .day-tab .num { font-size: 1rem; color: var(--ink); }
+    .day-tab .dots { display: flex; gap: 3px; margin-top: 3px; }
+    .day-tab .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); }
+    .day-tab .hour { display: block; margin-top: 4px; font-size: .62rem; font-weight: 600; color: var(--amber); letter-spacing: normal; }
+    .day-tab:hover { border-color: var(--red); }
+    /* Celle giorno: solo visualizzazione, non più un link verso richiedi.html */
+    .day-tab.day-static { cursor: default; }
+    .day-tab.day-static:hover { border-color: var(--line); }
+    .day-tab.active-month { border-color: var(--red); background: var(--red); color: var(--surf); }
+    .day-tab.active-month .num { color: var(--surf); }
+
+    .day-tabs-track {
+      position: relative;
+      height: 3px;
+      margin-top: 8px;
+      background: var(--line);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .day-tabs-thumb {
+      position: relative;
+      height: 100%;
+      width: 30%;
+      background: var(--red);
+      border-radius: 2px;
+    }
+
+    .avail-legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+      margin-top: 18px;
+      font-size: .78rem;
+      color: var(--muted);
+    }
+    .avail-legend span { display: inline-flex; align-items: center; gap: 7px; }
+    .avail-legend .dots { display: inline-flex; gap: 3px; }
+    .avail-legend .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); }
+
+    footer {
+      padding: 24px max(5vw, 20px) 40px;
+      text-align: center;
+      font-size: .8rem;
+      color: var(--muted);
+    }
+    footer a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <img src="img/logo.png" alt="Cinematografo Ambulante">
+      <span>Cinema<span class="accent">tografo</span> Ambulante</span>
+    </div>
+  </header>
+
+  <main>
+    <div class="eyebrow">Disponibilità</div>
+    <h1>Date libere<br><span class="accent">e prenotabili.</span></h1>
+    <p class="section-sub">Le date non disponibili non sono mostrate. L'orario indicato corrisponde all'inizio possibile della proiezione, che richiede condizioni di oscurità.</p>
+    <div id="homeDataWrap"><div id="homeDataMonths"></div></div>
+  </main>
+
+  <footer>
+    Pagina temporanea di sola consultazione.
+  </footer>
+
+<script type="module">
+import{initializeApp}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import{getFirestore,collection,onSnapshot}from"https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const FB={apiKey:"AIzaSyCYM1tZsUI-pz3D0J6EWEMqyDxrk9hep1o",authDomain:"cinemanager-4c67c.firebaseapp.com",projectId:"cinemanager-4c67c",storageBucket:"cinemanager-4c67c.firebasestorage.app",messagingSenderId:"730874662111",appId:"1:730874662111:web:8a4a501dd81644bc96ed6a"};
+const app=initializeApp(FB);
+const db=getFirestore(app);
+
+function esc(s){return(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function toLocalDate(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+
+// Orario di inizio possibile = tramonto + 10 minuti a Mendrisio, calcolato
+// con la sunrise equation (Wikipedia/NOAA) — stessa funzione di index.html
+const MENDRISIO_LAT=45.8667,MENDRISIO_LON=8.9833;
+function startTimeLabel(dateStr){
+  const rad=Math.PI/180;
+  const date=new Date(dateStr+'T12:00:00Z');
+  const JD=date.getTime()/86400000+2440587.5;
+  const n=Math.ceil(JD-2451545.0+0.0008);
+  const Jstar=n-MENDRISIO_LON/360;
+  const M=(357.5291+0.98560028*Jstar)%360;
+  const Mrad=M*rad;
+  const C=1.9148*Math.sin(Mrad)+0.0200*Math.sin(2*Mrad)+0.0003*Math.sin(3*Mrad);
+  const lambda=(M+C+180+102.9372)%360;
+  const lambdaRad=lambda*rad;
+  const Jtransit=2451545.0+Jstar+0.0053*Math.sin(Mrad)-0.0069*Math.sin(2*lambdaRad);
+  const decl=Math.asin(Math.sin(lambdaRad)*Math.sin(23.4397*rad));
+  const h0=-0.833*rad;
+  const latRad=MENDRISIO_LAT*rad;
+  const cosOmega=(Math.sin(h0)-Math.sin(latRad)*Math.sin(decl))/(Math.cos(latRad)*Math.cos(decl));
+  const omega0=Math.acos(Math.max(-1,Math.min(1,cosOmega)))/rad;
+  const Jset=Jtransit+omega0/360;
+  const sunsetUTC=new Date((Jset-2440587.5)*86400000);
+  const start=new Date(sunsetUTC.getTime()+10*60000);
+  return start.toLocaleTimeString('it-CH',{timeZone:'Europe/Zurich',hour:'2-digit',minute:'2-digit'});
+}
+const CAL_MESI=['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
+const CAL_GIORNI_SHORT=['DOM','LUN','MAR','MER','GIO','VEN','SAB'];
+
+function setupDragScroll(el){
+  let isDown=false,startX=0,startScroll=0,moved=false;
+  el.addEventListener('mousedown',e=>{
+    isDown=true;moved=false;
+    el.classList.add('dragging');
+    startX=e.pageX;
+    startScroll=el.scrollLeft;
+    e.preventDefault();
+  });
+  window.addEventListener('mouseup',()=>{isDown=false;el.classList.remove('dragging');});
+  window.addEventListener('mousemove',e=>{
+    if(!isDown)return;
+    const dx=e.pageX-startX;
+    if(Math.abs(dx)>3)moved=true;
+    el.scrollLeft=startScroll-dx;
+  });
+  el.addEventListener('click',e=>{if(moved){e.preventDefault();e.stopPropagation();moved=false;}},true);
+}
+
+function updateDateScrollThumb(scrollEl,thumbEl){
+  const sw=scrollEl.scrollWidth,cw=scrollEl.clientWidth;
+  if(sw<=cw+1){thumbEl.style.width='100%';thumbEl.style.left='0';return;}
+  const ratio=cw/sw;
+  const pos=scrollEl.scrollLeft/(sw-cw);
+  thumbEl.style.width=(ratio*100)+'%';
+  thumbEl.style.left=(pos*(100-ratio*100))+'%';
+}
+
+let _oaSlots=[],_bookings=[];
+onSnapshot(collection(db,'oaSlots'),snap=>{_oaSlots=snap.docs.map(d=>({id:d.id,...d.data()}));renderDataMonths();});
+onSnapshot(collection(db,'bookings'),snap=>{_bookings=snap.docs.map(d=>({id:d.id,...d.data()})).filter(b=>b.type==='openair');renderDataMonths();});
+
+// Le date non disponibili (passate, bloccate dallo staff o già al completo)
+// non si mostrano affatto — stesso criterio di index.html/richiedi.html
+function dateAvailability(d){
+  const today=new Date().toISOString().slice(0,10);
+  if(d<today)return{hide:true};
+  const slot=_oaSlots.find(s=>s.data===d);
+  if(slot&&slot.bloccata)return{hide:true};
+  const pren=_bookings.filter(b=>(b.dates||[]).some(bd=>bd.date===d)).length;
+  const max=(slot&&slot.maxPren)||2;
+  if(pren>=max)return{hide:true};
+  return{dots:Math.min(max-pren,2),label:'Disponibile'};
+}
+
+// Stagione Open Air: solo maggio–settembre, l'anno in corso se non è ancora
+// finita, altrimenti quello successivo
+function getSeasonWindow(){
+  const now=new Date();now.setHours(0,0,0,0);
+  let year=now.getFullYear();
+  let seasonEnd=new Date(year,8,30);
+  if(now>seasonEnd)year++;
+  return{start:new Date(year,4,1),end:new Date(year,8,30)};
+}
+
+let _activeMonthIdx=0;
+function renderDataMonths(){
+  const wrap=document.getElementById('homeDataMonths');
+  if(!wrap)return;
+  const{start,end}=getSeasonWindow();
+  const months=[];
+  let lastKey=null;
+  for(let d=new Date(start);d<=end;d.setDate(d.getDate()+1)){
+    const dateStr=toLocalDate(d);
+    const av=dateAvailability(dateStr);
+    if(av.hide)continue;
+    const key=d.getFullYear()+'-'+d.getMonth();
+    if(key!==lastKey){
+      months.push({label:CAL_MESI[d.getMonth()]+' '+d.getFullYear(),days:[]});
+      lastKey=key;
+    }
+    months[months.length-1].days.push({dateStr,dow:CAL_GIORNI_SHORT[d.getDay()],dayNum:d.getDate(),av});
+  }
+  if(!months.length){
+    wrap.innerHTML='<p style="color:var(--muted);font-size:.9rem">Nessuna data libera al momento — scrivici a info@cinema-ambulante.ch.</p>';
+    return;
+  }
+  if(_activeMonthIdx>=months.length)_activeMonthIdx=months.length-1;
+  const monthTabs=months.map((m,mi)=>`<button type="button" class="day-tab${mi===_activeMonthIdx?' active-month':''}" onclick="selectDataMonth(${mi})">${esc(m.label)}</button>`).join('');
+  const activeDays=months[_activeMonthIdx].days;
+  const dayTabs=activeDays.map(x=>{
+    const dots='<span class="dot"></span>'.repeat(x.av.dots||1);
+    return `<div class="day-tab day-static" title="${esc(x.av.label||'')} — dalle ${esc(startTimeLabel(x.dateStr))}">
+      <span>${x.dow}</span><span class="num">${x.dayNum}</span><span class="dots">${dots}</span><span class="hour">${esc(startTimeLabel(x.dateStr))}</span>
+    </div>`;
+  }).join('');
+  wrap.innerHTML=
+    `<div class="day-tabs-scroll" id="monthScroll">${monthTabs}</div>`
+    +`<div class="day-tabs-track"><div class="day-tabs-thumb" id="monthThumb"></div></div>`
+    +`<div class="day-tabs-scroll" id="dayScroll" style="margin-top:12px">${dayTabs}</div>`
+    +`<div class="day-tabs-track"><div class="day-tabs-thumb" id="dayThumb"></div></div>`
+    +`<div class="avail-legend"><span><span class="dots"><span class="dot"></span></span>Disponibile</span><span><span class="dot" style="background:var(--amber)"></span>ora del tramonto, inizio spettacolo</span></div>`;
+  [['monthScroll','monthThumb'],['dayScroll','dayThumb']].forEach(([sId,tId])=>{
+    const scrollEl=document.getElementById(sId);
+    const thumbEl=document.getElementById(tId);
+    if(!scrollEl||!thumbEl)return;
+    const update=()=>updateDateScrollThumb(scrollEl,thumbEl);
+    scrollEl.addEventListener('scroll',update,{passive:true});
+    window.addEventListener('resize',update);
+    update();
+    setupDragScroll(scrollEl);
+  });
+}
+window.selectDataMonth=function(mi){
+  _activeMonthIdx=mi;
+  renderDataMonths();
+};
+renderDataMonths();
+</script>
+</body>
+</html>
