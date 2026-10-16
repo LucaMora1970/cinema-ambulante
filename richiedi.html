@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#0b0b0b">
+  <meta name="theme-color" content="#f7f3ec">
   <title>Richiedi una serata — Cinematografo Ambulante</title>
   <meta name="description" content="Richiedi una serata di cinema open air: dicci dove, quando e che film vorresti vedere, ti rispondiamo con disponibilità e dettagli.">
   <link rel="canonical" href="https://www.cinema-ambulante.ch/richiedi.html">
@@ -21,27 +21,35 @@
   <link rel="preconnect" href="https://image.tmdb.org" crossorigin>
 
   <style>
+    /* Versione a sfondo chiaro di richiedi.html — stessa pagina, stessa
+       logica, stesso HTML/JS: cambia solo la palette. --bg è nuovo (prima
+       lo sfondo pagina usava --black, che resta invariato perché serve
+       ancora come colore testo nei campi input, da sempre chiari). --white
+       nel tema scuro era il testo principale chiaro: qui diventa il testo
+       principale scuro — il nome resta per non dover toccare uno a uno
+       tutti i riferimenti nel resto del file */
     :root {
+      --bg: #f7f3ec;
       --black: #0b0b0b;
-      --surf: #161616;
-      --surf2: #1e1e1e;
-      --white: #fffdf8;
-      --muted: #9c968e;
+      --surf: #ffffff;
+      --surf2: #efe9df;
+      --white: #0b0b0b;
+      --muted: #726b60;
       --red: #e9342f;
       --red-deep: #92211d;
       --amber: #d99a16;
-      --ivory: #f2ede4;
-      --green: #32d67a;
-      --line: rgba(255,253,248,.16);
+      --ivory: #ffffff;
+      --green: #1f9e5a;
+      --line: rgba(11,11,11,.14);
       --ease: cubic-bezier(.16,1,.3,1);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    html { background: var(--black); }
+    html { background: var(--bg); }
 
     body {
-      background: var(--black);
+      background: var(--bg);
       color: var(--white);
       font-family: 'DM Sans', Arial, Helvetica, sans-serif;
       line-height: 1.5;
@@ -56,7 +64,7 @@
       z-index: 40;
       height: 76px;
       padding: 0 max(5vw, 20px);
-      background: rgba(11,11,11,.92);
+      background: rgba(247,243,236,.92);
       backdrop-filter: blur(8px);
       border-bottom: 1px solid var(--line);
     }
@@ -104,13 +112,13 @@
       width: 42px;
       height: 42px;
       border-radius: 50%;
-      background: rgba(255,253,248,.06);
+      background: rgba(11,11,11,.05);
       border: 1px solid var(--line);
       color: var(--white);
       text-decoration: none;
       transition: background-color .2s var(--ease), border-color .2s var(--ease), color .2s var(--ease);
     }
-    .back-link:hover { background: rgba(255,253,248,.12); border-color: var(--red); color: var(--red); }
+    .back-link:hover { background: rgba(11,11,11,.1); border-color: var(--red); color: var(--red); }
 
     main {
       width: min(100%, 720px);
@@ -146,7 +154,7 @@
 
     .page-sub {
       margin-top: 18px;
-      color: #c8c6c0;
+      color: #4a453d;
       font-size: 1.02rem;
       max-width: 560px;
     }
@@ -356,7 +364,7 @@
     /* ── Servizi extra ────────────────────────────────────────── */
     .condizioni-text {
       font-size: .86rem;
-      color: #c8c6c0;
+      color: #4a453d;
       line-height: 1.65;
       background: var(--surf);
       border: 1px solid var(--line);
@@ -487,7 +495,7 @@
       width: 34px;
       height: 34px;
       border-radius: 50%;
-      background: rgba(255,253,248,.08);
+      background: rgba(11,11,11,.06);
       border: none;
       color: var(--white);
       font-size: 1.1rem;
@@ -599,7 +607,7 @@
       overflow: hidden;
     }
 
-    /* ── Battery pack + privacy ───────────────────────────────── */
+    /* ── Check-row (accesso carrabile, privacy) ──────────────────── */
     .check-row {
       display: flex;
       align-items: flex-start;
@@ -616,7 +624,7 @@
     }
     .check-row span {
       font-size: .84rem;
-      color: #d8d6d0;
+      color: #4a453d;
       text-transform: none;
       letter-spacing: normal;
       line-height: 1.55;
@@ -652,7 +660,7 @@
       font-size: .84rem;
       font-weight: 600;
     }
-    .form-msg.err { color: #ff6b61; }
+    .form-msg.err { color: #c6322b; }
     .form-msg.ok { color: var(--green); }
 
     .sent-state {
@@ -666,7 +674,7 @@
     }
     .sent-state p {
       margin-top: 18px;
-      color: #c8c6c0;
+      color: #4a453d;
       max-width: 480px;
       margin-inline: auto;
     }
@@ -747,8 +755,8 @@
             <span>Confermo che il luogo è carrabile su tutto il sedime e libero da ostacoli, per permettere l'accesso di furgone e rimorchio.</span>
           </div>
           <div class="check-row" style="margin-top:12px">
-            <input type="checkbox" id="batteryPack">
-            <span>Sul posto non c'è una presa elettrica CEE 16A 5 poli disponibile (serviranno batterie/gruppo elettrogeno)</span>
+            <input type="checkbox" id="presaElettrica">
+            <span>Sul posto c'è una presa elettrica CEE 16A 5 poli disponibile.<br><em style="font-style:italic;color:var(--muted);font-size:.9em">(Se non c'è puoi richiedere a noi il generatore a batterie nelle richieste opzionali che troverai sotto)</em></span>
           </div>
         </fieldset>
 
@@ -1364,8 +1372,8 @@ window.submitRequest=async function(ev){
     filmAltro:filmAltro||null,
     filmSelezionato:null,
     requisitiConfermati:{
-      batteryPackRichiesto:document.getElementById('batteryPack').checked,
-      accessoCarrabileConfermato:document.getElementById('accessoCarrabile').checked
+      accessoCarrabileConfermato:document.getElementById('accessoCarrabile').checked,
+      presaElettricaDisponibile:document.getElementById('presaElettrica').checked
     },
     note:(form.note.value||'').trim(),
     consensoPrivacy:true,

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <meta name="theme-color" content="#0b0b0b">
+  <meta name="theme-color" content="#f7f3ec">
   <title>Scheda film — Cinematografo Ambulante</title>
   <meta name="description" content="Scheda del film: trama, cast e disponibilità per una proiezione open air.">
   <link rel="canonical" href="https://www.cinema-ambulante.ch/film.html">
@@ -21,28 +21,34 @@
   <link rel="preconnect" href="https://image.tmdb.org" crossorigin>
 
   <style>
+    /* Versione a sfondo chiaro — stesso schema delle altre pagine: --bg/--ink
+       nuovi per pagina/testo chiari, --white resta il bianco letterale
+       invariato perché serve ancora sopra la foto backdrop (resta scura,
+       non dipende dallo sfondo pagina) */
     :root {
+      --bg: #f7f3ec;
+      --ink: #0b0b0b;
       --black: #0b0b0b;
-      --surf: #161616;
-      --surf2: #1e1e1e;
+      --surf: #ffffff;
+      --surf2: #efe9df;
       --white: #fffdf8;
-      --muted: #9c968e;
+      --muted: #726b60;
       --red: #e9342f;
       --red-deep: #92211d;
       --amber: #d99a16;
-      --ivory: #f2ede4;
-      --green: #32d67a;
-      --line: rgba(255,253,248,.16);
+      --ivory: #ffffff;
+      --green: #1f9e5a;
+      --line: rgba(11,11,11,.14);
       --ease: cubic-bezier(.16,1,.3,1);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    html { background: var(--black); }
+    html { background: var(--bg); }
 
     body {
-      background: var(--black);
-      color: var(--white);
+      background: var(--bg);
+      color: var(--ink);
       font-family: 'DM Sans', Arial, Helvetica, sans-serif;
       line-height: 1.5;
       overflow-x: clip;
@@ -56,7 +62,7 @@
       z-index: 40;
       height: 76px;
       padding: 0 max(5vw, 20px);
-      background: rgba(11,11,11,.92);
+      background: rgba(247,243,236,.92);
       backdrop-filter: blur(8px);
       border-bottom: 1px solid var(--line);
     }
@@ -98,22 +104,26 @@
       width: 42px;
       height: 42px;
       border-radius: 50%;
-      background: rgba(255,253,248,.06);
+      background: rgba(11,11,11,.05);
       border: 1px solid var(--line);
-      color: var(--white);
+      color: var(--ink);
       text-decoration: none;
       transition: background-color .2s var(--ease), border-color .2s var(--ease), color .2s var(--ease);
     }
-    .back-link:hover { background: rgba(255,253,248,.12); border-color: var(--red); color: var(--red); }
+    .back-link:hover { background: rgba(11,11,11,.1); border-color: var(--red); color: var(--red); }
 
     /* object-fit:contain, non cover: l'immagine non viene mai ritagliata —
        stessa scelta fatta per la foto dell'hero in home */
+    /* La foto backdrop e il suo velo restano scuri (non dipendono dallo
+       sfondo pagina): placeholder/velo con colori fissi invece dei token
+       --surf/--muted ora chiari, titolo/meta bianchi espliciti perché
+       altrimenti erediterebbero il testo scuro di --ink */
     .hero {
       position: relative;
       width: 100%;
       aspect-ratio: 16/9;
       max-height: 58vh;
-      background: linear-gradient(135deg, var(--surf), var(--surf2));
+      background: linear-gradient(135deg, #161616, #1e1e1e);
       overflow: hidden;
     }
     .hero img { width: 100%; height: 100%; object-fit: contain; object-position: center bottom; display: block; }
@@ -126,6 +136,7 @@
       width: min(100%, 1000px);
       margin: 0 auto;
       padding: 0 max(5vw, 20px) 26px;
+      color: var(--white);
     }
     .hero-content .title {
       font-size: clamp(1.5rem, 4vw, 2.4rem);
@@ -135,7 +146,7 @@
     }
     .hero-content .meta {
       display: flex; gap: 8px; flex-wrap: wrap;
-      margin-top: 10px; font-size: .72rem; color: var(--muted);
+      margin-top: 10px; font-size: .72rem; color: #9c968e;
     }
     .hero-content .meta span {
       background: rgba(255,253,248,.1);
@@ -192,9 +203,9 @@
       color: var(--red); margin: 26px 0 12px;
     }
     .layout h2:first-child { margin-top: 0; }
-    .plot { font-size: .9rem; color: var(--white); opacity: .9; line-height: 1.65; }
+    .plot { font-size: .9rem; color: var(--ink); opacity: .9; line-height: 1.65; }
     .credits { font-size: .82rem; color: var(--muted); }
-    .credits b { color: var(--white); font-weight: 700; }
+    .credits b { color: var(--ink); font-weight: 700; }
 
     .trailer-wrap {
       position: relative; width: 100%; aspect-ratio: 16/9;
