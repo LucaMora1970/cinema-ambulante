@@ -160,9 +160,16 @@
     }
     .rights-notice p + p { margin-top: 8px; }
 
-    /* ── Ricerca per titolo ──────────────────────────────────────────── */
-    .film-search {
+    /* ── Ricerca per titolo + filtri ─────────────────────────────────── */
+    .film-filters {
       margin-top: 32px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+    }
+    .film-search {
+      width: 100%;
       max-width: 360px;
       position: relative;
     }
@@ -189,7 +196,31 @@
       color: var(--muted);
       pointer-events: none;
     }
+    .filter-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      height: 46px;
+      padding: 0 18px;
+      border-radius: 23px;
+      border: 1px solid var(--line);
+      background: var(--surf);
+      color: var(--ink);
+      font-family: inherit;
+      font-size: .86rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background-color .2s var(--ease), border-color .2s var(--ease), color .2s var(--ease);
+      white-space: nowrap;
+    }
+    .filter-chip:hover { border-color: var(--red); }
+    .filter-chip.active {
+      background: var(--red);
+      border-color: var(--red);
+      color: var(--white);
+    }
     .film-count {
+      width: 100%;
       margin-top: 10px;
       font-size: .78rem;
       color: var(--muted);
@@ -284,11 +315,15 @@
       <p>Vi daremo conferma o meno della loro disponibilità solo dopo averci comunicato la vostra richiesta.</p>
     </div>
 
-    <div class="film-search">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
-      <input type="text" id="filmSearch" placeholder="Cerca per titolo…" autocomplete="off">
+    <div class="film-filters">
+      <div class="film-search">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input type="text" id="filmSearch" placeholder="Cerca per titolo…" autocomplete="off">
+      </div>
+      <button type="button" class="filter-chip" id="filterCinewow">🎭 Cinewow Arthouse</button>
+      <button type="button" class="filter-chip" id="filterSeason">📅 Stagione più recente</button>
+      <div id="filmCount" class="film-count"></div>
     </div>
-    <div id="filmCount" class="film-count"></div>
 
     <div id="filmGrid" class="cinewow-titles"><p style="color:var(--muted);font-size:.9rem">Caricamento…</p></div>
   </main>
@@ -350,6 +385,17 @@ function renderFilmCards(films){
   }).join('');
 }
 
+// Stagione cinematografica: da settembre a luglio. Restituisce l'intervallo
+// [inizio,fine] della stagione in corso rispetto alla data odierna (se siamo
+// da settembre in poi la stagione è iniziata quest'anno, altrimenti l'anno
+// scorso)
+function currentSeasonRange(){
+  const now=new Date();
+  const y=now.getFullYear(), m=now.getMonth()+1;
+  const startYear=m>=9?y:y-1;
+  return{start:`${startYear}-09-01`,end:`${startYear+1}-07-31`};
+}
+
 // A differenza della home (che mostra solo i 20 più recenti come
 // consigliati), qui va l'intero catalogo Open Air, senza limite
 (async function loadFilmGrid(){
@@ -363,13 +409,31 @@ function renderFilmCards(films){
     renderFilmCards(allFilms);
 
     const searchInput=document.getElementById('filmSearch');
-    if(searchInput){
-      searchInput.addEventListener('input',()=>{
-        const q=searchInput.value.trim().toLowerCase();
-        const filtered=q?allFilms.filter(f=>(f.title||'').toLowerCase().includes(q)):allFilms;
-        renderFilmCards(filtered);
-      });
+    const cinewowChip=document.getElementById('filterCinewow');
+    const seasonChip=document.getElementById('filterSeason');
+    const season=currentSeasonRange();
+    const state={cinewow:false,season:false};
+
+    function applyFilters(){
+      const q=searchInput?searchInput.value.trim().toLowerCase():'';
+      let films=allFilms;
+      if(q)films=films.filter(f=>(f.title||'').toLowerCase().includes(q));
+      if(state.cinewow)films=films.filter(f=>f.cinewow===true);
+      if(state.season)films=films.filter(f=>f.release&&f.release>=season.start&&f.release<=season.end);
+      renderFilmCards(films);
     }
+
+    if(searchInput)searchInput.addEventListener('input',applyFilters);
+    if(cinewowChip)cinewowChip.addEventListener('click',()=>{
+      state.cinewow=!state.cinewow;
+      cinewowChip.classList.toggle('active',state.cinewow);
+      applyFilters();
+    });
+    if(seasonChip)seasonChip.addEventListener('click',()=>{
+      state.season=!state.season;
+      seasonChip.classList.toggle('active',state.season);
+      applyFilters();
+    });
   }catch(e){
     console.error(e);
     el.innerHTML='<p style="color:var(--muted);font-size:.9rem">Impossibile caricare i film al momento.</p>';
