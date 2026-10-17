@@ -143,6 +143,23 @@
       font-size: 1.02rem;
     }
 
+    /* ── Avviso disponibilità diritti ────────────────────────────────── */
+    .rights-notice {
+      margin-top: 28px;
+      max-width: 620px;
+      padding: 16px 20px;
+      border-radius: 10px;
+      background: rgba(217,154,22,.08);
+      border: 1px solid rgba(217,154,22,.3);
+      border-left: 3px solid var(--amber);
+    }
+    .rights-notice p {
+      font-size: .86rem;
+      color: #4a453d;
+      line-height: 1.55;
+    }
+    .rights-notice p + p { margin-top: 8px; }
+
     /* ── Ricerca per titolo ──────────────────────────────────────────── */
     .film-search {
       margin-top: 32px;
@@ -260,6 +277,12 @@
     <div class="page-eyebrow">Film consigliati</div>
     <h1>Tutti i film <span class="accent">disponibili Open Air.</span></h1>
     <p class="page-sub">L'intero catalogo dei titoli che possiamo proiettare all'aperto, con la data da cui ciascuno è disponibile.</p>
+
+    <div class="rights-notice">
+      <p>La disponibilità dei diritti film è vincolata all'accettazione da parte del distributore del film, e pertanto dovrà essere da noi verificata per ogni titolo, data e luogo proposto.</p>
+      <p>I film elencati doppiati sono disponibili anche nella versione linguistica originale, spesso con sottotitoli.</p>
+      <p>Vi daremo conferma o meno della loro disponibilità solo dopo averci comunicato la vostra richiesta.</p>
+    </div>
 
     <div class="film-search">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
