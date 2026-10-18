@@ -193,10 +193,35 @@
       cursor: pointer;
     }
     .measure-field .unit {
-      padding-right: 18px;
+      padding-right: 12px;
       color: var(--muted);
       font-size: .82rem;
     }
+    .measure-field input::-webkit-outer-spin-button,
+    .measure-field input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .measure-field input[type="number"] { -moz-appearance: textfield; appearance: textfield; }
+    .spin-buttons {
+      display: flex;
+      flex-direction: column;
+      align-self: stretch;
+      border-left: 1px solid var(--line);
+    }
+    .spin-btn {
+      flex: 1;
+      width: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 0;
+      line-height: 1;
+    }
+    .spin-btn:first-child { border-bottom: 1px solid var(--line); }
+    .spin-btn:hover { background: rgba(233,52,47,.08); color: var(--red); }
+    .spin-btn svg { display: block; width: 9px; height: 9px; }
 
     /* ── Riepilogo ────────────────────────────────────────────────────── */
     .summary {
@@ -288,6 +313,7 @@
     .toolbar button:hover { border-color: var(--red); background: rgba(233,52,47,.05); }
 
     .print-measures { display: none; }
+    .print-description { display: none; }
     .print-brand { display: none; }
     .print-footer { display: none; }
 
@@ -317,9 +343,15 @@
         color: #4a453d;
       }
       .print-footer img { width: 22px; height: 22px; border-radius: 50%; object-fit: cover; }
-      .print-measures {
+      .print-description {
         display: block;
         margin-top: 10px;
+        font-size: .85rem;
+        color: #4a453d;
+      }
+      .print-measures {
+        display: block;
+        margin-top: 6px;
         font-size: .95rem;
         font-weight: 700;
       }
@@ -355,6 +387,7 @@
     <div class="page-eyebrow">Allestimento</div>
     <h1>Piantina <span class="accent">della proiezione.</span></h1>
     <p class="page-sub">Inserisci lunghezza e larghezza del luogo: ti mostriamo come si allestisce la serata — furgone schermo, zona libera, file e cabina di proiezione — con le misure reali del nostro equipaggiamento.</p>
+    <p class="print-description">Area della proiezione proposta — furgone schermo, zona libera, file e cabina di proiezione — con le misure reali del nostro equipaggiamento.</p>
     <div id="printMeasures" class="print-measures"></div>
 
     <div class="plan-notice">Durante la proiezione nessuna luce deve restare accesa su tutta l'area dell'allestimento — schermo, file e cabina di proiezione comprese.</div>
@@ -365,6 +398,10 @@
         <div class="field-row">
           <input type="number" id="inpLength" min="17.5" step="0.5" value="25">
           <span class="unit">metri</span>
+          <div class="spin-buttons">
+            <button type="button" class="spin-btn" data-target="inpLength" data-dir="1" aria-label="Aumenta" tabindex="-1"><svg viewBox="0 0 10 10"><path d="M1 7l4-4 4 4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            <button type="button" class="spin-btn" data-target="inpLength" data-dir="-1" aria-label="Diminuisci" tabindex="-1"><svg viewBox="0 0 10 10"><path d="M1 3l4 4 4-4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          </div>
         </div>
       </div>
       <div class="measure-field">
@@ -372,6 +409,10 @@
         <div class="field-row">
           <input type="number" id="inpWidth" min="11" step="0.5" value="14">
           <span class="unit">metri</span>
+          <div class="spin-buttons">
+            <button type="button" class="spin-btn" data-target="inpWidth" data-dir="1" aria-label="Aumenta" tabindex="-1"><svg viewBox="0 0 10 10"><path d="M1 7l4-4 4 4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            <button type="button" class="spin-btn" data-target="inpWidth" data-dir="-1" aria-label="Diminuisci" tabindex="-1"><svg viewBox="0 0 10 10"><path d="M1 3l4 4 4-4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          </div>
         </div>
       </div>
       <div class="measure-field">
@@ -395,6 +436,10 @@
         <div class="field-row">
           <input type="number" id="inpRowPitch" min="1" step="0.05" value="1">
           <span class="unit">metri</span>
+          <div class="spin-buttons">
+            <button type="button" class="spin-btn" data-target="inpRowPitch" data-dir="1" aria-label="Aumenta" tabindex="-1"><svg viewBox="0 0 10 10"><path d="M1 7l4-4 4 4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            <button type="button" class="spin-btn" data-target="inpRowPitch" data-dir="-1" aria-label="Diminuisci" tabindex="-1"><svg viewBox="0 0 10 10"><path d="M1 3l4 4 4-4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          </div>
         </div>
       </div>
     </div>
@@ -649,6 +694,21 @@ function renderPlan(length,width,L){
 
   let parts=[];
 
+  // etichetta di fila, uguale per tutte le file (davanti, cabina, ai
+  // lati della cabina, dietro): due righe se c'è spazio, una se stretto
+  function rowLabel(pos,count,color,opts){
+    opts=opts||{};
+    const bold=opts.bold?' font-weight="700"':'';
+    const warn=opts.warn?' ⚠':'';
+    const y=Y(pos);
+    if(scale*L.rowPitch>=24){
+      parts.push(`<text x="${marginLeft-8}" y="${y+8}" text-anchor="end" font-size="9" fill="${color}"${bold}>${fmt(pos)} m</text>`);
+      parts.push(`<text x="${marginLeft-8}" y="${y+19}" text-anchor="end" font-size="8" fill="${color}">${count} posti${warn}</text>`);
+    }else{
+      parts.push(`<text x="${marginLeft-8}" y="${y+4}" text-anchor="end" font-size="8" fill="${color}"${bold}>${fmt(pos)} m · ${count}p${warn}</text>`);
+    }
+  }
+
   // quota larghezza, sopra il disegno
   const dimY=marginTop-30;
   parts.push(`<line x1="${X(-width/2)}" y1="${dimY}" x2="${X(width/2)}" y2="${dimY}" stroke="var(--ink)" stroke-width="1"/>`);
@@ -685,8 +745,8 @@ function renderPlan(length,width,L){
   // zone di manovra ai lati del furgone/schermo
   const sideClear=(width-SCREEN_WIDTH)/2;
   if(sideClear>0){
-    const okColor=sideClear>=SIDE_CLEARANCE?'rgba(31,158,90,.12)':'rgba(233,52,47,.12)';
-    const okStroke=sideClear>=SIDE_CLEARANCE?'var(--green)':'var(--red)';
+    const okColor='rgba(11,11,11,.06)';
+    const okStroke=sideClear>=SIDE_CLEARANCE?'rgba(11,11,11,.3)':'var(--red)';
     [[-width/2,-screenHalf],[screenHalf,width/2]].forEach(([x0,x1])=>{
       parts.push(`<rect x="${X(x0)}" y="${Y(0)}" width="${(x1-x0)*scale}" height="${TRUCK_DEPTH*scale}" fill="${okColor}" stroke="${okStroke}" stroke-width="1" stroke-dasharray="3,3"/>`);
     });
@@ -735,6 +795,11 @@ function renderPlan(length,width,L){
     }
     // passaggio cavi centrale (30 cm), dal furgone fino alla cabina
     parts.push(`<rect x="${X(-CABLE_PATH/2)}" y="${Y(TRUCK_DEPTH)}" width="${CABLE_PATH*scale}" height="${(cableBottom-TRUCK_DEPTH)*scale}" fill="none" stroke="var(--amber)" stroke-width="1" stroke-dasharray="2,3"/>`);
+    if(cableBottom-TRUCK_DEPTH>1){
+      const cableLabelX=X(CABLE_PATH/2)+10;
+      const cableLabelY=Y(TRUCK_DEPTH)+26;
+      parts.push(`<text x="${cableLabelX}" y="${cableLabelY}" text-anchor="middle" font-size="8" fill="var(--amber)" transform="rotate(-45 ${cableLabelX} ${cableLabelY})">30 cm</text>`);
+    }
   }
 
   // file (le prime 2, troppo vicine allo schermo, evidenziate come meno
@@ -742,16 +807,10 @@ function renderPlan(length,width,L){
   // laterali fuori dal cono ottimale di visione (si allarga allontanandosi
   // dallo schermo, dai due angoli dello schermo) restano poco indicati
   L.normalRows.forEach((r,i)=>{
-    const y=Y(r.pos);
     const rowLessGood=i<2;
     const chairLessGood=i<2?true:(cx=>Math.abs(cx)>coneHalfWidth(r.pos,L.boothDist));
     const labelColor=rowLessGood?'var(--amber)':'var(--muted)';
-    if(scale*L.rowPitch>=24){
-      parts.push(`<text x="${marginLeft-8}" y="${y+8}" text-anchor="end" font-size="9" fill="${labelColor}">${fmt(r.pos)} m</text>`);
-      parts.push(`<text x="${marginLeft-8}" y="${y+19}" text-anchor="end" font-size="8" fill="${labelColor}">${L.seatsPerRowNormal} posti${rowLessGood?' ⚠':''}</text>`);
-    }else{
-      parts.push(`<text x="${marginLeft-8}" y="${y+4}" text-anchor="end" font-size="8" fill="${labelColor}">${fmt(r.pos)} m · ${L.seatsPerRowNormal}p</text>`);
-    }
+    rowLabel(r.pos,L.seatsPerRowNormal,labelColor,{warn:rowLessGood});
     parts.push(chairRects(-width/2+AISLE_SIDE,-CABLE_PATH/2,r.pos,L.seatsPerBlockNormal,chairLessGood));
     parts.push(chairRects(CABLE_PATH/2,width/2-AISLE_SIDE,r.pos,L.seatsPerBlockNormal,chairLessGood));
   });
@@ -766,7 +825,7 @@ function renderPlan(length,width,L){
     const boltSize=Math.min(BOOTH_WIDTH*scale*0.55,28);
     const boltCx=X(0), boltCy=y+BOOTH_DEPTH*scale/2;
     parts.push(`<g transform="translate(${boltCx},${boltCy}) scale(${boltSize/24})"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" transform="translate(-12,-12)" fill="#fff" stroke="var(--red-deep)" stroke-width="0.6"/></g>`);
-    parts.push(`<text x="${marginLeft-8}" y="${y+12}" text-anchor="end" font-size="9" fill="var(--red-deep)" font-weight="700">${fmt(L.boothRow.pos)} m · ${L.seatsBoothRow}p</text>`);
+    rowLabel(L.boothRow.pos,L.seatsBoothRow,'var(--red-deep)',{bold:true});
     if(width*scale>160){
       parts.push(`<text x="${X(-width/4)}" y="${y-6}" text-anchor="middle" font-size="9" fill="var(--muted)">posti laterali</text>`);
       parts.push(`<text x="${X(width/4)}" y="${y-6}" text-anchor="middle" font-size="9" fill="var(--muted)">posti laterali</text>`);
@@ -786,8 +845,7 @@ function renderPlan(length,width,L){
   // file dietro ai lati della cabina (stesso ingombro laterale: chi è
   // seduto vede comunque l'angolo dello schermo verso la cabina)
   L.wingRows.forEach(r=>{
-    const y=Y(r.pos);
-    parts.push(`<text x="${marginLeft-8}" y="${y+8}" text-anchor="end" font-size="9" fill="var(--muted)">${fmt(r.pos)} m · ${L.seatsBoothRow}p</text>`);
+    rowLabel(r.pos,L.seatsBoothRow,'var(--muted)');
     parts.push(chairRects(-width/2+AISLE_SIDE,-lateralInner,r.pos,L.seatsPerBlockBooth));
     parts.push(chairRects(lateralInner,width/2-AISLE_SIDE,r.pos,L.seatsPerBlockBooth));
   });
@@ -796,8 +854,7 @@ function renderPlan(length,width,L){
   // dalla cabina (si allarga andando indietro) — niente sedie lì
   if(L.rearRows.length){
     L.rearRows.forEach(r=>{
-      const y=Y(r.pos);
-      parts.push(`<text x="${marginLeft-8}" y="${y+8}" text-anchor="end" font-size="9" fill="var(--muted)">${fmt(r.pos)} m · ${r.seats}p</text>`);
+      rowLabel(r.pos,r.seats,'var(--muted)');
       parts.push(chairRects(-width/2+AISLE_SIDE,-r.excludeHalf,r.pos,r.seatsPerBlock));
       parts.push(chairRects(r.excludeHalf,width/2-AISLE_SIDE,r.pos,r.seatsPerBlock));
     });
@@ -861,24 +918,56 @@ async function downloadPlanAsPng(){
   const h=svgEl.viewBox.baseVal.height||svgEl.height.baseVal.value;
   const footerH=56;
 
+  function wrapText(ctx2,text,maxWidth){
+    const words=text.split(' ');
+    const lines=[];
+    let line='';
+    words.forEach(word=>{
+      const test=line?line+' '+word:word;
+      if(line&&ctx2.measureText(test).width>maxWidth){
+        lines.push(line);
+        line=word;
+      }else{
+        line=test;
+      }
+    });
+    if(line)lines.push(line);
+    return lines;
+  }
+
+  const captionText='Area della proiezione proposta — furgone schermo, zona libera, file e cabina di proiezione — con le misure reali del nostro equipaggiamento.';
+  const measureCtx=document.createElement('canvas').getContext('2d');
+  measureCtx.font='11px Arial, sans-serif';
+  const captionLines=wrapText(measureCtx,captionText,w-20);
+  const headerH=14+captionLines.length*15;
+
   const canvas=document.createElement('canvas');
   canvas.width=w*scaleFactor;
-  canvas.height=(h+footerH)*scaleFactor;
+  canvas.height=(headerH+h+footerH)*scaleFactor;
   const ctx=canvas.getContext('2d');
   ctx.fillStyle='#ffffff';
   ctx.fillRect(0,0,canvas.width,canvas.height);
   ctx.scale(scaleFactor,scaleFactor);
-  ctx.drawImage(planImg,0,0,w,h);
+
+  // didascalia dell'esportazione, al posto del testo istruzioni della pagina
+  ctx.textBaseline='alphabetic';
+  ctx.fillStyle='#4a453d';
+  ctx.font='11px Arial, sans-serif';
+  captionLines.forEach((line,i)=>{
+    ctx.fillText(line,10,16+i*15);
+  });
+
+  ctx.drawImage(planImg,0,headerH,w,h);
 
   // marchio e dati di contatto, sempre presenti sull'immagine esportata
   ctx.strokeStyle='rgba(11,11,11,.14)';
   ctx.lineWidth=1;
   ctx.beginPath();
-  ctx.moveTo(0,h+0.5);
-  ctx.lineTo(w,h+0.5);
+  ctx.moveTo(0,headerH+h+0.5);
+  ctx.lineTo(w,headerH+h+0.5);
   ctx.stroke();
 
-  const logoSize=32, logoX=0, logoY=h+(footerH-logoSize)/2;
+  const logoSize=32, logoX=0, logoY=headerH+h+(footerH-logoSize)/2;
   ctx.save();
   ctx.beginPath();
   ctx.arc(logoX+logoSize/2,logoY+logoSize/2,logoSize/2,0,Math.PI*2);
@@ -886,13 +975,12 @@ async function downloadPlanAsPng(){
   ctx.drawImage(logoImg,logoX,logoY,logoSize,logoSize);
   ctx.restore();
 
-  ctx.textBaseline='alphabetic';
   ctx.fillStyle='#0b0b0b';
   ctx.font='bold 11px Arial, sans-serif';
-  ctx.fillText('CINEMATOGRAFO AMBULANTE',logoX+logoSize+10,h+footerH/2-3);
+  ctx.fillText('CINEMATOGRAFO AMBULANTE',logoX+logoSize+10,headerH+h+footerH/2-3);
   ctx.fillStyle='#4a453d';
   ctx.font='10px Arial, sans-serif';
-  ctx.fillText('+41 091 646 16 54 · info@cinema-ambulante.ch · Mendrisio · Ticino · Svizzera',logoX+logoSize+10,h+footerH/2+12);
+  ctx.fillText('+41 091 646 16 54 · info@cinema-ambulante.ch · Mendrisio · Ticino · Svizzera',logoX+logoSize+10,headerH+h+footerH/2+12);
 
   canvas.toBlob(function(blob){
     const a=document.createElement('a');
@@ -913,6 +1001,20 @@ function clampOnChange(inp){
     }
   });
 }
+
+document.querySelectorAll('.spin-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const inp=document.getElementById(btn.dataset.target);
+    if(!inp)return;
+    const step=parseFloat(inp.step)||1;
+    const min=parseFloat(inp.min);
+    const dir=parseFloat(btn.dataset.dir);
+    let val=(parseFloat(inp.value)||min||0)+dir*step;
+    if(!isNaN(min))val=Math.max(min,val);
+    inp.value=Math.round(val*100)/100;
+    update();
+  });
+});
 
 const inpLength=document.getElementById('inpLength');
 const inpWidth=document.getElementById('inpWidth');
