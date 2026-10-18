@@ -745,13 +745,13 @@ function renderPlan(length,width,L){
   // zone di manovra ai lati del furgone/schermo
   const sideClear=(width-SCREEN_WIDTH)/2;
   if(sideClear>0){
-    const okColor='rgba(11,11,11,.06)';
-    const okStroke=sideClear>=SIDE_CLEARANCE?'rgba(11,11,11,.3)':'var(--red)';
+    const okColor='#726b60';
+    const okStroke=sideClear>=SIDE_CLEARANCE?'rgba(255,255,255,.3)':'var(--red)';
     [[-width/2,-screenHalf],[screenHalf,width/2]].forEach(([x0,x1])=>{
       parts.push(`<rect x="${X(x0)}" y="${Y(0)}" width="${(x1-x0)*scale}" height="${TRUCK_DEPTH*scale}" fill="${okColor}" stroke="${okStroke}" stroke-width="1" stroke-dasharray="3,3"/>`);
     });
     if(sideClear*scale>26){
-      parts.push(`<text x="${X(-width/2)+((-screenHalf)-(-width/2))*scale/2}" y="${Y(TRUCK_DEPTH/2)}" text-anchor="middle" font-size="9" fill="var(--ink)">${fmt(sideClear)} m</text>`);
+      parts.push(`<text x="${X(-width/2)+((-screenHalf)-(-width/2))*scale/2}" y="${Y(TRUCK_DEPTH/2)}" text-anchor="middle" font-size="9" fill="#fff">${fmt(sideClear)} m</text>`);
     }
   }
 
