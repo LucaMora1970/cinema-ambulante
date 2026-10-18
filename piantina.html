@@ -321,7 +321,7 @@
       @page { size: A4; margin: 12mm; }
       body { background: #fff; }
       header, .toolbar, .measure-form, .plan-notice { display: none !important; }
-      main { padding: 0; width: 100%; }
+      main { padding: 0; width: 100%; display: flex; flex-direction: column; }
       h1 { font-size: 1.6rem; }
       .page-sub { display: none; }
       .print-brand {
@@ -356,13 +356,26 @@
         font-weight: 700;
       }
       .summary { page-break-inside: avoid; }
+      /* la piantina va da sola sulla prima pagina, senza intestazione né
+         testi, occupando tutto lo spazio disponibile; il resto (titolo,
+         descrizione, misure, riepilogo, legenda) segue su una seconda
+         pagina — l'order negativo la porta in cima nonostante sia dopo
+         nel markup, page-break-after la separa dal resto */
       .plan-wrap {
-        margin-top: 16px;
+        order: -1;
+        margin: 0;
         padding: 0;
         border: none;
         overflow: visible;
+        page-break-inside: avoid;
+        page-break-after: always;
+        break-after: page;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 265mm;
       }
-      .plan-wrap svg { width: 100%; height: auto; }
+      .plan-wrap svg { width: auto; height: auto; max-width: 100%; max-height: 265mm; }
       .legend { page-break-inside: avoid; }
     }
   </style>
@@ -473,6 +486,9 @@ const TRUCK_DEPTH = 2.70;   // ingombro furgone schermo
 const CLEAR_ZONE  = 4.00;   // zona libera furgone → prima fila
 const ROW_PITCH_DEFAULT = 1.00; // passo di default tra una fila e l'altra (min. 1 m)
 const BOOTH_DIST_DEFAULT = 19; // distanza cabina-schermo di default (m)
+// URL assoluto: un riferimento relativo dentro l'SVG non si risolve quando
+// l'SVG viene caricato da un blob: (esportazione PNG)
+const LOGO_URL = new URL('img/logo.png',document.baseURI).href;
 const BOOTH_WIDTH = 1.50;   // larghezza cabina
 const BOOTH_DEPTH = 2.42;   // profondità cabina
 const SCREEN_WIDTH = 7.00;  // larghezza schermo
@@ -746,7 +762,15 @@ function renderPlan(length,width,L){
       parts.push(`<rect x="${X(x0)}" y="${Y(0)}" width="${(x1-x0)*scale}" height="${TRUCK_DEPTH*scale}" fill="${okColor}" stroke="${okStroke}" stroke-width="1" stroke-dasharray="3,3"/>`);
     });
     if(sideClear*scale>26){
+      // misura a sinistra, logo nel riquadro grigio a destra
       parts.push(`<text x="${X(-width/2)+((-screenHalf)-(-width/2))*scale/2}" y="${Y(TRUCK_DEPTH/2)}" text-anchor="middle" font-size="9" fill="#fff">${fmt(sideClear)} m</text>`);
+      const logoSize=Math.min(sideClear*scale*0.6,TRUCK_DEPTH*scale*0.6,36);
+      if(logoSize>14){
+        const logoCx=X(screenHalf)+(sideClear*scale)/2;
+        const logoCy=Y(TRUCK_DEPTH/2);
+        parts.push(`<defs><clipPath id="planLogoClip"><circle cx="${logoCx}" cy="${logoCy}" r="${logoSize/2}"/></clipPath></defs>`);
+        parts.push(`<image href="${LOGO_URL}" x="${logoCx-logoSize/2}" y="${logoCy-logoSize/2}" width="${logoSize}" height="${logoSize}" preserveAspectRatio="xMidYMid slice" clip-path="url(#planLogoClip)"/>`);
+      }
     }
   }
 
@@ -789,7 +813,7 @@ function renderPlan(length,width,L){
     parts.push(`<rect x="${X(-CABLE_PATH/2)}" y="${Y(TRUCK_DEPTH)}" width="${CABLE_PATH*scale}" height="${(cableBottom-TRUCK_DEPTH)*scale}" fill="none" stroke="var(--amber)" stroke-width="1" stroke-dasharray="2,3"/>`);
     if(cableBottom-TRUCK_DEPTH>1){
       // quota tra le due linee centrali del passaggio cavi, in cm
-      const cableDimY=Y(TRUCK_DEPTH+CLEAR_ZONE/2);
+      const cableDimY=Y(TRUCK_DEPTH+CLEAR_ZONE*0.22);
       const cxL=X(-CABLE_PATH/2), cxR=X(CABLE_PATH/2);
       parts.push(`<line x1="${cxL}" y1="${cableDimY}" x2="${cxR}" y2="${cableDimY}" stroke="var(--amber)" stroke-width="1"/>`);
       parts.push(`<line x1="${cxL}" y1="${cableDimY-4}" x2="${cxL}" y2="${cableDimY+4}" stroke="var(--amber)" stroke-width="1"/>`);
@@ -863,12 +887,15 @@ function renderPlan(length,width,L){
   container.innerHTML=`<svg viewBox="0 0 ${svgW} ${svgH}" width="${svgW}" height="${svgH}" xmlns="http://www.w3.org/2000/svg">${parts.join('')}</svg>`;
 }
 
+let lastLayout=null;
+
 function update(){
   const length=parseFloat(document.getElementById('inpLength').value)||0;
   const width=parseFloat(document.getElementById('inpWidth').value)||0;
   const boothDist=parseFloat(document.getElementById('inpBoothDist').value)||BOOTH_DIST_DEFAULT;
   const rowPitch=parseFloat(document.getElementById('inpRowPitch').value)||ROW_PITCH_DEFAULT;
   const L=computeLayout(length,width,boothDist,rowPitch);
+  lastLayout=L;
   renderSummary(length,width,L,boothDist);
   renderPlan(length,width,L);
   const pm=document.getElementById('printMeasures');
@@ -950,6 +977,30 @@ async function downloadPlanAsPng(){
   });
 
   ctx.drawImage(planImg,0,headerH,w,h);
+
+  // riepilogo posti, nell'area libera davanti allo schermo (solo nel PNG)
+  if(lastLayout){
+    const zonaRect=svgEl.querySelector('rect[stroke-dasharray="4,4"]');
+    if(zonaRect){
+      const zx=parseFloat(zonaRect.getAttribute('x'))+parseFloat(zonaRect.getAttribute('width'))/2;
+      const zy=parseFloat(zonaRect.getAttribute('y'))+parseFloat(zonaRect.getAttribute('height'))*0.68+headerH;
+      const line3=`Gialli da posare per ultimi o tralasciare: ${lastLayout.yellowSeats}`;
+      ctx.font='11px Arial, sans-serif';
+      const boxW=ctx.measureText(line3).width+24;
+      ctx.fillStyle='rgba(255,255,255,.88)';
+      ctx.fillRect(zx-boxW/2,zy-24,boxW,46);
+      ctx.textAlign='center';
+      ctx.font='bold 12px Arial, sans-serif';
+      ctx.fillStyle='#0b0b0b';
+      ctx.fillText(`Totale posti: ${lastLayout.totalSeats}`,zx,zy-10);
+      ctx.font='11px Arial, sans-serif';
+      ctx.fillStyle='#726b60';
+      ctx.fillText(`Grigi: ${lastLayout.graySeats}`,zx,zy+6);
+      ctx.fillStyle='#d99a16';
+      ctx.fillText(line3,zx,zy+22);
+      ctx.textAlign='left';
+    }
+  }
 
   // marchio e dati di contatto, sempre presenti sull'immagine esportata
   ctx.strokeStyle='rgba(11,11,11,.14)';
