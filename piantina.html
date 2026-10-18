@@ -137,6 +137,20 @@
       font-size: 1.02rem;
     }
 
+    /* ── Avviso luci spente ──────────────────────────────────────────── */
+    .plan-notice {
+      margin-top: 28px;
+      max-width: 640px;
+      padding: 16px 20px;
+      border-radius: 10px;
+      background: rgba(217,154,22,.08);
+      border: 1px solid rgba(217,154,22,.3);
+      border-left: 3px solid var(--amber);
+      font-size: .86rem;
+      color: #4a453d;
+      line-height: 1.55;
+    }
+
     /* ── Form misure ──────────────────────────────────────────────────── */
     .measure-form {
       margin-top: 32px;
@@ -264,6 +278,8 @@
     <h1>Piantina <span class="accent">della proiezione.</span></h1>
     <p class="page-sub">Inserisci lunghezza e larghezza del luogo: ti mostriamo come si allestisce la serata — furgone schermo, zona libera, file e cabina di proiezione — con le misure reali del nostro equipaggiamento.</p>
 
+    <div class="plan-notice">Durante la proiezione nessuna luce deve restare accesa su tutta l'area dell'allestimento — schermo, file e cabina di proiezione comprese.</div>
+
     <div class="measure-form">
       <div class="measure-field">
         <label for="inpLength">Lunghezza del luogo</label>
@@ -295,6 +311,7 @@
       <div class="legend-item"><span class="legend-swatch" style="background:rgba(11,11,11,.045)"></span>Corridoio laterale (120 cm)</div>
       <div class="legend-item"><span class="legend-swatch" style="background:#fff;border:1px dashed var(--amber)"></span>Passaggio cavi centrale (30 cm)</div>
       <div class="legend-item"><span class="legend-swatch" style="background:var(--amber)"></span>Cabina di proiezione (150×242 cm)</div>
+      <div class="legend-item"><span class="legend-swatch" style="background:var(--amber);display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;line-height:1">⚡</span>Punto di alimentazione elettrica</div>
     </div>
   </main>
 
@@ -311,6 +328,7 @@ const SCREEN_WIDTH = 7.00;  // larghezza schermo
 const SIDE_CLEARANCE = 2.00; // manovra minima per lato
 const AISLE_SIDE  = 1.20;   // corridoio ai lati delle file
 const CABLE_PATH  = 0.30;   // passaggio centrale cavi cabina→furgone
+const BOOTH_SIDE_GAP = 0.80; // passaggio attorno alla cabina, a sinistra e destra
 const CHAIR_W     = 0.45;   // larghezza sedia
 const CHAIR_D      = 0.53;  // profondità sedia
 
@@ -318,8 +336,8 @@ function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;',
 function fmt(n){return n.toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2});}
 
 // Sequenza teorica delle file: fissa, non dipende dalle misure del luogo —
-// si ferma alla prima posizione compresa tra 19 e 22 m, che diventa la fila
-// della cabina di proiezione
+// si ferma alla prima posizione compresa tra 15 e 24 m (cabina di
+// proiezione), poi aggiunge due file ai lati, dietro la cabina
 function theoreticalRows(){
   const rows=[];
   let pos=TRUCK_DEPTH+CLEAR_ZONE;
@@ -328,6 +346,11 @@ function theoreticalRows(){
     pos+=ROW_PITCH;
   }
   rows.push({pos,type:'booth'});
+  // le 2 file ai lati della cabina seguono lo stesso passo delle altre
+  // file (1 m), non la profondità della cabina: restano quindi affiancate
+  // alla cabina anziché dietro
+  rows.push({pos:pos+ROW_PITCH,type:'wing'});
+  rows.push({pos:pos+2*ROW_PITCH,type:'wing'});
   return rows;
 }
 const ROWS_ALL=theoreticalRows();
@@ -337,6 +360,7 @@ function computeLayout(length,width){
   const fitting=ROWS_ALL.filter(r=>r.pos<=length+1e-9);
   const boothRow=fitting.find(r=>r.type==='booth')||null;
   const normalRows=fitting.filter(r=>r.type==='normal');
+  const wingRows=fitting.filter(r=>r.type==='wing');
   const sideClearance=(width-SCREEN_WIDTH)/2;
 
   // Larghezza utile per le sedie: tolti i corridoi ai due lati e il
@@ -345,16 +369,18 @@ function computeLayout(length,width){
   const seatsPerBlockNormal=Math.floor(blockWidthNormal/CHAIR_W+1e-9);
   const seatsPerRowNormal=seatsPerBlockNormal*2;
 
-  // Alla fila della cabina, il blocco utile è tolto anche della metà
-  // larghezza cabina (150 cm) al posto del passaggio cavi
-  const blockWidthBooth=Math.max(0,(width-2*AISLE_SIDE-BOOTH_WIDTH)/2);
+  // Alla fila della cabina (e alle due file dietro, stesso ingombro
+  // laterale), il blocco utile è tolto della metà larghezza cabina più
+  // il passaggio di 80 cm attorno ad essa
+  const blockWidthBooth=Math.max(0,(width-2*AISLE_SIDE-BOOTH_WIDTH-2*BOOTH_SIDE_GAP)/2);
   const seatsPerBlockBooth=Math.floor(blockWidthBooth/CHAIR_W+1e-9);
   const seatsBoothRow=seatsPerBlockBooth*2;
 
-  const totalSeats=normalRows.length*seatsPerRowNormal+(boothRow?seatsBoothRow:0);
+  const totalSeats=normalRows.length*seatsPerRowNormal+(boothRow?seatsBoothRow:0)+wingRows.length*seatsBoothRow;
+  const boothBack=boothRow?boothRow.pos+BOOTH_DEPTH:null;
 
   return{
-    firstRow, fitting, boothRow, normalRows,
+    firstRow, fitting, boothRow, normalRows, wingRows, boothBack,
     sideClearance, widthOk: sideClearance>=SIDE_CLEARANCE,
     minWidth: SCREEN_WIDTH+2*SIDE_CLEARANCE,
     fitsFirstRow: length>=firstRow,
@@ -374,14 +400,21 @@ function renderSummary(length,width,L){
     lines.push({cls:'ok',html:`<strong>${L.normalRows.length}</strong> fil${L.normalRows.length===1?'a':'e'} a tutta larghezza, a partire da <strong>${fmt(L.firstRow)} m</strong> dal furgone.`});
     if(L.seatsPerRowNormal>0){
       lines.push({cls:'ok',html:`<strong>${L.seatsPerRowNormal} sedie</strong> per fila (${L.seatsPerBlockNormal} per lato del passaggio cavi centrale).`});
+      if(L.normalRows.length>0){
+        lines.push({cls:'warn',html:`Le prime <strong>${Math.min(2,L.normalRows.length)}</strong> fil${Math.min(2,L.normalRows.length)===1?'a':'e'} (troppo vicine allo schermo) sono i posti meno indicati: da allestire per ultime, solo se servono posti in più.`});
+      }
     }else if(L.normalRows.length>0){
       lines.push({cls:'bad',html:`Larghezza insufficiente per i corridoi laterali (120 cm), il passaggio cavi (30 cm) e almeno una sedia per lato.`});
     }
     if(L.boothRow){
-      lines.push({cls:'ok',html:`Cabina di proiezione inclusa a <strong>${fmt(L.boothRow.pos)} m</strong> (150×242 cm), con <strong>${L.seatsBoothRow} sedie</strong> ai lati (${L.seatsPerBlockBooth} per lato).`});
-      const residual=length-L.boothRow.pos-BOOTH_DEPTH;
+      lines.push({cls:'ok',html:`Cabina di proiezione inclusa a <strong>${fmt(L.boothRow.pos)} m</strong> (150×242 cm, retro a ${fmt(L.boothBack)} m), con <strong>${L.seatsBoothRow} sedie</strong> ai lati (${L.seatsPerBlockBooth} per lato, passaggio di 80 cm attorno alla cabina).`});
+      if(L.wingRows.length>0){
+        lines.push({cls:'ok',html:`<strong>${L.wingRows.length}</strong> fil${L.wingRows.length===1?'a':'e'} in più dietro, ai lati della cabina, con lo stesso ingombro laterale (chi siede vede comunque l'angolo dello schermo verso la cabina).`});
+      }
+      const lastPos=L.wingRows.length?L.wingRows[L.wingRows.length-1].pos+ROW_PITCH:L.boothBack;
+      const residual=length-lastPos;
       if(residual>0.5){
-        lines.push({cls:'warn',html:`Spazio residuo oltre la cabina: <strong>${fmt(residual)} m</strong>, non utilizzato in questo schema.`});
+        lines.push({cls:'warn',html:`Spazio residuo oltre l'ultima fila: <strong>${fmt(residual)} m</strong>, non utilizzato in questo schema.`});
       }
     }else{
       lines.push({cls:'warn',html:`Cabina di proiezione non inclusa: servono almeno <strong>${fmt(BOOTH_MIN)} m</strong> di profondità (attualmente ${fmt(length)} m).`});
@@ -409,7 +442,7 @@ function renderPlan(length,width,L){
     return;
   }
 
-  const marginLeft=78, marginRight=20, marginTop=28, marginBottom=20;
+  const marginLeft=78, marginRight=58, marginTop=50, marginBottom=20;
   const maxPxW=640, maxPxH=820;
   const scale=Math.max(10,Math.min(maxPxW/width,maxPxH/Math.max(length,TRUCK_DEPTH+CLEAR_ZONE),55));
 
@@ -420,6 +453,13 @@ function renderPlan(length,width,L){
   const Y=ry=>marginTop+ry*scale;
 
   let parts=[];
+
+  // quota larghezza, sopra il disegno
+  const dimY=marginTop-30;
+  parts.push(`<line x1="${X(-width/2)}" y1="${dimY}" x2="${X(width/2)}" y2="${dimY}" stroke="var(--ink)" stroke-width="1"/>`);
+  parts.push(`<line x1="${X(-width/2)}" y1="${dimY-4}" x2="${X(-width/2)}" y2="${dimY+4}" stroke="var(--ink)" stroke-width="1"/>`);
+  parts.push(`<line x1="${X(width/2)}" y1="${dimY-4}" x2="${X(width/2)}" y2="${dimY+4}" stroke="var(--ink)" stroke-width="1"/>`);
+  parts.push(`<text x="${svgW/2}" y="${dimY-6}" text-anchor="middle" font-size="10" font-weight="700" fill="var(--ink)">larghezza — ${fmt(width)} m</text>`);
 
   // confine del luogo
   parts.push(`<rect x="${marginLeft}" y="${marginTop}" width="${width*scale}" height="${length*scale}" fill="none" stroke="var(--line)" stroke-width="1"/>`);
@@ -452,51 +492,84 @@ function renderPlan(length,width,L){
     parts.push(`<text x="${svgW/2}" y="${Y(TRUCK_DEPTH+CLEAR_ZONE/2)+4}" text-anchor="middle" font-size="10" fill="var(--muted)">zona libera — 4 m</text>`);
   }
 
-  function chairRects(xStartReal,xEndReal,yTopReal,n){
+  function chairRects(xStartReal,xEndReal,yTopReal,n,lessGood){
     if(n<=0)return '';
     const blockW=xEndReal-xStartReal;
     const used=n*CHAIR_W;
     const offset=(blockW-used)/2;
+    const fill=lessGood?'rgba(217,154,22,.14)':'rgba(11,11,11,.09)';
+    const stroke=lessGood?'var(--amber)':'rgba(11,11,11,.3)';
     let s='';
     for(let i=0;i<n;i++){
       const x0=xStartReal+offset+i*CHAIR_W;
-      s+=`<rect x="${X(x0)+1}" y="${Y(yTopReal)+1}" width="${CHAIR_W*scale-2}" height="${CHAIR_D*scale-2}" rx="2" fill="rgba(11,11,11,.09)" stroke="rgba(11,11,11,.3)" stroke-width="1"/>`;
+      s+=`<rect x="${X(x0)+1}" y="${Y(yTopReal)+1}" width="${CHAIR_W*scale-2}" height="${CHAIR_D*scale-2}" rx="2" fill="${fill}" stroke="${stroke}" stroke-width="1"/>`;
     }
     return s;
   }
 
-  const seatingBottom=L.boothRow?L.boothRow.pos+BOOTH_DEPTH:(L.normalRows.length?L.normalRows[L.normalRows.length-1].pos+ROW_PITCH:null);
+  const corridorBottom=L.wingRows.length?L.wingRows[L.wingRows.length-1].pos+ROW_PITCH:(L.boothRow?L.boothRow.pos+BOOTH_DEPTH:(L.normalRows.length?L.normalRows[L.normalRows.length-1].pos+ROW_PITCH:null));
+  const cableBottom=L.boothRow?L.boothRow.pos:corridorBottom;
 
-  if(seatingBottom){
+  if(corridorBottom){
     // corridoi laterali (120 cm)
     const corrColor='rgba(11,11,11,.045)';
-    parts.push(`<rect x="${X(-width/2)}" y="${Y(L.firstRow)}" width="${AISLE_SIDE*scale}" height="${(seatingBottom-L.firstRow)*scale}" fill="${corrColor}"/>`);
-    parts.push(`<rect x="${X(width/2-AISLE_SIDE)}" y="${Y(L.firstRow)}" width="${AISLE_SIDE*scale}" height="${(seatingBottom-L.firstRow)*scale}" fill="${corrColor}"/>`);
-    // passaggio cavi centrale (30 cm), dal furgone fino in fondo alle file
-    parts.push(`<rect x="${X(-CABLE_PATH/2)}" y="${Y(TRUCK_DEPTH)}" width="${CABLE_PATH*scale}" height="${(seatingBottom-TRUCK_DEPTH)*scale}" fill="none" stroke="var(--amber)" stroke-width="1" stroke-dasharray="2,3"/>`);
+    parts.push(`<rect x="${X(-width/2)}" y="${Y(L.firstRow)}" width="${AISLE_SIDE*scale}" height="${(corridorBottom-L.firstRow)*scale}" fill="${corrColor}"/>`);
+    parts.push(`<rect x="${X(width/2-AISLE_SIDE)}" y="${Y(L.firstRow)}" width="${AISLE_SIDE*scale}" height="${(corridorBottom-L.firstRow)*scale}" fill="${corrColor}"/>`);
+    // passaggio cavi centrale (30 cm), dal furgone fino alla cabina
+    parts.push(`<rect x="${X(-CABLE_PATH/2)}" y="${Y(TRUCK_DEPTH)}" width="${CABLE_PATH*scale}" height="${(cableBottom-TRUCK_DEPTH)*scale}" fill="none" stroke="var(--amber)" stroke-width="1" stroke-dasharray="2,3"/>`);
   }
 
-  // file
-  L.normalRows.forEach(r=>{
+  // file (le prime 2, troppo vicine allo schermo, evidenziate come meno
+  // indicate: da allestire per ultime)
+  L.normalRows.forEach((r,i)=>{
     const y=Y(r.pos);
-    parts.push(`<text x="${marginLeft-8}" y="${y+8}" text-anchor="end" font-size="9" fill="var(--muted)">${fmt(r.pos)} m</text>`);
-    parts.push(chairRects(-width/2+AISLE_SIDE,-CABLE_PATH/2,r.pos,L.seatsPerBlockNormal));
-    parts.push(chairRects(CABLE_PATH/2,width/2-AISLE_SIDE,r.pos,L.seatsPerBlockNormal));
+    const lessGood=i<2;
+    const labelColor=lessGood?'var(--amber)':'var(--muted)';
+    if(scale*ROW_PITCH>=24){
+      parts.push(`<text x="${marginLeft-8}" y="${y+8}" text-anchor="end" font-size="9" fill="${labelColor}">${fmt(r.pos)} m</text>`);
+      parts.push(`<text x="${marginLeft-8}" y="${y+19}" text-anchor="end" font-size="8" fill="${labelColor}">${L.seatsPerRowNormal} posti${lessGood?' ⚠':''}</text>`);
+    }else{
+      parts.push(`<text x="${marginLeft-8}" y="${y+4}" text-anchor="end" font-size="8" fill="${labelColor}">${fmt(r.pos)} m · ${L.seatsPerRowNormal}p</text>`);
+    }
+    parts.push(chairRects(-width/2+AISLE_SIDE,-CABLE_PATH/2,r.pos,L.seatsPerBlockNormal,lessGood));
+    parts.push(chairRects(CABLE_PATH/2,width/2-AISLE_SIDE,r.pos,L.seatsPerBlockNormal,lessGood));
   });
 
-  // cabina di proiezione + posti laterali
+  // cabina di proiezione + posti laterali (passaggio di 80 cm attorno alla cabina)
+  const lateralInner=BOOTH_WIDTH/2+BOOTH_SIDE_GAP;
   if(L.boothRow){
     const y=Y(L.boothRow.pos);
     const boothHalf=BOOTH_WIDTH/2;
     parts.push(`<rect x="${X(-boothHalf)}" y="${y}" width="${BOOTH_WIDTH*scale}" height="${BOOTH_DEPTH*scale}" fill="var(--amber)"/>`);
-    parts.push(`<text x="${marginLeft-8}" y="${y+12}" text-anchor="end" font-size="9" fill="var(--red-deep)" font-weight="700">${fmt(L.boothRow.pos)} m</text>`);
+    // simbolo corrente — la cabina necessita di alimentazione elettrica
+    const boltSize=Math.min(BOOTH_WIDTH*scale*0.55,28);
+    const boltCx=X(0), boltCy=y+BOOTH_DEPTH*scale/2;
+    parts.push(`<g transform="translate(${boltCx},${boltCy}) scale(${boltSize/24})"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" transform="translate(-12,-12)" fill="#fff" stroke="var(--red-deep)" stroke-width="0.6"/></g>`);
+    parts.push(`<text x="${marginLeft-8}" y="${y+12}" text-anchor="end" font-size="9" fill="var(--red-deep)" font-weight="700">${fmt(L.boothRow.pos)} m · ${L.seatsBoothRow}p</text>`);
     if(width*scale>160){
       parts.push(`<text x="${X(-width/4)}" y="${y-6}" text-anchor="middle" font-size="9" fill="var(--muted)">posti laterali</text>`);
       parts.push(`<text x="${X(width/4)}" y="${y-6}" text-anchor="middle" font-size="9" fill="var(--muted)">posti laterali</text>`);
     }
-    parts.push(chairRects(-width/2+AISLE_SIDE,-boothHalf,L.boothRow.pos,L.seatsPerBlockBooth));
-    parts.push(chairRects(boothHalf,width/2-AISLE_SIDE,L.boothRow.pos,L.seatsPerBlockBooth));
+    parts.push(chairRects(-width/2+AISLE_SIDE,-lateralInner,L.boothRow.pos,L.seatsPerBlockBooth));
+    parts.push(chairRects(lateralInner,width/2-AISLE_SIDE,L.boothRow.pos,L.seatsPerBlockBooth));
+
+    // quota lunghezza: da retro furgone (y=0) a retro cabina
+    const dimX=X(width/2)+30;
+    const y0=Y(0), y1=Y(L.boothBack);
+    parts.push(`<line x1="${dimX}" y1="${y0}" x2="${dimX}" y2="${y1}" stroke="var(--ink)" stroke-width="1"/>`);
+    parts.push(`<line x1="${dimX-4}" y1="${y0}" x2="${dimX+4}" y2="${y0}" stroke="var(--ink)" stroke-width="1"/>`);
+    parts.push(`<line x1="${dimX-4}" y1="${y1}" x2="${dimX+4}" y2="${y1}" stroke="var(--ink)" stroke-width="1"/>`);
+    parts.push(`<text x="${dimX+6}" y="${(y0+y1)/2}" font-size="9" font-weight="700" fill="var(--ink)" transform="rotate(90 ${dimX+6} ${(y0+y1)/2})" text-anchor="middle">retro furgone → retro cabina — ${fmt(L.boothBack)} m</text>`);
   }
+
+  // file dietro ai lati della cabina (stesso ingombro laterale: chi è
+  // seduto vede comunque l'angolo dello schermo verso la cabina)
+  L.wingRows.forEach(r=>{
+    const y=Y(r.pos);
+    parts.push(`<text x="${marginLeft-8}" y="${y+8}" text-anchor="end" font-size="9" fill="var(--muted)">${fmt(r.pos)} m · ${L.seatsBoothRow}p</text>`);
+    parts.push(chairRects(-width/2+AISLE_SIDE,-lateralInner,r.pos,L.seatsPerBlockBooth));
+    parts.push(chairRects(lateralInner,width/2-AISLE_SIDE,r.pos,L.seatsPerBlockBooth));
+  });
 
   container.innerHTML=`<svg viewBox="0 0 ${svgW} ${svgH}" width="${svgW}" height="${svgH}" xmlns="http://www.w3.org/2000/svg">${parts.join('')}</svg>`;
 }
