@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f7f3ec">
+  <title>Piantina allestimento — Cinematografo Ambulante</title>
+  <meta name="description" content="Inserisci le misure del luogo e scopri come si allestisce la proiezione: furgone schermo, file e cabina di proiezione.">
+  <link rel="canonical" href="https://www.cinema-ambulante.ch/piantina.html">
+
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="img/favicon-16x16.png">
+  <link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+
+  <style>
+    :root {
+      --bg: #f7f3ec;
+      --ink: #0b0b0b;
+      --black: #0b0b0b;
+      --surf: #ffffff;
+      --white: #fffdf8;
+      --muted: #726b60;
+      --red: #e9342f;
+      --red-deep: #92211d;
+      --amber: #d99a16;
+      --ivory: #ffffff;
+      --green: #1f9e5a;
+      --line: rgba(11,11,11,.14);
+      --ease: cubic-bezier(.16,1,.3,1);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { background: var(--bg); }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: 'DM Sans', Arial, Helvetica, sans-serif;
+      line-height: 1.5;
+      overflow-x: clip;
+    }
+
+    a { color: inherit; }
+
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      height: 76px;
+      padding: 0 max(5vw, 20px);
+      background: rgba(247,243,236,.92);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .header-inner {
+      width: min(100%, 1200px);
+      height: 100%;
+      margin-inline: auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 800;
+      font-size: .74rem;
+      letter-spacing: .02em;
+      text-transform: uppercase;
+      text-decoration: none;
+    }
+    .brand-mark {
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+    .brand-mark img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: rgba(11,11,11,.05);
+      border: 1px solid var(--line);
+      color: var(--ink);
+      text-decoration: none;
+      transition: background-color .2s var(--ease), border-color .2s var(--ease), color .2s var(--ease);
+    }
+    .back-link:hover { background: rgba(11,11,11,.1); border-color: var(--red); color: var(--red); }
+
+    main {
+      width: min(100%, 1200px);
+      margin: 0 auto;
+      padding: 56px max(5vw, 20px) 100px;
+    }
+
+    .page-eyebrow {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      color: var(--red);
+      font-size: .74rem;
+      font-weight: 700;
+      letter-spacing: .24em;
+      text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+    .page-eyebrow::before { content:""; width: 40px; height: 2px; background: var(--red); }
+
+    h1 {
+      font-size: clamp(2rem, 5vw, 2.8rem);
+      line-height: 1.05;
+      letter-spacing: -.02em;
+      text-transform: uppercase;
+    }
+    h1 .accent { color: var(--red); }
+
+    .page-sub {
+      margin-top: 18px;
+      max-width: 640px;
+      color: #4a453d;
+      font-size: 1.02rem;
+    }
+
+    /* ── Form misure ──────────────────────────────────────────────────── */
+    .measure-form {
+      margin-top: 32px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: flex-end;
+    }
+    .measure-field label {
+      display: block;
+      font-size: .76rem;
+      font-weight: 700;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    .measure-field .field-row {
+      display: flex;
+      align-items: center;
+      border-radius: 23px;
+      border: 1px solid var(--line);
+      background: var(--surf);
+      overflow: hidden;
+      transition: border-color .2s var(--ease);
+    }
+    .measure-field .field-row:focus-within { border-color: var(--red); }
+    .measure-field input {
+      width: 110px;
+      height: 46px;
+      padding: 0 4px 0 20px;
+      border: none;
+      outline: none;
+      background: transparent;
+      color: var(--ink);
+      font-family: inherit;
+      font-size: .98rem;
+      font-weight: 600;
+    }
+    .measure-field .unit {
+      padding-right: 18px;
+      color: var(--muted);
+      font-size: .82rem;
+    }
+
+    /* ── Riepilogo ────────────────────────────────────────────────────── */
+    .summary {
+      margin-top: 28px;
+      max-width: 640px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .summary-line {
+      display: flex;
+      gap: 10px;
+      align-items: baseline;
+      font-size: .92rem;
+    }
+    .summary-line .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      flex-shrink: 0;
+      transform: translateY(-2px);
+    }
+    .summary-line.warn .dot { background: var(--amber); }
+    .summary-line.bad .dot { background: var(--red); }
+    .summary-line strong { font-weight: 700; }
+    .summary-line.warn,
+    .summary-line.bad { color: var(--red-deep); }
+
+    /* ── Diagramma ────────────────────────────────────────────────────── */
+    .plan-wrap {
+      margin-top: 36px;
+      padding: 24px;
+      background: var(--surf);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      overflow-x: auto;
+    }
+    .plan-wrap svg { display: block; margin: 0 auto; }
+
+    .legend {
+      margin-top: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px 24px;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: .8rem;
+      color: #4a453d;
+    }
+    .legend-swatch {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 560px) {
+      .measure-form { gap: 12px; }
+      .measure-field input { width: 90px; }
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-inner">
+      <a href="index.html" class="brand">
+        <span class="brand-mark"><img src="img/logo.png" alt="Cinematografo Ambulante"></span>
+        <span>Cinematografo Ambulante</span>
+      </a>
+      <a href="index.html" class="back-link" aria-label="Torna al sito"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></a>
+    </div>
+  </header>
+
+  <main>
+    <div class="page-eyebrow">Allestimento</div>
+    <h1>Piantina <span class="accent">della proiezione.</span></h1>
+    <p class="page-sub">Inserisci lunghezza e larghezza del luogo: ti mostriamo come si allestisce la serata — furgone schermo, zona libera, file e cabina di proiezione — con le misure reali del nostro equipaggiamento.</p>
+
+    <div class="measure-form">
+      <div class="measure-field">
+        <label for="inpLength">Lunghezza del luogo</label>
+        <div class="field-row">
+          <input type="number" id="inpLength" min="0" step="0.5" value="25">
+          <span class="unit">metri</span>
+        </div>
+      </div>
+      <div class="measure-field">
+        <label for="inpWidth">Larghezza del luogo</label>
+        <div class="field-row">
+          <input type="number" id="inpWidth" min="0" step="0.5" value="14">
+          <span class="unit">metri</span>
+        </div>
+      </div>
+    </div>
+
+    <div id="summary" class="summary"></div>
+
+    <div class="plan-wrap">
+      <div id="planSvg"></div>
+    </div>
+
+    <div class="legend">
+      <div class="legend-item"><span class="legend-swatch" style="background:#726b60"></span>Furgone schermo (270 cm)</div>
+      <div class="legend-item"><span class="legend-swatch" style="background:var(--red)"></span>Schermo (7 m)</div>
+      <div class="legend-item"><span class="legend-swatch" style="background:repeating-linear-gradient(135deg,rgba(11,11,11,.12),rgba(11,11,11,.12) 3px,transparent 3px,transparent 7px)"></span>Zona libera (4 m)</div>
+      <div class="legend-item"><span class="legend-swatch" style="background:rgba(11,11,11,.09);border:1px solid rgba(11,11,11,.3)"></span>Sedia (45×53 cm)</div>
+      <div class="legend-item"><span class="legend-swatch" style="background:rgba(11,11,11,.045)"></span>Corridoio laterale (120 cm)</div>
+      <div class="legend-item"><span class="legend-swatch" style="background:#fff;border:1px dashed var(--amber)"></span>Passaggio cavi centrale (30 cm)</div>
+      <div class="legend-item"><span class="legend-swatch" style="background:var(--amber)"></span>Cabina di proiezione (150×242 cm)</div>
+    </div>
+  </main>
+
+<script>
+// Misure fisse del nostro equipaggiamento — vedi legenda
+const TRUCK_DEPTH = 2.70;   // ingombro furgone schermo
+const CLEAR_ZONE  = 4.00;   // zona libera furgone → prima fila
+const ROW_PITCH   = 1.00;   // passo tra una fila e l'altra
+const BOOTH_MIN   = 15.00;  // cabina di proiezione: distanza minima dal furgone
+const BOOTH_MAX   = 24.00;  // cabina di proiezione: distanza massima
+const BOOTH_WIDTH = 1.50;   // larghezza cabina
+const BOOTH_DEPTH = 2.42;   // profondità cabina
+const SCREEN_WIDTH = 7.00;  // larghezza schermo
+const SIDE_CLEARANCE = 2.00; // manovra minima per lato
+const AISLE_SIDE  = 1.20;   // corridoio ai lati delle file
+const CABLE_PATH  = 0.30;   // passaggio centrale cavi cabina→furgone
+const CHAIR_W     = 0.45;   // larghezza sedia
+const CHAIR_D      = 0.53;  // profondità sedia
+
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function fmt(n){return n.toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2});}
+
+// Sequenza teorica delle file: fissa, non dipende dalle misure del luogo —
+// si ferma alla prima posizione compresa tra 19 e 22 m, che diventa la fila
+// della cabina di proiezione
+function theoreticalRows(){
+  const rows=[];
+  let pos=TRUCK_DEPTH+CLEAR_ZONE;
+  while(pos<BOOTH_MIN){
+    rows.push({pos,type:'normal'});
+    pos+=ROW_PITCH;
+  }
+  rows.push({pos,type:'booth'});
+  return rows;
+}
+const ROWS_ALL=theoreticalRows();
+
+function computeLayout(length,width){
+  const firstRow=TRUCK_DEPTH+CLEAR_ZONE;
+  const fitting=ROWS_ALL.filter(r=>r.pos<=length+1e-9);
+  const boothRow=fitting.find(r=>r.type==='booth')||null;
+  const normalRows=fitting.filter(r=>r.type==='normal');
+  const sideClearance=(width-SCREEN_WIDTH)/2;
+
+  // Larghezza utile per le sedie: tolti i corridoi ai due lati e il
+  // passaggio centrale per i cavi, divisa in blocco sinistro e destro
+  const blockWidthNormal=Math.max(0,(width-2*AISLE_SIDE-CABLE_PATH)/2);
+  const seatsPerBlockNormal=Math.floor(blockWidthNormal/CHAIR_W+1e-9);
+  const seatsPerRowNormal=seatsPerBlockNormal*2;
+
+  // Alla fila della cabina, il blocco utile è tolto anche della metà
+  // larghezza cabina (150 cm) al posto del passaggio cavi
+  const blockWidthBooth=Math.max(0,(width-2*AISLE_SIDE-BOOTH_WIDTH)/2);
+  const seatsPerBlockBooth=Math.floor(blockWidthBooth/CHAIR_W+1e-9);
+  const seatsBoothRow=seatsPerBlockBooth*2;
+
+  const totalSeats=normalRows.length*seatsPerRowNormal+(boothRow?seatsBoothRow:0);
+
+  return{
+    firstRow, fitting, boothRow, normalRows,
+    sideClearance, widthOk: sideClearance>=SIDE_CLEARANCE,
+    minWidth: SCREEN_WIDTH+2*SIDE_CLEARANCE,
+    fitsFirstRow: length>=firstRow,
+    blockWidthNormal, seatsPerBlockNormal, seatsPerRowNormal,
+    blockWidthBooth, seatsPerBlockBooth, seatsBoothRow,
+    totalSeats
+  };
+}
+
+function renderSummary(length,width,L){
+  const el=document.getElementById('summary');
+  const lines=[];
+
+  if(!L.fitsFirstRow){
+    lines.push({cls:'bad',html:`Profondità insufficiente anche solo per la prima fila: servono almeno <strong>${fmt(L.firstRow)} m</strong> oltre al furgone.`});
+  }else{
+    lines.push({cls:'ok',html:`<strong>${L.normalRows.length}</strong> fil${L.normalRows.length===1?'a':'e'} a tutta larghezza, a partire da <strong>${fmt(L.firstRow)} m</strong> dal furgone.`});
+    if(L.seatsPerRowNormal>0){
+      lines.push({cls:'ok',html:`<strong>${L.seatsPerRowNormal} sedie</strong> per fila (${L.seatsPerBlockNormal} per lato del passaggio cavi centrale).`});
+    }else if(L.normalRows.length>0){
+      lines.push({cls:'bad',html:`Larghezza insufficiente per i corridoi laterali (120 cm), il passaggio cavi (30 cm) e almeno una sedia per lato.`});
+    }
+    if(L.boothRow){
+      lines.push({cls:'ok',html:`Cabina di proiezione inclusa a <strong>${fmt(L.boothRow.pos)} m</strong> (150×242 cm), con <strong>${L.seatsBoothRow} sedie</strong> ai lati (${L.seatsPerBlockBooth} per lato).`});
+      const residual=length-L.boothRow.pos-BOOTH_DEPTH;
+      if(residual>0.5){
+        lines.push({cls:'warn',html:`Spazio residuo oltre la cabina: <strong>${fmt(residual)} m</strong>, non utilizzato in questo schema.`});
+      }
+    }else{
+      lines.push({cls:'warn',html:`Cabina di proiezione non inclusa: servono almeno <strong>${fmt(BOOTH_MIN)} m</strong> di profondità (attualmente ${fmt(length)} m).`});
+    }
+    if(L.totalSeats>0){
+      lines.push({cls:'ok',html:`Totale posti a sedere: <strong>${L.totalSeats}</strong>.`});
+    }
+  }
+
+  if(width>0){
+    if(L.widthOk){
+      lines.push({cls:'ok',html:`Larghezza sufficiente per lo schermo (7 m) con <strong>${fmt(L.sideClearance)} m</strong> di manovra per lato.`});
+    }else{
+      lines.push({cls:'bad',html:`Larghezza insufficiente: servono almeno <strong>${fmt(L.minWidth)} m</strong> per schermo e manovra (attualmente ${fmt(width)} m, manovra disponibile ${fmt(Math.max(L.sideClearance,0))} m per lato).`});
+    }
+  }
+
+  el.innerHTML=lines.map(l=>`<div class="summary-line ${l.cls==='ok'?'':l.cls}"><span class="dot"></span><span>${l.html}</span></div>`).join('');
+}
+
+function renderPlan(length,width,L){
+  const container=document.getElementById('planSvg');
+  if(length<=0||width<=0){
+    container.innerHTML='<p style="color:var(--muted);font-size:.9rem;text-align:center;padding:40px 0">Inserisci lunghezza e larghezza per vedere la piantina.</p>';
+    return;
+  }
+
+  const marginLeft=78, marginRight=20, marginTop=28, marginBottom=20;
+  const maxPxW=640, maxPxH=820;
+  const scale=Math.max(10,Math.min(maxPxW/width,maxPxH/Math.max(length,TRUCK_DEPTH+CLEAR_ZONE),55));
+
+  const svgW=Math.round(width*scale)+marginLeft+marginRight;
+  const svgH=Math.round(length*scale)+marginTop+marginBottom;
+
+  const X=rx=>marginLeft+(rx+width/2)*scale;
+  const Y=ry=>marginTop+ry*scale;
+
+  let parts=[];
+
+  // confine del luogo
+  parts.push(`<rect x="${marginLeft}" y="${marginTop}" width="${width*scale}" height="${length*scale}" fill="none" stroke="var(--line)" stroke-width="1"/>`);
+
+  // furgone schermo
+  parts.push(`<rect x="${X(-width/2)}" y="${Y(0)}" width="${width*scale}" height="${TRUCK_DEPTH*scale}" fill="#726b60"/>`);
+  parts.push(`<text x="${svgW/2}" y="${Y(TRUCK_DEPTH/2)-4}" text-anchor="middle" font-size="11" font-weight="700" fill="#fff">FURGONE SCHERMO</text>`);
+  parts.push(`<text x="${svgW/2}" y="${Y(TRUCK_DEPTH/2)+11}" text-anchor="middle" font-size="10" fill="#e5e1d9">270 cm</text>`);
+
+  // schermo (linea rossa sul fronte del furgone)
+  const screenHalf=SCREEN_WIDTH/2;
+  parts.push(`<line x1="${X(-screenHalf)}" y1="${Y(TRUCK_DEPTH)}" x2="${X(screenHalf)}" y2="${Y(TRUCK_DEPTH)}" stroke="var(--red)" stroke-width="4"/>`);
+
+  // zone di manovra ai lati del furgone/schermo
+  const sideClear=(width-SCREEN_WIDTH)/2;
+  if(sideClear>0){
+    const okColor=sideClear>=SIDE_CLEARANCE?'rgba(31,158,90,.12)':'rgba(233,52,47,.12)';
+    const okStroke=sideClear>=SIDE_CLEARANCE?'var(--green)':'var(--red)';
+    [[-width/2,-screenHalf],[screenHalf,width/2]].forEach(([x0,x1])=>{
+      parts.push(`<rect x="${X(x0)}" y="${Y(0)}" width="${(x1-x0)*scale}" height="${TRUCK_DEPTH*scale}" fill="${okColor}" stroke="${okStroke}" stroke-width="1" stroke-dasharray="3,3"/>`);
+    });
+    if(sideClear*scale>26){
+      parts.push(`<text x="${X(-width/2)+((-screenHalf)-(-width/2))*scale/2}" y="${Y(TRUCK_DEPTH/2)}" text-anchor="middle" font-size="9" fill="var(--ink)">${fmt(sideClear)} m</text>`);
+    }
+  }
+
+  // zona libera 4m
+  parts.push(`<rect x="${X(-width/2)}" y="${Y(TRUCK_DEPTH)}" width="${width*scale}" height="${CLEAR_ZONE*scale}" fill="none" stroke="rgba(11,11,11,.3)" stroke-width="1" stroke-dasharray="4,4"/>`);
+  if(CLEAR_ZONE*scale>18){
+    parts.push(`<text x="${svgW/2}" y="${Y(TRUCK_DEPTH+CLEAR_ZONE/2)+4}" text-anchor="middle" font-size="10" fill="var(--muted)">zona libera — 4 m</text>`);
+  }
+
+  function chairRects(xStartReal,xEndReal,yTopReal,n){
+    if(n<=0)return '';
+    const blockW=xEndReal-xStartReal;
+    const used=n*CHAIR_W;
+    const offset=(blockW-used)/2;
+    let s='';
+    for(let i=0;i<n;i++){
+      const x0=xStartReal+offset+i*CHAIR_W;
+      s+=`<rect x="${X(x0)+1}" y="${Y(yTopReal)+1}" width="${CHAIR_W*scale-2}" height="${CHAIR_D*scale-2}" rx="2" fill="rgba(11,11,11,.09)" stroke="rgba(11,11,11,.3)" stroke-width="1"/>`;
+    }
+    return s;
+  }
+
+  const seatingBottom=L.boothRow?L.boothRow.pos+BOOTH_DEPTH:(L.normalRows.length?L.normalRows[L.normalRows.length-1].pos+ROW_PITCH:null);
+
+  if(seatingBottom){
+    // corridoi laterali (120 cm)
+    const corrColor='rgba(11,11,11,.045)';
+    parts.push(`<rect x="${X(-width/2)}" y="${Y(L.firstRow)}" width="${AISLE_SIDE*scale}" height="${(seatingBottom-L.firstRow)*scale}" fill="${corrColor}"/>`);
+    parts.push(`<rect x="${X(width/2-AISLE_SIDE)}" y="${Y(L.firstRow)}" width="${AISLE_SIDE*scale}" height="${(seatingBottom-L.firstRow)*scale}" fill="${corrColor}"/>`);
+    // passaggio cavi centrale (30 cm), dal furgone fino in fondo alle file
+    parts.push(`<rect x="${X(-CABLE_PATH/2)}" y="${Y(TRUCK_DEPTH)}" width="${CABLE_PATH*scale}" height="${(seatingBottom-TRUCK_DEPTH)*scale}" fill="none" stroke="var(--amber)" stroke-width="1" stroke-dasharray="2,3"/>`);
+  }
+
+  // file
+  L.normalRows.forEach(r=>{
+    const y=Y(r.pos);
+    parts.push(`<text x="${marginLeft-8}" y="${y+8}" text-anchor="end" font-size="9" fill="var(--muted)">${fmt(r.pos)} m</text>`);
+    parts.push(chairRects(-width/2+AISLE_SIDE,-CABLE_PATH/2,r.pos,L.seatsPerBlockNormal));
+    parts.push(chairRects(CABLE_PATH/2,width/2-AISLE_SIDE,r.pos,L.seatsPerBlockNormal));
+  });
+
+  // cabina di proiezione + posti laterali
+  if(L.boothRow){
+    const y=Y(L.boothRow.pos);
+    const boothHalf=BOOTH_WIDTH/2;
+    parts.push(`<rect x="${X(-boothHalf)}" y="${y}" width="${BOOTH_WIDTH*scale}" height="${BOOTH_DEPTH*scale}" fill="var(--amber)"/>`);
+    parts.push(`<text x="${marginLeft-8}" y="${y+12}" text-anchor="end" font-size="9" fill="var(--red-deep)" font-weight="700">${fmt(L.boothRow.pos)} m</text>`);
+    if(width*scale>160){
+      parts.push(`<text x="${X(-width/4)}" y="${y-6}" text-anchor="middle" font-size="9" fill="var(--muted)">posti laterali</text>`);
+      parts.push(`<text x="${X(width/4)}" y="${y-6}" text-anchor="middle" font-size="9" fill="var(--muted)">posti laterali</text>`);
+    }
+    parts.push(chairRects(-width/2+AISLE_SIDE,-boothHalf,L.boothRow.pos,L.seatsPerBlockBooth));
+    parts.push(chairRects(boothHalf,width/2-AISLE_SIDE,L.boothRow.pos,L.seatsPerBlockBooth));
+  }
+
+  container.innerHTML=`<svg viewBox="0 0 ${svgW} ${svgH}" width="${svgW}" height="${svgH}" xmlns="http://www.w3.org/2000/svg">${parts.join('')}</svg>`;
+}
+
+function update(){
+  const length=parseFloat(document.getElementById('inpLength').value)||0;
+  const width=parseFloat(document.getElementById('inpWidth').value)||0;
+  const L=computeLayout(length,width);
+  renderSummary(length,width,L);
+  renderPlan(length,width,L);
+}
+
+document.getElementById('inpLength').addEventListener('input',update);
+document.getElementById('inpWidth').addEventListener('input',update);
+update();
+</script>
+</body>
+</html>
