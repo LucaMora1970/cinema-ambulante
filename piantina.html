@@ -418,17 +418,12 @@
       <div class="measure-field">
         <label for="inpBoothDist">Distanza schermo-cabina</label>
         <div class="field-row">
-          <select id="inpBoothDist">
-            <option value="15">15</option>
-            <option value="16">16</option>
-            <option value="17">17</option>
-            <option value="18">18</option>
-            <option value="19" selected>19</option>
-            <option value="20">20</option>
-            <option value="21">21</option>
-            <option value="22">22</option>
-          </select>
+          <input type="number" id="inpBoothDist" min="15" max="22" step="1" value="19">
           <span class="unit">metri</span>
+          <div class="spin-buttons">
+            <button type="button" class="spin-btn" data-target="inpBoothDist" data-dir="1" aria-label="Aumenta" tabindex="-1"><svg viewBox="0 0 10 10"><path d="M1 7l4-4 4 4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+            <button type="button" class="spin-btn" data-target="inpBoothDist" data-dir="-1" aria-label="Diminuisci" tabindex="-1"><svg viewBox="0 0 10 10"><path d="M1 3l4 4 4-4" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+          </div>
         </div>
       </div>
       <div class="measure-field">
@@ -992,8 +987,13 @@ async function downloadPlanAsPng(){
 function clampOnChange(inp){
   inp.addEventListener('change',()=>{
     const min=parseFloat(inp.min);
-    if(inp.value!==''&&parseFloat(inp.value)<min){
-      inp.value=min;
+    const max=parseFloat(inp.max);
+    let val=parseFloat(inp.value);
+    if(inp.value===''||isNaN(val))return;
+    if(!isNaN(min)&&val<min)val=min;
+    if(!isNaN(max)&&val>max)val=max;
+    if(val!==parseFloat(inp.value)){
+      inp.value=val;
       update();
     }
   });
@@ -1005,9 +1005,11 @@ document.querySelectorAll('.spin-btn').forEach(btn=>{
     if(!inp)return;
     const step=parseFloat(inp.step)||1;
     const min=parseFloat(inp.min);
+    const max=parseFloat(inp.max);
     const dir=parseFloat(btn.dataset.dir);
     let val=(parseFloat(inp.value)||min||0)+dir*step;
     if(!isNaN(min))val=Math.max(min,val);
+    if(!isNaN(max))val=Math.min(max,val);
     inp.value=Math.round(val*100)/100;
     update();
   });
@@ -1016,13 +1018,15 @@ document.querySelectorAll('.spin-btn').forEach(btn=>{
 const inpLength=document.getElementById('inpLength');
 const inpWidth=document.getElementById('inpWidth');
 const inpRowPitch=document.getElementById('inpRowPitch');
+const inpBoothDist=document.getElementById('inpBoothDist');
 inpLength.addEventListener('input',update);
 inpWidth.addEventListener('input',update);
 inpRowPitch.addEventListener('input',update);
+inpBoothDist.addEventListener('input',update);
 clampOnChange(inpLength);
 clampOnChange(inpWidth);
 clampOnChange(inpRowPitch);
-document.getElementById('inpBoothDist').addEventListener('change',update);
+clampOnChange(inpBoothDist);
 document.getElementById('btnPrint').addEventListener('click',()=>window.print());
 document.getElementById('btnPng').addEventListener('click',downloadPlanAsPng);
 update();
