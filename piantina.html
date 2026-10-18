@@ -757,9 +757,6 @@ function renderPlan(length,width,L){
 
   // zona libera 4m
   parts.push(`<rect x="${X(-width/2)}" y="${Y(TRUCK_DEPTH)}" width="${width*scale}" height="${CLEAR_ZONE*scale}" fill="none" stroke="rgba(11,11,11,.3)" stroke-width="1" stroke-dasharray="4,4"/>`);
-  if(CLEAR_ZONE*scale>18){
-    parts.push(`<text x="${svgW/2}" y="${Y(TRUCK_DEPTH+CLEAR_ZONE/2)+4}" text-anchor="middle" font-size="10" fill="var(--muted)">zona libera — 4 m</text>`);
-  }
 
   function chairRects(xStartReal,xEndReal,yTopReal,n,lessGood){
     if(n<=0)return '';
@@ -796,9 +793,13 @@ function renderPlan(length,width,L){
     // passaggio cavi centrale (30 cm), dal furgone fino alla cabina
     parts.push(`<rect x="${X(-CABLE_PATH/2)}" y="${Y(TRUCK_DEPTH)}" width="${CABLE_PATH*scale}" height="${(cableBottom-TRUCK_DEPTH)*scale}" fill="none" stroke="var(--amber)" stroke-width="1" stroke-dasharray="2,3"/>`);
     if(cableBottom-TRUCK_DEPTH>1){
-      const cableLabelX=X(CABLE_PATH/2)+10;
-      const cableLabelY=Y(TRUCK_DEPTH)+26;
-      parts.push(`<text x="${cableLabelX}" y="${cableLabelY}" text-anchor="middle" font-size="8" fill="var(--amber)" transform="rotate(-45 ${cableLabelX} ${cableLabelY})">30 cm</text>`);
+      // quota tra le due linee centrali del passaggio cavi, in cm
+      const cableDimY=Y(TRUCK_DEPTH+CLEAR_ZONE/2);
+      const cxL=X(-CABLE_PATH/2), cxR=X(CABLE_PATH/2);
+      parts.push(`<line x1="${cxL}" y1="${cableDimY}" x2="${cxR}" y2="${cableDimY}" stroke="var(--amber)" stroke-width="1"/>`);
+      parts.push(`<line x1="${cxL}" y1="${cableDimY-4}" x2="${cxL}" y2="${cableDimY+4}" stroke="var(--amber)" stroke-width="1"/>`);
+      parts.push(`<line x1="${cxR}" y1="${cableDimY-4}" x2="${cxR}" y2="${cableDimY+4}" stroke="var(--amber)" stroke-width="1"/>`);
+      parts.push(`<text x="${(cxL+cxR)/2}" y="${cableDimY-7}" text-anchor="middle" font-size="8" fill="var(--amber)">${Math.round(CABLE_PATH*100)} cm</text>`);
     }
   }
 
@@ -826,10 +827,6 @@ function renderPlan(length,width,L){
     const boltCx=X(0), boltCy=y+BOOTH_DEPTH*scale/2;
     parts.push(`<g transform="translate(${boltCx},${boltCy}) scale(${boltSize/24})"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" transform="translate(-12,-12)" fill="#fff" stroke="var(--red-deep)" stroke-width="0.6"/></g>`);
     rowLabel(L.boothRow.pos,L.seatsBoothRow,'var(--red-deep)',{bold:true});
-    if(width*scale>160){
-      parts.push(`<text x="${X(-width/4)}" y="${y-6}" text-anchor="middle" font-size="9" fill="var(--muted)">posti laterali</text>`);
-      parts.push(`<text x="${X(width/4)}" y="${y-6}" text-anchor="middle" font-size="9" fill="var(--muted)">posti laterali</text>`);
-    }
     parts.push(chairRects(-width/2+AISLE_SIDE,-lateralInner,L.boothRow.pos,L.seatsPerBlockBooth));
     parts.push(chairRects(lateralInner,width/2-AISLE_SIDE,L.boothRow.pos,L.seatsPerBlockBooth));
 
